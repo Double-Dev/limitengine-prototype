@@ -1,11 +1,11 @@
 package main
 
 import (
-	"doubledev/limitengine/core"
-	"doubledev/limitengine/ecs"
-	"doubledev/limitengine/gfx"
-	"doubledev/limitengine/gio"
-	"doubledev/limitengine/gmath"
+	"double-dev/limitengine/core"
+	"double-dev/limitengine/ecs"
+	"double-dev/limitengine/gfx"
+	"double-dev/limitengine/gio"
+	"double-dev/limitengine/gmath"
 	"fmt"
 	"time"
 )

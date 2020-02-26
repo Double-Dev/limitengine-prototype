@@ -1,10 +1,10 @@
 package gfx
 
 import (
-	"doubledev/limitengine/core"
-	"doubledev/limitengine/gfx/framework"
-	"doubledev/limitengine/gfx/gl"
-	"doubledev/limitengine/gmath"
+	"double-dev/limitengine/core"
+	"double-dev/limitengine/gfx/framework"
+	"double-dev/limitengine/gfx/gl"
+	"double-dev/limitengine/gmath"
 	"runtime"
 	"time"
 )

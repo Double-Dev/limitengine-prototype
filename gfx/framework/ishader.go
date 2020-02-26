@@ -1,7 +1,7 @@
 package framework
 
 import (
-	"doubledev/limitengine/gmath"
+	"double-dev/limitengine/gmath"
 )
 
 type IShader interface {

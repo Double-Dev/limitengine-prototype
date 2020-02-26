@@ -1,7 +1,7 @@
 package gl
 
 import (
-	"doubledev/limitengine/gmath"
+	"double-dev/limitengine/gmath"
 
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
