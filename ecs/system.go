@@ -1,9 +1,11 @@
 package ecs
 
-import "reflect"
+import (
+	"reflect"
+)
 
 var (
-	systems = []ecsSystem{}
+	systems = []*ecsSystem{}
 )
 
 type ecsSystem struct {
@@ -27,34 +29,38 @@ func NewSystem(update func(delta float32, entity ECSEntity), nilTargetComponents
 
 func UpdateSystems(delta float32) {
 	for _, system := range systems {
-		for _, entity := range system.entities {
+		for _, entity := range system.GetEntities() {
 			system.update(delta, entity)
 		}
 	}
 }
 
-func (system *ecsSystem) OnAddEntity(entity *ECSEntity) {
-	system.entities = append(system.entities, *entity)
+func AddSystem(system *ecsSystem) {
+	systems = append(systems, system)
 }
 
-func (system *ecsSystem) OnAddComponent(entity *ECSEntity, component interface{}) {
+func (system *ecsSystem) OnAddEntity(entity ECSEntity) {
+	system.entities = append(system.entities, entity)
+}
+
+func (system *ecsSystem) OnAddComponent(entity ECSEntity, component interface{}) {
 	if entity.HasComponent(system.GetTargetComponents()...) {
-		system.entities = append(system.entities, *entity)
+		system.entities = append(system.entities, entity)
 	}
 }
 
-func (system *ecsSystem) OnRemoveComponent(entity *ECSEntity, component interface{}) {
+func (system *ecsSystem) OnRemoveComponent(entity ECSEntity, component interface{}) {
 	for i, target := range system.entities {
-		if target == *entity {
+		if target == entity {
 			system.entities[i] = system.entities[len(system.entities)-1]
 			system.entities = system.entities[:len(system.entities)-1]
 		}
 	}
 }
 
-func (system *ecsSystem) OnRemoveEntity(entity *ECSEntity) {
+func (system *ecsSystem) OnRemoveEntity(entity ECSEntity) {
 	for i, target := range system.entities {
-		if target == *entity {
+		if target == entity {
 			system.entities[i] = system.entities[len(system.entities)-1]
 			system.entities = system.entities[:len(system.entities)-1]
 		}

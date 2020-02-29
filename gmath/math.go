@@ -74,6 +74,14 @@ func Tan(f float32) float32 {
 	return float32(math.Tan(float64(f)))
 }
 
+// AbsI returns the absolute value of an int.
+func AbsI(i int) int {
+	if i < 0 {
+		return i * -1
+	}
+	return i
+}
+
 // MinI returns the minimum of two ints.
 func MinI(a, b int) int {
 	if a <= b {

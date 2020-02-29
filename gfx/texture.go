@@ -1,6 +1,6 @@
 package gfx
 
-import "double-dev/limitengine/gfx/framework"
+import "github.com/double-dev/limitengine/gfx/framework"
 
 var (
 	textureIndex = uint32(0)

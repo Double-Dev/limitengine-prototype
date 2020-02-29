@@ -1,7 +1,7 @@
 package gfx
 
 import (
-	"double-dev/limitengine/gfx/framework"
+	"github.com/double-dev/limitengine/gfx/framework"
 )
 
 var (

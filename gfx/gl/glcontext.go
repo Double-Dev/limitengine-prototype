@@ -1,9 +1,9 @@
 package gl
 
 import (
-	"double-dev/limitengine/gfx/framework"
 	"fmt"
 
+	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -59,17 +59,3 @@ func (glContext glContext) CreateTexture(image []uint8, width, height int32) fra
 	texture := newTexture(image, width, height)
 	return texture
 }
-
-// var testTextureID uint32
-
-// func CreateTextureTest() {
-// 	reader, _ := os.Open("testIcon.png")
-// 	img, _ := png.Decode(reader)
-// 	rgba := image.NewRGBA(img.Bounds())
-// 	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
-
-// 	gl.GenTextures(1, &testTextureID)
-// 	gl.ActiveTexture(gl.TEXTURE0)
-// 	gl.BindTexture(gl.TEXTURE_2D, testTextureID)
-// 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, int32(rgba.Rect.Size().X), int32(rgba.Rect.Size().Y), 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(rgba.Pix))
-// }

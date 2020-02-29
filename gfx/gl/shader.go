@@ -1,8 +1,10 @@
 package gl
 
 import (
-	"double-dev/limitengine/gmath"
+	"fmt"
+	"strings"
 
+	"github.com/double-dev/limitengine/gmath"
 	"github.com/go-gl/gl/v3.2-core/gl"
 )
 
@@ -21,17 +23,15 @@ type shader struct {
 func newShader(vertSrc, fragSrc string) *shader {
 	id := gl.CreateProgram()
 
-	vertID := gl.CreateShader(vertexShaderType)
-	vertPtr, free := gl.Strs(vertSrc + "\x00")
-	gl.ShaderSource(vertID, 1, vertPtr, nil)
-	free()
-	gl.CompileShader(vertID)
+	vertID, vertErr := compileShader(vertSrc, vertexShaderType)
+	if vertErr != nil {
+		panic(vertErr)
+	}
 
-	fragID := gl.CreateShader(fragmentShaderType)
-	fragPtr, free := gl.Strs(fragSrc + "\x00")
-	gl.ShaderSource(fragID, 1, fragPtr, nil)
-	free()
-	gl.CompileShader(fragID)
+	fragID, fragErr := compileShader(fragSrc, fragmentShaderType)
+	if fragErr != nil {
+		panic(fragErr)
+	}
 
 	gl.AttachShader(id, vertID)
 	gl.AttachShader(id, fragID)
@@ -45,16 +45,45 @@ func newShader(vertSrc, fragSrc string) *shader {
 	}
 
 	shader.Start()
-	var count int32
-	gl.GetProgramiv(shader.id, gl.ACTIVE_UNIFORMS, &count)
-	for i := uint32(0); i < uint32(count); i++ {
+	var numUniforms int32
+	gl.GetProgramiv(shader.id, gl.ACTIVE_UNIFORMS, &numUniforms)
+	for i := uint32(0); i < uint32(numUniforms); i++ {
 		var name [256]byte
 		gl.GetActiveUniformName(shader.id, i, 256, nil, &name[0])
 		shader.uniforms[gl.GoStr(&name[0])] = gl.GetUniformLocation(shader.id, &name[0])
 	}
+	// var c2 int32
+	// gl.GetProgramiv(shader.id, gl.ACTIVE_ATTRIBUTES, &c2)
+	// for i := uint32(0); i < uint32(c2); i++ {
+	// 	var name [256]byte
+	// 	gl.GetActiveAttrib(shader.id, i, 256, nil, nil, nil, &name[0])
+	// 	gl
+	// }
 	shader.Stop()
+	for key, num := range shader.uniforms {
+		fmt.Println(key, num)
+	}
 
 	return shader
+}
+
+func compileShader(src string, shaderType uint32) (uint32, error) {
+	id := gl.CreateShader(shaderType)
+	srcPtr, free := gl.Strs(src + "\x00")
+	gl.ShaderSource(id, 1, srcPtr, nil)
+	free()
+	gl.CompileShader(id)
+
+	var status int32
+	gl.GetShaderiv(id, gl.COMPILE_STATUS, &status)
+	if status == gl.FALSE {
+		var logLength int32
+		gl.GetShaderiv(id, gl.INFO_LOG_LENGTH, &logLength)
+		log := strings.Repeat("\x00", int(logLength+1))
+		gl.GetShaderInfoLog(id, logLength, nil, gl.Str(log))
+		return 0, fmt.Errorf("Shader failed to compile %v: %v", src, log)
+	}
+	return id, nil
 }
 
 func (shader *shader) Start() {

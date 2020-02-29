@@ -1,6 +1,8 @@
 package gmath
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Matrix is an array of vectors with util methods for matrix mathematics.
 type Matrix []Vector
@@ -29,8 +31,8 @@ func NewProjectionMatrix(aspectRatio, nearPlane, farPlane, fov float32) Matrix {
 	matrix[0][0] = xScale
 	matrix[1][1] = yScale
 	matrix[2][2] = -((farPlane + nearPlane) / frustumLen)
-	matrix[3][2] = -1.0
-	matrix[2][3] = -((2.0 * nearPlane * farPlane) / frustumLen)
+	matrix[2][3] = -1.0
+	matrix[3][2] = -((2.0 * nearPlane * farPlane) / frustumLen)
 	matrix[3][3] = 0.0
 
 	return matrix
@@ -67,9 +69,10 @@ func (matrix Matrix) MulM(other Matrix) Matrix {
 }
 
 func (matrix Matrix) Translate(amount Vector) Matrix {
-	last := matrix[len(matrix)-1]
-	for i := 0; i < MinI(len(last), len(amount)); i++ {
-		last[i] += amount[i]
+	for i := 0; i < len(matrix)-1; i++ {
+		for j := 0; j < MinI(len(matrix)-1, len(amount)-1); j++ {
+			matrix[len(matrix)-1][i] += matrix[j][i] * amount[j]
+		}
 	}
 	return matrix
 }
@@ -91,7 +94,7 @@ func (matrix Matrix) ToArray() []float32 {
 	arr := []float32{}
 	for i := 0; i < len(matrix); i++ {
 		for j := 0; j < len(matrix[i]); j++ {
-			arr = append(arr, matrix[j][i])
+			arr = append(arr, matrix[i][j])
 		}
 	}
 	return arr

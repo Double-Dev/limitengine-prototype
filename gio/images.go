@@ -8,7 +8,7 @@ import (
 )
 
 func LoadPNG(path string) (data []uint8, width, height int32) {
-	reader, loadErr := os.Open("testIcon.png")
+	reader, loadErr := os.Open("../DefaultIcon.png")
 	if loadErr != nil {
 		panic(loadErr)
 	}
