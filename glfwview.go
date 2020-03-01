@@ -28,6 +28,9 @@ func newGLFWView() *glfwView {
 	}
 	glfw.WindowHint(glfw.Samples, BufferSamples)
 	window, err := glfw.CreateWindow(InitWidth, InitHeight, WindowTitle, nil, nil)
+
+	window.SetInputMode(glfw.StickyKeysMode, glfw.False)
+
 	if err != nil {
 		log.Err("Error creating window.", err)
 	}

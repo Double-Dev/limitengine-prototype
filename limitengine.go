@@ -54,6 +54,7 @@ func init() {
 		for _, closeCallback := range closeCallbacks {
 			closeCallback()
 		}
+		view.delete()
 	})
 	view.setResizeCallback(func(width, height int) {
 		for _, resizeCallback := range resizeCallbacks {

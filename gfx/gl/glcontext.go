@@ -16,8 +16,8 @@ func NewGLContext() (glContext, error) {
 	}
 	// TODO: Add options for opengl features.
 	gl.Enable(gl.MULTISAMPLE)
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	// gl.Enable(gl.BLEND)
+	// gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	return glContext{}, err
 }
 
