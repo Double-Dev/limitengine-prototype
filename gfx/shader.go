@@ -5,9 +5,11 @@ import (
 )
 
 var (
-	shaderIndex = uint32(0)
+	shaderIndex = uint32(1)
 	shaders     = make(map[uint32]framework.IShader)
 )
+
+func init() { shaders[0] = nil }
 
 type Shader struct {
 	id            uint32

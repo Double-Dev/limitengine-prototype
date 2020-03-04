@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -11,6 +12,7 @@ var (
 	log         = limitengine.NewLogger("ecs")
 	entityIndex = uint32(0)
 	ecs         = make(map[ECSEntity]map[reflect.Type]interface{})
+	ecsMutex    = sync.RWMutex{}
 	listeners   = []ECSListener{}
 )
 
@@ -43,11 +45,13 @@ type ECSListener interface {
 
 func NewEntity(components ...interface{}) ECSEntity {
 	entity := ECSEntity(entityIndex)
+	ecsMutex.Lock()
 	ecs[entity] = make(map[reflect.Type]interface{})
 	entityIndex++
 	for _, component := range components {
 		ecs[entity][reflect.TypeOf(component)] = component
 	}
+	ecsMutex.Unlock()
 	for _, listener := range listeners {
 		listener.GetTargetComponents()
 		if entity.HasComponent(listener.GetTargetComponents()...) {
@@ -59,7 +63,9 @@ func NewEntity(components ...interface{}) ECSEntity {
 
 func (entity ECSEntity) AddComponent(component interface{}) {
 	componentType := reflect.TypeOf(component)
+	ecsMutex.Lock()
 	ecs[entity][componentType] = component
+	ecsMutex.Unlock()
 	for _, listener := range listeners {
 		for _, target := range listener.GetTargetComponents() {
 			if target == componentType {
@@ -73,7 +79,9 @@ func (entity ECSEntity) AddComponent(component interface{}) {
 func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool {
 	componentType := reflect.TypeOf(nilComponent)
 	if entity.HasComponent(componentType) {
+		ecsMutex.RLock()
 		component := ecs[entity][componentType]
+		ecsMutex.RUnlock()
 		for _, listener := range listeners {
 			for _, target := range listener.GetTargetComponents() {
 				if target == componentType {
@@ -82,13 +90,16 @@ func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool {
 				}
 			}
 		}
+		ecsMutex.Lock()
 		delete(ecs[entity], componentType)
+		ecsMutex.Unlock()
 		return true
 	}
 	return false
 }
 
 func RemoveEntity(entity ECSEntity) bool {
+	ecsMutex.RLock()
 	if &entity != nil && ecs[entity] != nil {
 		for _, listener := range listeners {
 			for _, listenEntity := range listener.GetEntities() {
@@ -98,20 +109,29 @@ func RemoveEntity(entity ECSEntity) bool {
 				break
 			}
 		}
+		ecsMutex.Lock()
 		delete(ecs, entity)
+		ecsMutex.Unlock()
+		ecsMutex.RUnlock()
 		return true
 	}
+	ecsMutex.RUnlock()
 	return false
 }
 
 func (entity ECSEntity) GetComponent(nilComponent interface{}) interface{} {
-	if entity.HasComponent(reflect.TypeOf(nilComponent)) {
-		return ecs[entity][reflect.TypeOf(nilComponent)]
+	ecsMutex.RLock()
+	if ecs[entity] == nil {
+		ecsMutex.RUnlock()
+		return nil
 	}
-	return nil
+	component := ecs[entity][reflect.TypeOf(nilComponent)]
+	ecsMutex.RUnlock()
+	return component
 }
 
 func (entity ECSEntity) HasComponent(targets ...reflect.Type) bool {
+	ecsMutex.RLock()
 	if ecs[entity] == nil {
 		return false
 	}
@@ -120,6 +140,7 @@ func (entity ECSEntity) HasComponent(targets ...reflect.Type) bool {
 			return false
 		}
 	}
+	ecsMutex.RUnlock()
 	return true
 }
 

@@ -3,9 +3,11 @@ package gfx
 import "github.com/double-dev/limitengine/gfx/framework"
 
 var (
-	modelIndex = uint32(0)
+	modelIndex = uint32(1)
 	models     = make(map[uint32]framework.IModel)
 )
+
+func init() { models[0] = nil }
 
 // Model is a gfx model.
 type Model struct {

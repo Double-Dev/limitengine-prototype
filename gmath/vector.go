@@ -20,10 +20,26 @@ func NewVectorOfSize(size uint) Vector {
 	return make([]float32, size)
 }
 
+// Set sets each element of this Vector object to the corresponding elements of a float32 vararg.
+func (vector Vector) Set(other ...float32) Vector {
+	for i := 0; i < MinI(len(vector), len(other)); i++ {
+		vector[i] = other[i]
+	}
+	return vector
+}
+
 // Add adds a float32 vararg to this Vector object.
 func (vector Vector) Add(other ...float32) Vector {
 	for i := 0; i < MinI(len(vector), len(other)); i++ {
 		vector[i] += other[i]
+	}
+	return vector
+}
+
+// AddSc adds a float32 scalar to every element within this Vector object.
+func (vector Vector) AddSc(scalar float32) Vector {
+	for i := 0; i < len(vector); i++ {
+		vector[i] += scalar
 	}
 	return vector
 }
@@ -40,6 +56,14 @@ func (vector Vector) AddV(other Vector) Vector {
 func (vector Vector) Sub(other ...float32) Vector {
 	for i := 0; i < MinI(len(vector), len(other)); i++ {
 		vector[i] -= other[i]
+	}
+	return vector
+}
+
+// SubSc subtracts a float32 scalar from every element within this Vector object.
+func (vector Vector) SubSc(scalar float32) Vector {
+	for i := 0; i < len(vector); i++ {
+		vector[i] -= scalar
 	}
 	return vector
 }

@@ -49,8 +49,12 @@ func (glContext glContext) CreateModel(indices []uint32, vertices, texCoords, no
 	model.bind()
 	model.addIndicesArr(indices)
 	model.addFloatAttribArr(vertices, 0, 3, false)
-	model.addFloatAttribArr(texCoords, 1, 2, false)
-	model.addFloatAttribArr(normals, 2, 3, false)
+	if len(texCoords) > 0 {
+		model.addFloatAttribArr(texCoords, 1, 2, false)
+	}
+	if len(normals) > 0 {
+		model.addFloatAttribArr(normals, 2, 3, false)
+	}
 	model.unbind()
 	return model
 }

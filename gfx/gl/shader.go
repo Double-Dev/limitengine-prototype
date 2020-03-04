@@ -52,12 +52,12 @@ func newShader(vertSrc, fragSrc string) *shader {
 		gl.GetActiveUniformName(shader.id, i, 256, nil, &name[0])
 		shader.uniforms[gl.GoStr(&name[0])] = gl.GetUniformLocation(shader.id, &name[0])
 	}
-	// var c2 int32
-	// gl.GetProgramiv(shader.id, gl.ACTIVE_ATTRIBUTES, &c2)
-	// for i := uint32(0); i < uint32(c2); i++ {
+	// var numAttribs int32
+	// gl.GetProgramiv(shader.id, gl.ACTIVE_ATTRIBUTES, &numAttribs)
+	// for i := uint32(0); i < uint32(numAttribs); i++ {
 	// 	var name [256]byte
 	// 	gl.GetActiveAttrib(shader.id, i, 256, nil, nil, nil, &name[0])
-	// 	gl
+	// 	gl.BindAttribLocation(shader.id, i, &name[0])
 	// }
 	shader.Stop()
 	for key, num := range shader.uniforms {

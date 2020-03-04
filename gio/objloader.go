@@ -64,20 +64,24 @@ func LoadOBJ(path string) ([]uint32, []float32, []float32, []float32) {
 				if err != nil {
 					panic(err)
 				}
-				texIndex, err := strconv.ParseUint(vertex[1], 10, 32)
-				if err != nil {
-					panic(err)
-				}
-				normIndex, err := strconv.ParseUint(vertex[2], 10, 32)
-				if err != nil {
-					panic(err)
-				}
 				offsetVertIndex := (vertIndex - 1) * 3
 				outVertices = append(outVertices, rawVertices[offsetVertIndex], rawVertices[offsetVertIndex+1], rawVertices[offsetVertIndex+2])
-				offsetTexIndex := (texIndex - 1) * 2
-				outTextureCoords = append(outTextureCoords, rawTextureCoords[offsetTexIndex], rawTextureCoords[offsetTexIndex+1])
-				offsetNormIndex := (normIndex - 1) * 3
-				outNormals = append(outNormals, rawNormals[offsetNormIndex], rawNormals[offsetNormIndex+1], rawNormals[offsetNormIndex+2])
+				if len(vertex) > 1 {
+					texIndex, err := strconv.ParseUint(vertex[1], 10, 32)
+					if err != nil {
+						panic(err)
+					}
+					offsetTexIndex := (texIndex - 1) * 2
+					outTextureCoords = append(outTextureCoords, rawTextureCoords[offsetTexIndex], rawTextureCoords[offsetTexIndex+1])
+					if len(vertex) > 2 {
+						normIndex, err := strconv.ParseUint(vertex[2], 10, 32)
+						if err != nil {
+							panic(err)
+						}
+						offsetNormIndex := (normIndex - 1) * 3
+						outNormals = append(outNormals, rawNormals[offsetNormIndex], rawNormals[offsetNormIndex+1], rawNormals[offsetNormIndex+2])
+					}
+				}
 				indices = append(indices, uint32(len(indices)))
 			}
 		}
@@ -89,9 +93,4 @@ func LoadOBJ(path string) ([]uint32, []float32, []float32, []float32) {
 	// fmt.Println(outTextureCoords)
 	// fmt.Println(outNormals)
 	return indices, outVertices, outTextureCoords, outNormals
-}
-
-func parseOBJIndex(token string) {
-	// values := strings.Split(token, "/")
-
 }

@@ -167,18 +167,38 @@ const (
 	ModSuper   = limitengine.ModKey(glfw.ModSuper)
 )
 
-// Definition for an input mouse button.
+// Definition for an input mouse button. (Offset is to prevent button with zero value.)
 const (
-	MouseButton1      = limitengine.MouseButton(glfw.MouseButton1)
-	MouseButton2      = limitengine.MouseButton(glfw.MouseButton2)
-	MouseButton3      = limitengine.MouseButton(glfw.MouseButton3)
-	MouseButton4      = limitengine.MouseButton(glfw.MouseButton4)
-	MouseButton5      = limitengine.MouseButton(glfw.MouseButton5)
-	MouseButton6      = limitengine.MouseButton(glfw.MouseButton6)
-	MouseButton7      = limitengine.MouseButton(glfw.MouseButton7)
-	MouseButton8      = limitengine.MouseButton(glfw.MouseButton8)
-	MouseButtonLast   = limitengine.MouseButton(glfw.MouseButtonLast)
-	MouseButtonLeft   = limitengine.MouseButton(glfw.MouseButtonLeft)
-	MouseButtonRight  = limitengine.MouseButton(glfw.MouseButtonRight)
-	MouseButtonMiddle = limitengine.MouseButton(glfw.MouseButtonMiddle)
+	MouseButton1      = limitengine.MouseButton(glfw.MouseButton1) + 1
+	MouseButton2      = limitengine.MouseButton(glfw.MouseButton2) + 1
+	MouseButton3      = limitengine.MouseButton(glfw.MouseButton3) + 1
+	MouseButton4      = limitengine.MouseButton(glfw.MouseButton4) + 1
+	MouseButton5      = limitengine.MouseButton(glfw.MouseButton5) + 1
+	MouseButton6      = limitengine.MouseButton(glfw.MouseButton6) + 1
+	MouseButton7      = limitengine.MouseButton(glfw.MouseButton7) + 1
+	MouseButton8      = limitengine.MouseButton(glfw.MouseButton8) + 1
+	MouseButtonLast   = limitengine.MouseButton(glfw.MouseButtonLast) + 1
+	MouseButtonLeft   = limitengine.MouseButton(glfw.MouseButtonLeft) + 1
+	MouseButtonRight  = limitengine.MouseButton(glfw.MouseButtonRight) + 1
+	MouseButtonMiddle = limitengine.MouseButton(glfw.MouseButtonMiddle) + 1
 )
+
+func getTotalMods(mods ...limitengine.ModKey) int {
+	totalMods := 0
+	for _, mod := range mods {
+		totalMods = totalMods | int(mod)
+	}
+	return totalMods
+}
+
+// GetModdedKey returns a new key that represents the specified key with the
+// specified mods applied.
+func GetModdedKey(key limitengine.Key, mods ...limitengine.ModKey) limitengine.Key {
+	return limitengine.Key(int(key) | getTotalMods(mods...))
+}
+
+// GetModdedMouseButton returns a new mouse button that represents the specified
+// mouse button with the specified mods applied.
+func GetModdedMouseButton(mouseButton limitengine.MouseButton, mods ...limitengine.ModKey) limitengine.MouseButton {
+	return limitengine.MouseButton(int(mouseButton) | getTotalMods(mods...))
+}

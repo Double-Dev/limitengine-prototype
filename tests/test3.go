@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/double-dev/limitengine/ui"
-
-	"github.com/double-dev/limitengine/gmath"
-
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/ecs"
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gio"
+	"github.com/double-dev/limitengine/gmath"
+	"github.com/double-dev/limitengine/ui"
+	"github.com/double-dev/limitengine/utils"
 )
 
 type TestComponent struct {
@@ -19,28 +18,6 @@ type TestComponent struct {
 }
 
 func main() {
-	// indices := []uint32{
-	// 	0, 1, 2, 2, 1, 3,
-	// }
-	// vertices := []float32{
-	// 	-0.75, 0.75, -2.0,
-	// 	-0.75, -0.75, -2.0,
-	// 	0.75, 0.75, -2.0,
-	// 	0.75, -0.75, -2.0,
-	// }
-	// texCoords := []float32{
-	// 	0.0, 0.0,
-	// 	0.0, 1.0,
-	// 	1.0, 0.0,
-	// 	1.0, 1.0,
-	// }
-	// normals := []float32{
-	// 	0.0, 0.0, 0.0,
-	// 	0.0, 0.0, 0.0,
-	// 	0.0, 0.0, 0.0,
-	// 	0.0, 0.0, 0.0,
-	// }
-	// model := gfx.CreateModel(indices, vertices, texCoords, normals)
 	model := gfx.CreateModel(gio.LoadOBJ("dragon.obj"))
 	fmt.Println(model)
 	shader := gfx.CreateShader(`#version 150 core
@@ -48,57 +25,75 @@ in vec3 coord;
 in vec2 texCoord;
 in vec3 norm;
 out vec2 textureCoord;
+// out vec3 normal;
+// out vec3 toLightVec;
 uniform mat4 projMat;
 uniform mat4 viewMat;
+// const vec3 lightPos = vec3(0.0, 0.0, -10.0);
 void main()
 {
-	textureCoord = texCoord;
+	// vec3 toLight = lightPos - coord;
+	textureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
+	// normal = norm;
 	gl_Position = projMat * viewMat * vec4(coord, 1.0);
 }`, `#version 150 core
 in vec2 textureCoord;
+// in vec3 normal;
+// in vec3 toLightVec;
 out vec4 fragColor;
 uniform sampler2D tex;
+// const vec3 lightColor = vec3(1.0, 1.0, 1.0);
+// const float ambient = 0.1;
 void main()
 {
-	fragColor = texture(tex, textureCoord);
+	// float lightDot = dot(normalize(normal), normalize(toLightVec));
+	// float brightness = max(lightDot, ambient);
+	// vec3 diffuse = brightness * lightColor;
+	// fragColor = texture(tex, textureCoord);
+	fragColor = vec4(0.6, 0.6, 0.1, 1.0);
 }`,
 	)
 	fmt.Println(shader)
-	texture := gfx.CreateTexture(gio.LoadPNG("../DefaultIcon.png"))
+	texture := gfx.CreateTexture(gio.LoadPNG("lamp.png"))
 	fmt.Println(texture)
 
-	camPos := gmath.NewVector(0.0, 0.0, -2.0, 1.0)
-	limitengine.AddKeyCallback(
-		func(key limitengine.Key, scancode int, action limitengine.Action, mods limitengine.ModKey) {
-			if key == ui.KeyW {
-				camPos[2] += 0.05
-			} else if key == ui.KeyS {
-				camPos[2] -= 0.05
-			}
-			if key == ui.KeySpace {
-				camPos[1] -= 0.05
-			} else if key == ui.KeyLeftShift {
-				camPos[1] += 0.05
-			}
-			if key == ui.KeyA {
-				camPos[0] += 0.05
-			} else if key == ui.KeyD {
-				camPos[0] -= 0.05
-			}
+	xAxis := ui.InputControl{}
+	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyA}, 1.0)
+	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyD}, -1.0)
+	yAxis := ui.InputControl{}
+	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, 1.0)
+	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeySpace}, -1.0)
+	zAxis := ui.InputControl{}
+	zAxis.AddTrigger(ui.InputEvent{Key: ui.KeyW}, 1.0)
+	zAxis.AddTrigger(ui.InputEvent{Key: ui.KeyS}, -1.0)
+
+	ecs.NewEntity(
+		&utils.TranformComponent{
+			Position: gmath.NewVector(0.0, 1.0, -10.0, 1.0),
+			Rotation: gmath.NewVector(0.0, 0.0, 0.0),
+			Scale:    gmath.NewVector(1.0, 1.0, 1.0),
+		},
+		&utils.MotionComponent{
+			Velocity:     gmath.NewVector(0.0, 0.0, 0.0),
+			Acceleration: gmath.NewVector(0.0, 0.0, 0.0),
+		},
+		&utils.MotionControlComponent{
+			Axis: []ui.InputControl{xAxis, yAxis, zAxis},
 		},
 	)
 
 	testSystem := ecs.NewSystem(func(delta float32, entity ecs.ECSEntity) {
+		transform := entity.GetComponent((*utils.TranformComponent)(nil)).(*utils.TranformComponent)
 		camera := gmath.NewMatrix(4, 4)
-		camera.Translate(camPos)
+		camera.Translate(transform.Position)
 
 		gfx.ClearScreen(0.0, 0.1, 0.25, 1.0)
 		gfx.Render(camera, shader, model, texture)
 		gfx.RenderSweep()
-	})
-
+	}, (*utils.TranformComponent)(nil))
 	ecs.AddSystem(testSystem)
-	ecs.NewEntity()
+	ecs.AddSystem(utils.NewMotionControlSystem())
+	ecs.AddSystem(utils.NewMotionSystem(0.95))
 
 	limitengine.Launch()
 }

@@ -10,6 +10,22 @@ const (
 	DtoR = Pi / 180
 )
 
+// Abs returns the absolute value of a float32.
+func Abs(f float32) float32 {
+	if f < 0.0 {
+		return f * -1.0
+	}
+	return f
+}
+
+// Sign returns the sign of a float32.
+func Sign(f float32) float32 {
+	if f < 0.0 {
+		return -1.0
+	}
+	return 1.0
+}
+
 // Min returns the minimum of two float32s.
 func Min(a, b float32) float32 {
 	if a <= b {
@@ -24,6 +40,11 @@ func Max(a, b float32) float32 {
 		return a
 	}
 	return b
+}
+
+// Clamp returns the float32 number closest to the input number within the input bounds.
+func Clamp(num, min, max float32) float32 {
+	return Min(Max(num, min), max)
 }
 
 // Sqrt returns the square root of a float32.

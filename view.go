@@ -18,6 +18,7 @@ type View interface {
 	setMouseMotionCallback(func(x, y float32))
 	setMouseScrollCallback(func(x, y float32))
 	setTouchMotionCallback(func(x, y []float32))
+	setTypingCallback(func(char rune, mods ModKey))
 
 	delete()
 }

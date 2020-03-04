@@ -3,9 +3,11 @@ package gfx
 import "github.com/double-dev/limitengine/gfx/framework"
 
 var (
-	textureIndex = uint32(0)
+	textureIndex = uint32(1)
 	textures     = make(map[uint32]framework.ITexture)
 )
+
+func init() { textures[0] = nil }
 
 type Texture struct {
 	id uint32

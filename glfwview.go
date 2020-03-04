@@ -28,9 +28,6 @@ func newGLFWView() *glfwView {
 	}
 	glfw.WindowHint(glfw.Samples, BufferSamples)
 	window, err := glfw.CreateWindow(InitWidth, InitHeight, WindowTitle, nil, nil)
-
-	window.SetInputMode(glfw.StickyKeysMode, glfw.False)
-
 	if err != nil {
 		log.Err("Error creating window.", err)
 	}
@@ -87,7 +84,7 @@ func (glfwView *glfwView) setKeyCallback(callback func(key Key, scancode int, ac
 
 func (glfwView *glfwView) setMouseButtonCallback(callback func(button MouseButton, action Action, mod ModKey)) {
 	glfwView.window.SetMouseButtonCallback(func(w *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
-		callback(MouseButton(button), Action(action), ModKey(mod))
+		callback(MouseButton(int(button)+1), Action(action), ModKey(mod))
 	})
 }
 
@@ -105,6 +102,12 @@ func (glfwView *glfwView) setMouseScrollCallback(callback func(x, y float32)) {
 
 func (glfwView *glfwView) setTouchMotionCallback(callback func(x, y []float32)) {
 	// TODO: Figure out how to separate this from mouse motion cross-platform.
+}
+
+func (glfwView *glfwView) setTypingCallback(callback func(char rune, mods ModKey)) {
+	glfwView.window.SetCharModsCallback(func(w *glfw.Window, char rune, mods glfw.ModifierKey) {
+		callback(char, ModKey(mods))
+	})
 }
 
 func (glfwView *glfwView) delete() {
