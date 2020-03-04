@@ -14,7 +14,7 @@ type MotionComponent struct {
 
 func NewMotionSystem(damping float32) *ecs.ECSSystem {
 	return ecs.NewSystem(func(delta float32, entity ecs.ECSEntity) {
-		transform := entity.GetComponent((*TranformComponent)(nil)).(*TranformComponent)
+		transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
 		motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
 		motion.Velocity.AddV(motion.Acceleration.Clone().MulSc(delta))
 
@@ -22,5 +22,5 @@ func NewMotionSystem(damping float32) *ecs.ECSSystem {
 		motion.Velocity.MulSc(damping)
 
 		transform.Position.AddV(motion.Velocity.Clone().MulSc(delta))
-	}, (*MotionComponent)(nil), (*TranformComponent)(nil))
+	}, (*MotionComponent)(nil), (*TransformComponent)(nil))
 }

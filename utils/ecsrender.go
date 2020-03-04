@@ -15,5 +15,5 @@ func NewRenderSystem() *ecs.ECSSystem {
 	return ecs.NewSystem(func(delta float32, entity ecs.ECSEntity) {
 		// transform := entity.GetComponent((*TranformationComponent)(nil)).(*TranformationComponent)
 		// render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
-	}, (*RenderComponent)(nil), (*TranformComponent)(nil))
+	}, (*RenderComponent)(nil), (*TransformComponent)(nil))
 }

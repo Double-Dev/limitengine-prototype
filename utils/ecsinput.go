@@ -6,7 +6,8 @@ import (
 )
 
 type MotionControlComponent struct {
-	Axis []ui.InputControl
+	Axis  []*ui.InputControl
+	Speed float32
 }
 
 func NewMotionControlSystem() *ecs.ECSSystem {
@@ -14,7 +15,7 @@ func NewMotionControlSystem() *ecs.ECSSystem {
 		control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
 		motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
 		for i, axis := range control.Axis {
-			motion.Acceleration[i] = axis.Amount()
+			motion.Acceleration[i] = axis.Amount() * control.Speed
 		}
 	}, (*MotionControlComponent)(nil), (*MotionComponent)(nil))
 }

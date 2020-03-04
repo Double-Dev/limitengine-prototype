@@ -25,7 +25,7 @@ in vec3 coord;
 in vec2 texCoord;
 in vec3 norm;
 out vec2 textureCoord;
-// out vec3 normal;
+out vec3 normal;
 // out vec3 toLightVec;
 uniform mat4 projMat;
 uniform mat4 viewMat;
@@ -34,23 +34,23 @@ void main()
 {
 	// vec3 toLight = lightPos - coord;
 	textureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
-	// normal = norm;
+	normal = norm;
 	gl_Position = projMat * viewMat * vec4(coord, 1.0);
 }`, `#version 150 core
 in vec2 textureCoord;
-// in vec3 normal;
+in vec3 normal;
 // in vec3 toLightVec;
 out vec4 fragColor;
 uniform sampler2D tex;
-// const vec3 lightColor = vec3(1.0, 1.0, 1.0);
-// const float ambient = 0.1;
+const vec3 lightColor = vec3(1.0, 1.0, 1.0);
+const float ambient = 0.1;
 void main()
 {
-	// float lightDot = dot(normalize(normal), normalize(toLightVec));
-	// float brightness = max(lightDot, ambient);
-	// vec3 diffuse = brightness * lightColor;
+	float lightDot = dot(normalize(normal), vec3(0.0, 1.0, 0.0));
+	float brightness = max(lightDot, ambient);
+	vec3 diffuse = brightness * lightColor;
 	// fragColor = texture(tex, textureCoord);
-	fragColor = vec4(0.6, 0.6, 0.1, 1.0);
+	fragColor = vec4(diffuse, 1.0) * vec4(0.6, 0.6, 0.1, 1.0);
 }`,
 	)
 	fmt.Println(shader)
@@ -68,7 +68,7 @@ void main()
 	zAxis.AddTrigger(ui.InputEvent{Key: ui.KeyS}, -1.0)
 
 	ecs.NewEntity(
-		&utils.TranformComponent{
+		&utils.TransformComponent{
 			Position: gmath.NewVector(0.0, 1.0, -10.0, 1.0),
 			Rotation: gmath.NewVector(0.0, 0.0, 0.0),
 			Scale:    gmath.NewVector(1.0, 1.0, 1.0),
@@ -78,19 +78,20 @@ void main()
 			Acceleration: gmath.NewVector(0.0, 0.0, 0.0),
 		},
 		&utils.MotionControlComponent{
-			Axis: []ui.InputControl{xAxis, yAxis, zAxis},
+			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis},
+			Speed: 100.0,
 		},
 	)
 
 	testSystem := ecs.NewSystem(func(delta float32, entity ecs.ECSEntity) {
-		transform := entity.GetComponent((*utils.TranformComponent)(nil)).(*utils.TranformComponent)
+		transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
 		camera := gmath.NewMatrix(4, 4)
 		camera.Translate(transform.Position)
 
 		gfx.ClearScreen(0.0, 0.1, 0.25, 1.0)
 		gfx.Render(camera, shader, model, texture)
 		gfx.RenderSweep()
-	}, (*utils.TranformComponent)(nil))
+	}, (*utils.TransformComponent)(nil))
 	ecs.AddSystem(testSystem)
 	ecs.AddSystem(utils.NewMotionControlSystem())
 	ecs.AddSystem(utils.NewMotionSystem(0.95))
