@@ -20,9 +20,9 @@ func init() {
 			moddedKey := GetModdedKey(key, mods)
 			for inputEvent, set := range inputControls {
 				if inputEvent.Key == key || inputEvent.Key == moddedKey {
-					if action == Press || action == Repeat {
-						set.InputControl.amt = 1.0 * set.float32
-					} else {
+					if action == Press {
+						set.InputControl.amt = set.float32
+					} else if action == Release && set.InputControl.amt == set.float32 {
 						set.InputControl.amt = 0.0
 					}
 				}
