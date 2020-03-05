@@ -11,10 +11,10 @@ var (
 type ECSSystem struct {
 	targetComponents []reflect.Type
 	entities         []ECSEntity
-	update           func(delta float32, entity ECSEntity)
+	update           func(delta float32, entities []ECSEntity)
 }
 
-func NewSystem(update func(delta float32, entity ECSEntity), nilTargetComponents ...interface{}) *ECSSystem {
+func NewSystem(update func(delta float32, entities []ECSEntity), nilTargetComponents ...interface{}) *ECSSystem {
 	system := ECSSystem{
 		targetComponents: []reflect.Type{},
 		entities:         []ECSEntity{},
@@ -28,9 +28,7 @@ func NewSystem(update func(delta float32, entity ECSEntity), nilTargetComponents
 
 func UpdateSystems(delta float32) {
 	for _, system := range systems {
-		for _, entity := range system.GetEntities() {
-			system.update(delta, entity)
-		}
+		system.update(delta, system.GetEntities())
 	}
 }
 

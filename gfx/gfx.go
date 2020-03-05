@@ -18,7 +18,7 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix
 
-	renderBuffers map[uint32]uint32
+	// renderBuffers map[uint32]uint32
 
 	renderBatch = make(map[uint32]map[uint32]uint32)
 	actionQueue = []func(){}
@@ -74,7 +74,7 @@ func ClearScreen(r, g, b, a float32) {
 }
 
 // RenderSweep sweeps queued gfx actions onto the render pipeline.
-func RenderSweep() {
+func Sweep() {
 	if len(gfxPipeline) <= 6 {
 		pipeline := make(chan func())
 		gfxPipeline = append(gfxPipeline, pipeline)
@@ -91,7 +91,7 @@ func RenderSweep() {
 	}
 }
 
-func Render(camera gmath.Matrix, shader *Shader, model *Model, texture *Texture) {
+func Render(camera *Camera, shader *Shader, model *Model, texture *Texture, transform gmath.Matrix) {
 	actionQueue = append(actionQueue, func() {
 		iShader := shaders[shader.id]
 		iModel := models[model.id]
@@ -99,7 +99,12 @@ func Render(camera gmath.Matrix, shader *Shader, model *Model, texture *Texture)
 		iShader.Start()
 		iTexture.Bind()
 		iShader.LoadUniformMatrix4fv("projMat", projMatrix)
-		iShader.LoadUniformMatrix4fv("viewMat", camera)
+
+		vMat := gmath.NewMatrix(4, 4)
+		vMat.Translate(camera.Position())
+		// fmt.Println(vMat.MulM(transform))
+
+		iShader.LoadUniformMatrix4fv("mvMat", vMat.MulM(transform))
 		iShader.LoadUniform1I("tex", 0)
 		iModel.Enable()
 		iModel.Render()

@@ -44,14 +44,6 @@ func (vector Vector) AddSc(scalar float32) Vector {
 	return vector
 }
 
-// AddV adds a Vector to this Vector object.
-func (vector Vector) AddV(other Vector) Vector {
-	for i := 0; i < MinI(len(vector), len(other)); i++ {
-		vector[i] += other[i]
-	}
-	return vector
-}
-
 // Sub subtracts a float32 vararg from this Vector object.
 func (vector Vector) Sub(other ...float32) Vector {
 	for i := 0; i < MinI(len(vector), len(other)); i++ {
@@ -64,14 +56,6 @@ func (vector Vector) Sub(other ...float32) Vector {
 func (vector Vector) SubSc(scalar float32) Vector {
 	for i := 0; i < len(vector); i++ {
 		vector[i] -= scalar
-	}
-	return vector
-}
-
-// SubV subtracts a Vector from this Vector object.
-func (vector Vector) SubV(other Vector) Vector {
-	for i := 0; i < MinI(len(vector), len(other)); i++ {
-		vector[i] -= other[i]
 	}
 	return vector
 }
@@ -92,24 +76,8 @@ func (vector Vector) MulSc(scalar float32) Vector {
 	return vector
 }
 
-// MulV multiplies this Vector object's components by another Vector object's components.
-func (vector Vector) MulV(other Vector) Vector {
-	for i := 0; i < MinI(len(vector), len(other)); i++ {
-		vector[i] *= other[i]
-	}
-	return vector
-}
-
 // Div divides this Vector object by a float32 vararg.
 func (vector Vector) Div(other ...float32) Vector {
-	for i := 0; i < MinI(len(vector), len(other)); i++ {
-		vector[i] /= other[i]
-	}
-	return vector
-}
-
-// DivV divides this Vector object by a Vector.
-func (vector Vector) DivV(other Vector) Vector {
 	for i := 0; i < MinI(len(vector), len(other)); i++ {
 		vector[i] /= other[i]
 	}

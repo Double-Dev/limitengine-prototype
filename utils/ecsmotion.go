@@ -13,14 +13,16 @@ type MotionComponent struct {
 }
 
 func NewMotionSystem(damping float32) *ecs.ECSSystem {
-	return ecs.NewSystem(func(delta float32, entity ecs.ECSEntity) {
-		transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
-		motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
-		motion.Velocity.AddV(motion.Acceleration.Clone().MulSc(delta))
+	return ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
+		for _, entity := range entities {
+			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
+			motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
+			motion.Velocity.Add(motion.Acceleration.Clone().MulSc(delta)...)
 
-		// TODO: Implement proper damping.
-		motion.Velocity.MulSc(damping)
+			// TODO: Implement proper damping.
+			motion.Velocity.MulSc(damping)
 
-		transform.Position.AddV(motion.Velocity.Clone().MulSc(delta))
+			transform.Position.Add(motion.Velocity.Clone().MulSc(delta)...)
+		}
 	}, (*MotionComponent)(nil), (*TransformComponent)(nil))
 }

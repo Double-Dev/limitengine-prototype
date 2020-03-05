@@ -11,11 +11,13 @@ type MotionControlComponent struct {
 }
 
 func NewMotionControlSystem() *ecs.ECSSystem {
-	return ecs.NewSystem(func(delta float32, entity ecs.ECSEntity) {
-		control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
-		motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
-		for i, axis := range control.Axis {
-			motion.Acceleration[i] = axis.Amount() * control.Speed
+	return ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
+		for _, entity := range entities {
+			control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
+			motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
+			for i, axis := range control.Axis {
+				motion.Acceleration[i] = axis.Amount() * control.Speed
+			}
 		}
 	}, (*MotionControlComponent)(nil), (*MotionComponent)(nil))
 }

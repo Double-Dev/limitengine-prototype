@@ -22,6 +22,15 @@ func NewMatrixV(columns ...Vector) Matrix {
 	return columns
 }
 
+// NewMatrixM creates a new Matrix from a Matrix object.
+func NewMatrixM(m Matrix) Matrix {
+	var out Matrix
+	for _, v := range m {
+		out = append(m, v.Clone())
+	}
+	return out
+}
+
 func NewProjectionMatrix(aspectRatio, nearPlane, farPlane, fov float32) Matrix {
 	matrix := NewMatrix(4, 4)
 	yScale := 1.0 / Tan(ToRadians(fov/2.0))
@@ -55,7 +64,7 @@ func (matrix Matrix) MulV(vector Vector) Vector {
 	size := MinI(len(vector), len(matrix))
 	vOut := NewVectorOfSize(uint(size))
 	for i := 0; i < size; i++ {
-		vOut.AddV(matrix[i].Clone().MulSc(vector[i]))
+		vOut.Add(matrix[i].Clone().MulSc(vector[i])...)
 	}
 	return vOut
 }
@@ -63,7 +72,7 @@ func (matrix Matrix) MulV(vector Vector) Vector {
 func (matrix Matrix) MulM(other Matrix) Matrix {
 	mOut := NewMatrixV()
 	for i := 0; i < MinI(len(matrix), len(other)); i++ {
-		mOut = append(mOut, mOut.MulV(other[i]))
+		mOut = append(mOut, matrix.MulV(other[i]))
 	}
 	return mOut
 }
@@ -98,6 +107,11 @@ func (matrix Matrix) ToArray() []float32 {
 		}
 	}
 	return arr
+}
+
+// Clone returns a new Matrix with components equal to this Matrix.
+func (matrix Matrix) Clone() Matrix {
+	return NewMatrixM(matrix)
 }
 
 // NewVectorV creates a new Vector from a float32 array.
