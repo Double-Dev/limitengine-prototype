@@ -3,6 +3,7 @@ package gfx
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -22,7 +23,8 @@ var (
 
 	AdvanceFrames = 2
 
-	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Model][]uniformLoader{}
+	gfxMutex      = sync.RWMutex{}
+	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Model][]*Instance{}
 	actionQueue   = []func(){}
 	gfxPipeline   = [](chan func()){}
 )
@@ -80,7 +82,7 @@ func Sweep() {
 		time.Sleep(time.Millisecond * 10)
 	}
 	actionQueue = append(actionQueue, func() {
-		// Batching System TODO: Replace with instanced rendering.
+		// Batching System TODO: Improve with instanced rendering.
 		for camera, batch0 := range renderBatches[0] {
 			// iFrameBuffer := frameBuffers[camera.id]
 			// fmt.Println(iFrameBuffer)
@@ -126,25 +128,25 @@ func Sweep() {
 	}()
 }
 
-func Render(camera *Camera, shader *Shader, material *Material, model *Model, instance uniformLoader) {
+func Render(camera *Camera, shader *Shader, material *Material, model *Model, instance *Instance) {
 	actionQueue = append(actionQueue, func() {
 		if len(renderBatches) == 0 {
-			renderBatches = append(renderBatches, make(map[*Camera]map[*Shader]map[*Material]map[*Model][]uniformLoader))
+			renderBatches = append(renderBatches, make(map[*Camera]map[*Shader]map[*Material]map[*Model][]*Instance))
 		}
 		renderBatch := renderBatches[len(renderBatches)-1]
 		batch0 := renderBatch[camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[*Material]map[*Model][]uniformLoader)
+			batch0 = make(map[*Shader]map[*Material]map[*Model][]*Instance)
 			renderBatch[camera] = batch0
 		}
 		batch1 := batch0[shader]
 		if batch1 == nil {
-			batch1 = make(map[*Material]map[*Model][]uniformLoader)
+			batch1 = make(map[*Material]map[*Model][]*Instance)
 			batch0[shader] = batch1
 		}
 		batch2 := batch1[material]
 		if batch2 == nil {
-			batch2 = make(map[*Model][]uniformLoader)
+			batch2 = make(map[*Model][]*Instance)
 			batch1[material] = batch2
 		}
 		batch2[model] = append(batch2[model], instance)

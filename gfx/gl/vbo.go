@@ -1,6 +1,6 @@
 package gl
 
-import "github.com/go-gl/gl/v3.2-core/gl"
+import "github.com/go-gl/gl/v3.3-core/gl"
 
 const (
 	vboArrayBufferType               = gl.ARRAY_BUFFER

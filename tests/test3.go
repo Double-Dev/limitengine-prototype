@@ -12,13 +12,9 @@ import (
 	"github.com/double-dev/limitengine/utils"
 )
 
-type TestComponent struct {
-	t1 string
-	t2 int
-}
-
 func main() {
-	model := gfx.CreateModel(gio.LoadOBJ("monkey.obj"))
+	// model := gfx.CreateModel(gio.LoadOBJ("monkey.obj"))
+	model := &gfx.Model{}
 	shader := gfx.CreateShader(`#version 330 core
 layout(location = 0) in vec3 coord;
 layout(location = 1) in vec2 texCoord;
@@ -96,10 +92,16 @@ void main()
 			Camera:    camera,
 			PosOffset: gmath.Vector{0.0, 2.0, 15.0},
 		},
-		&TestComponent{},
+		&utils.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Model:    model,
+			Instance: gfx.NewInstance(),
+		},
 	)
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 3000; i++ {
 		randVelocity := gmath.Vector{rand.Float32()*500.0 - 250.0, rand.Float32()*500.0 - 250.0, rand.Float32()*500.0 - 250.0}
 		ecs.NewEntity(
 			&utils.TransformComponent{
@@ -111,28 +113,20 @@ void main()
 				Velocity:     randVelocity,
 				Acceleration: randVelocity.Clone().MulSc(-0.5),
 			},
-			&TestComponent{},
+			&utils.RenderComponent{
+				Camera:   camera,
+				Shader:   shader,
+				Material: material,
+				Model:    model,
+				Instance: gfx.NewInstance(),
+			},
 		)
 	}
 
-	testSystem := ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
-		gfx.ClearScreen(0.0, 0.1, 0.25, 1.0)
-		for _, entity := range entities {
-			transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
-			tMat := gmath.NewIdentityMatrix(4, 4)
-			tMat.Translate(transform.Position)
-
-			instance := gfx.NewUniformLoader()
-			instance.AddMatrix44("transformMat", tMat.ToMatrix44())
-
-			gfx.Render(camera, shader, material, model, instance)
-		}
-		gfx.Sweep()
-	}, (*utils.TransformComponent)(nil), (*TestComponent)(nil))
 	ecs.AddSystem(utils.NewMotionControlSystem())
 	ecs.AddSystem(utils.NewMotionSystem(0.95))
 	ecs.AddSystem(utils.NewCameraMotionSystem())
-	ecs.AddSystem(testSystem)
+	ecs.AddSystem(utils.NewRenderSystem())
 
 	limitengine.Launch()
 }

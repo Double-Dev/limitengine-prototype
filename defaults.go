@@ -13,7 +13,7 @@ var (
 	WindowTitle     = "Hello World!"
 	WindowIcons     []image.Image
 	WindowResizable = true
-	BufferSamples   = 4
+	BufferSamples   = 8
 )
 
 // // Variables used to change operating parameters.

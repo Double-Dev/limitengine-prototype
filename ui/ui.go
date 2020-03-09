@@ -15,7 +15,7 @@ var (
 
 func init() {
 	if limitengine.Running() {
-		// TODO: Sort out input.
+		// TODO: Implement controller input and ui events.
 		limitengine.AddKeyCallback(func(key limitengine.Key, scancode int, action limitengine.Action, mods limitengine.ModKey) {
 			moddedKey := GetModdedKey(key, mods)
 			for inputEvent, set := range inputControls {

@@ -8,13 +8,13 @@ type Material struct {
 func CreateMaterial() *Material {
 	return &Material{
 		texture: nil,
-		prefs:   NewUniformLoader(),
+		prefs:   newUniformLoader(),
 	}
 }
 
 func CreateTextureMaterial(texture *Texture) *Material {
 	return &Material{
 		texture: texture,
-		prefs:   NewUniformLoader(),
+		prefs:   newUniformLoader(),
 	}
 }

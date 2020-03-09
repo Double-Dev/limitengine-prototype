@@ -22,7 +22,7 @@ type Camera struct {
 func CreateCamera() *Camera {
 	return &Camera{
 		id:    0,
-		prefs: NewUniformLoader(),
+		prefs: newUniformLoader(),
 	}
 }
 

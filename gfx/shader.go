@@ -32,7 +32,7 @@ type uniformLoader struct {
 	uniformMatrix44s map[string]gmath.Matrix44
 }
 
-func NewUniformLoader() uniformLoader {
+func newUniformLoader() uniformLoader {
 	return uniformLoader{
 		uniformInts:      make(map[string]int32),
 		uniformMatrix44s: make(map[string]gmath.Matrix44),

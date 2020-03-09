@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/double-dev/limitengine/gfx/framework"
-	"github.com/go-gl/gl/v3.2-core/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
 type glContext struct{}
@@ -19,8 +19,8 @@ func NewGLContext() (glContext, error) {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.Enable(gl.CULL_FACE)
 	gl.CullFace(gl.BACK)
-	// gl.Enable(gl.BLEND)
-	// gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	return glContext{}, err
 }
 
