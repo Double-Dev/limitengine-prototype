@@ -12,11 +12,11 @@ func init() {
 	actionQueue = append(actionQueue, func() {
 		models[0] = context.CreateModel(
 			[]uint32{
-				0, 1, 3, 3, 1, 2,
+				3, 1, 0, 2, 1, 3,
 				4, 5, 7, 7, 5, 6,
-				8, 9, 11, 11, 9, 10,
+				11, 9, 8, 10, 9, 11,
 				12, 13, 15, 15, 13, 14,
-				16, 17, 19, 19, 17, 18,
+				19, 17, 16, 18, 17, 19,
 				20, 21, 23, 23, 21, 22,
 			},
 			[]float32{
@@ -50,6 +50,7 @@ func init() {
 // Model is a gfx model.
 type Model struct {
 	id          uint32
+	prefs       uniformLoader
 	DepthTest   bool
 	BackCulling bool
 	WriteDepth  bool

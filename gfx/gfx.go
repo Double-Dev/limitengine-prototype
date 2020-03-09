@@ -20,9 +20,11 @@ var (
 
 	// renderBuffers map[uint32]uint32
 
-	renderBatch = make(map[uint32]map[uint32]uint32)
-	actionQueue = []func(){}
-	gfxPipeline = [](chan func()){}
+	AdvanceFrames = 2
+
+	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Model][]uniformLoader{}
+	actionQueue   = []func(){}
+	gfxPipeline   = [](chan func()){}
 )
 
 func init() {
@@ -44,14 +46,13 @@ func init() {
 			})
 			projMatrix = gmath.NewProjectionMatrix(float32(limitengine.InitHeight)/float32(limitengine.InitWidth), 0.001, 1000.0, 60.0)
 
-			// currentTime := time.Now().UnixNano()
+			currentTime := time.Now().UnixNano()
 			for limitengine.Running() {
 				if len(gfxPipeline) > 0 {
-					// lastTime := currentTime
-					// currentTime = time.Now().UnixNano()
-					// delta := float32(currentTime-lastTime) / 1000000000.0
-					// fps = 1.0 / delta
-					// fmt.Println(fps)
+					lastTime := currentTime
+					currentTime = time.Now().UnixNano()
+					delta := float32(currentTime-lastTime) / 1000000000.0
+					fps = 1.0 / delta
 
 					pipeline := gfxPipeline[0]
 					for action := range pipeline {
@@ -73,49 +74,102 @@ func ClearScreen(r, g, b, a float32) {
 	actionQueue = append(actionQueue, func() { context.ClearScreen(r, g, b, a) })
 }
 
-// RenderSweep sweeps queued gfx actions onto the render pipeline.
+// Sweep sweeps queued gfx actions onto the render pipeline and renders all gfx objects added to the batch.
 func Sweep() {
-	if len(gfxPipeline) <= 6 {
-		pipeline := make(chan func())
-		gfxPipeline = append(gfxPipeline, pipeline)
-		queue := actionQueue
-		actionQueue = nil
-		go func() {
-			for _, action := range queue {
-				pipeline <- action
-			}
-			close(pipeline)
-		}()
-	} else {
+	for len(gfxPipeline)-1 > AdvanceFrames {
 		time.Sleep(time.Millisecond * 10)
 	}
-}
-
-func Render(camera *Camera, shader *Shader, model *Model, texture *Texture, transform gmath.Matrix) {
 	actionQueue = append(actionQueue, func() {
-		iShader := shaders[shader.id]
-		iModel := models[model.id]
-		iTexture := textures[texture.id]
-		iShader.Start()
-		iTexture.Bind()
-		iShader.LoadUniformMatrix4fv("projMat", projMatrix)
+		// Batching System TODO: Replace with instanced rendering.
+		for camera, batch0 := range renderBatches[0] {
+			// iFrameBuffer := frameBuffers[camera.id]
+			// fmt.Println(iFrameBuffer)
+			// Enable framebuffer
+			for shader, batch1 := range batch0 {
+				iShader := shaders[shader.id]
+				iShader.Start()
+				camera.prefs.loadTo(iShader)
+				iShader.LoadUniformMatrix4fv("projMat", projMatrix.ToMatrix44())
+				// iShader.LoadUniformMatrix4fv("viewMat", gmath.NewIdentityMatrix(4, 4).Translate(camera.position).ToMatrix44())
 
-		vMat := gmath.NewMatrix(4, 4)
-		vMat.Translate(camera.Position())
-		// fmt.Println(vMat.MulM(transform))
-
-		iShader.LoadUniformMatrix4fv("mvMat", vMat.MulM(transform))
-		iShader.LoadUniform1I("tex", 0)
-		iModel.Enable()
-		iModel.Render()
-		iModel.Disable()
-		iShader.Stop()
+				for material, batch2 := range batch1 {
+					material.prefs.loadTo(iShader)
+					iTexture := textures[material.texture.id]
+					iTexture.Bind()
+					for model, instances := range batch2 {
+						model.prefs.loadTo(iShader)
+						iModel := models[model.id]
+						iModel.Enable()
+						for _, instance := range instances {
+							instance.loadTo(iShader)
+							iModel.Render()
+						}
+						iModel.Disable()
+					}
+					iTexture.Unbind()
+				}
+				iShader.Stop()
+			}
+			// Disable framebuffer
+		}
+		renderBatches = renderBatches[1:]
 	})
+	pipeline := make(chan func())
+	gfxPipeline = append(gfxPipeline, pipeline)
+	queue := actionQueue
+	actionQueue = nil
+	go func() {
+		for _, action := range queue {
+			pipeline <- action
+		}
+		close(pipeline)
+	}()
 }
 
-func CreateFrameBuffer() {
-}
+func Render(camera *Camera, shader *Shader, material *Material, model *Model, instance uniformLoader) {
+	actionQueue = append(actionQueue, func() {
+		if len(renderBatches) == 0 {
+			renderBatches = append(renderBatches, make(map[*Camera]map[*Shader]map[*Material]map[*Model][]uniformLoader))
+		}
+		renderBatch := renderBatches[len(renderBatches)-1]
+		batch0 := renderBatch[camera]
+		if batch0 == nil {
+			batch0 = make(map[*Shader]map[*Material]map[*Model][]uniformLoader)
+			renderBatch[camera] = batch0
+		}
+		batch1 := batch0[shader]
+		if batch1 == nil {
+			batch1 = make(map[*Material]map[*Model][]uniformLoader)
+			batch0[shader] = batch1
+		}
+		batch2 := batch1[material]
+		if batch2 == nil {
+			batch2 = make(map[*Model][]uniformLoader)
+			batch1[material] = batch2
+		}
+		batch2[model] = append(batch2[model], instance)
 
-func CreateRenderBuffer() {
+		// iShader := shaders[shader.id]
+		// var iModel framework.IModel
+		// if model != nil {
+		// 	iModel = models[model.id]
+		// } else {
+		// 	iModel = models[0]
+		// }
+		// iTexture := textures[texture.id]
+		// iShader.Start()
+		// iTexture.Bind()
+		// iModel.Enable()
 
+		// iShader.LoadUniformMatrix4fv("projMat", projMatrix.ToMatrix44())
+		// vMat := gmath.NewIdentityMatrix(4, 4).Translate(camera.Position())
+
+		// iShader.LoadUniformMatrix4fv("viewMat", vMat.ToMatrix44())
+		// iShader.LoadUniformMatrix4fv("transformMat", transform.ToMatrix44())
+		// iShader.LoadUniform1I("tex", 0)
+
+		// iModel.Render()
+		// iModel.Disable()
+		// iShader.Stop()
+	})
 }

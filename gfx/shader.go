@@ -2,6 +2,7 @@ package gfx
 
 import (
 	"github.com/double-dev/limitengine/gfx/framework"
+	"github.com/double-dev/limitengine/gmath"
 )
 
 var (
@@ -13,7 +14,7 @@ func init() { shaders[0] = nil }
 
 type Shader struct {
 	id            uint32
-	uniformLoader func(framework.IShader, framework.IModel)
+	uniformLoader uniformLoader
 }
 
 func CreateShader(vertSrc, fragSrc string) *Shader {
@@ -23,4 +24,34 @@ func CreateShader(vertSrc, fragSrc string) *Shader {
 	shaderIndex++
 	actionQueue = append(actionQueue, func() { shaders[shader.id] = context.CreateShader(vertSrc, fragSrc) })
 	return shader
+}
+
+// TODO: Add support for more variables + array uniforms.
+type uniformLoader struct {
+	uniformInts      map[string]int32
+	uniformMatrix44s map[string]gmath.Matrix44
+}
+
+func NewUniformLoader() uniformLoader {
+	return uniformLoader{
+		uniformInts:      make(map[string]int32),
+		uniformMatrix44s: make(map[string]gmath.Matrix44),
+	}
+}
+
+func (this uniformLoader) loadTo(iShader framework.IShader) {
+	for varName, value := range this.uniformInts {
+		iShader.LoadUniform1I(varName, value)
+	}
+	for varName, value := range this.uniformMatrix44s {
+		iShader.LoadUniformMatrix4fv(varName, value)
+	}
+}
+
+func (this uniformLoader) AddInt(varName string, val int32) {
+	this.uniformInts[varName] = val
+}
+
+func (this uniformLoader) AddMatrix44(varName string, val gmath.Matrix44) {
+	this.uniformMatrix44s[varName] = val
 }

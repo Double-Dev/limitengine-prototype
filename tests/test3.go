@@ -18,41 +18,49 @@ type TestComponent struct {
 }
 
 func main() {
-	model := gfx.CreateModel(gio.LoadOBJ("lamp.obj"))
-	shader := gfx.CreateShader(`#version 150 core
-in vec3 coord;
-in vec2 texCoord;
-in vec3 norm;
-out vec2 textureCoord;
-// out vec3 normal;
-// out vec3 toLight;
+	model := gfx.CreateModel(gio.LoadOBJ("monkey.obj"))
+	shader := gfx.CreateShader(`#version 330 core
+layout(location = 0) in vec3 coord;
+layout(location = 1) in vec2 texCoord;
+layout(location = 2) in vec3 normal;
 uniform mat4 projMat;
-uniform mat4 mvMat;
-// const vec3 lightPos = vec3(-5.0, -10.0, 0.0);
+uniform mat4 viewMat;
+uniform mat4 transformMat;
+
+out vec2 textureCoord;
+out vec3 interpNormal;
+out vec3 toLight;
+const vec3 lightPos = vec3(-5.0, 10.0, 5.0);
 void main()
 {
-	// toLight = normalize(normalize(lightPos) - normalize(coord));
+	vec4 worldPos = transformMat * vec4(coord, 1.0);
+	gl_Position = projMat * viewMat * worldPos;
+
 	textureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
-	// normal = normalize(norm);
-	gl_Position = projMat * mvMat * vec4(coord, 1.0);
-}`, `#version 150 core
+	
+	interpNormal = normalize(normal);
+	toLight = normalize(lightPos - worldPos.xyz);
+}`, `#version 330 core
 in vec2 textureCoord;
-// in vec3 normal;
-// in vec3 toLight;
-out vec4 fragColor;
+in vec3 interpNormal;
+in vec3 toLight;
 uniform sampler2D tex;
-// const vec3 lightColor = vec3(1.0, 1.0, 1.0);
-// const float ambient = 0.1;
+
+out vec4 fragColor;
+const vec3 lightColor = vec3(1.0, 1.0, 1.0);
+const float ambient = 0.1;
 void main()
 {
-	// float lightDot = dot(normal, toLight);
-	// float brightness = max(lightDot, ambient);
-	// vec3 diffuse = brightness * lightColor;
-	fragColor = texture(tex, textureCoord);
-	// fragColor = vec4(diffuse, 1.0) * vec4(0.6, 0.6, 0.1, 1.0);
+	float lightDot = dot(interpNormal, toLight);
+	float brightness = max(lightDot, ambient);
+	vec3 diffuse = brightness * lightColor;
+	// fragColor = vec4(diffuse, 1.0) * texture(tex, textureCoord);
+	fragColor = vec4(diffuse, 1.0) * vec4(interpNormal, 1.0);
+	// fragColor = vec4(diffuse, 1.0) * vec4(1.0, 1.0, 1.0, 1.0);
 }`,
 	)
 	texture := gfx.CreateTexture(gio.LoadPNG("lamp.png"))
+	material := gfx.CreateTextureMaterial(texture)
 
 	xAxis := ui.InputControl{}
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyA}, -1.0)
@@ -72,13 +80,13 @@ void main()
 	camera := gfx.CreateCamera()
 	ecs.NewEntity(
 		&utils.TransformComponent{
-			Position: gmath.NewVector(0.0, 1.0, -10.0, 1.0),
-			Rotation: gmath.NewVector(0.0, 0.0, 0.0),
-			Scale:    gmath.NewVector(1.0, 1.0, 1.0),
+			Position: gmath.Vector{0.0, 1.0, -10.0, 1.0},
+			Rotation: gmath.Vector{0.0, 0.0, 0.0},
+			Scale:    gmath.Vector{1.0, 1.0, 1.0},
 		},
 		&utils.MotionComponent{
-			Velocity:     gmath.NewVector(0.0, 0.0, 0.0),
-			Acceleration: gmath.NewVector(0.0, 0.0, 0.0),
+			Velocity:     gmath.Vector{0.0, 0.0, 0.0},
+			Acceleration: gmath.Vector{0.0, 0.0, 0.0},
 		},
 		&utils.MotionControlComponent{
 			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis},
@@ -86,17 +94,22 @@ void main()
 		},
 		&utils.CameraComponent{
 			Camera:    camera,
-			PosOffset: gmath.NewVector(0.0, 5.0, 10.0),
+			PosOffset: gmath.Vector{0.0, 2.0, 15.0},
 		},
 		&TestComponent{},
 	)
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 1000; i++ {
+		randVelocity := gmath.Vector{rand.Float32()*500.0 - 250.0, rand.Float32()*500.0 - 250.0, rand.Float32()*500.0 - 250.0}
 		ecs.NewEntity(
 			&utils.TransformComponent{
-				Position: gmath.NewVector(rand.Float32()*10.0-15.0, rand.Float32()*10.0-15.0, rand.Float32()*10.0-15.0, 1.0),
-				Rotation: gmath.NewVector(0.0, 0.0, 0.0),
-				Scale:    gmath.NewVector(1.0, 1.0, 1.0),
+				Position: gmath.Vector{rand.Float32()*10.0 - 5.0, rand.Float32()*10.0 - 5.0, rand.Float32()*10.0 - 25.0, 1.0},
+				Rotation: gmath.Vector{0.0, 0.0, 0.0},
+				Scale:    gmath.Vector{1.0, 1.0, 1.0},
+			},
+			&utils.MotionComponent{
+				Velocity:     randVelocity,
+				Acceleration: randVelocity.Clone().MulSc(-0.5),
 			},
 			&TestComponent{},
 		)
@@ -106,17 +119,20 @@ void main()
 		gfx.ClearScreen(0.0, 0.1, 0.25, 1.0)
 		for _, entity := range entities {
 			transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
-			tMat := gmath.NewMatrix(4, 4)
+			tMat := gmath.NewIdentityMatrix(4, 4)
 			tMat.Translate(transform.Position)
 
-			gfx.Render(camera, shader, model, texture, tMat)
+			instance := gfx.NewUniformLoader()
+			instance.AddMatrix44("transformMat", tMat.ToMatrix44())
+
+			gfx.Render(camera, shader, material, model, instance)
 		}
 		gfx.Sweep()
 	}, (*utils.TransformComponent)(nil), (*TestComponent)(nil))
-	ecs.AddSystem(testSystem)
 	ecs.AddSystem(utils.NewMotionControlSystem())
 	ecs.AddSystem(utils.NewMotionSystem(0.95))
 	ecs.AddSystem(utils.NewCameraMotionSystem())
+	ecs.AddSystem(testSystem)
 
 	limitengine.Launch()
 }

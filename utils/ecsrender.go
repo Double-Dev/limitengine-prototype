@@ -7,16 +7,17 @@ import (
 )
 
 type RenderComponent struct {
-	Shader  gfx.Shader
-	Model   gfx.Model
-	Texture gfx.Texture
+	Camera   *gfx.Camera
+	Shader   *gfx.Shader
+	Material *gfx.Material
+	Model    *gfx.Model
 }
 
 func NewRenderSystem() *ecs.ECSSystem {
 	return ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
 		// for _, entity := range entities {
-		// transform := entity.GetComponent((*TranformationComponent)(nil)).(*TranformationComponent)
-		// render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
+		// 	transform := entity.GetComponent((*TranformationComponent)(nil)).(*TranformationComponent)
+		// 	render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
 		// }
 	}, (*RenderComponent)(nil), (*TransformComponent)(nil))
 }
@@ -31,9 +32,11 @@ func NewCameraMotionSystem() *ecs.ECSSystem {
 		for _, entity := range entities {
 			camera := entity.GetComponent((*CameraComponent)(nil)).(*CameraComponent)
 			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
-			camera.Camera.Position().Set(transform.Position.Clone().Add(camera.PosOffset...).MulSc(-1.0)...)
-			camera.Camera.Rotation().Set(transform.Rotation...)
-			camera.Camera.Scale().Set(transform.Scale...)
+
+			viewMat := gmath.NewIdentityMatrix(4, 4)
+			viewMat.Translate(transform.Position.Clone().Add(camera.PosOffset...).MulSc(-1.0))
+
+			camera.Camera.SetViewMat(viewMat.ToMatrix44())
 		}
 	}, (*CameraComponent)(nil), (*TransformComponent)(nil))
 }

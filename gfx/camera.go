@@ -14,30 +14,29 @@ func init() { frameBuffers[0] = nil }
 
 // Camera is a gfx framebuffer.
 type Camera struct {
-	id       uint32
-	position gmath.Vector
-	rotation gmath.Vector
-	scale    gmath.Vector
+	id    uint32
+	prefs uniformLoader
 }
 
 // CreateCamera queues a gfx action that creates a new camera.
 func CreateCamera() *Camera {
 	return &Camera{
-		id:       0,
-		position: gmath.NewVector(0.0, 0.0, 0.0, 1.0),
-		rotation: gmath.NewVector(0.0, 0.0, 0.0, 1.0),
-		scale:    gmath.NewVector(1.0, 1.0, 1.0, 1.0),
+		id:    0,
+		prefs: NewUniformLoader(),
 	}
 }
 
-func (camera *Camera) Position() gmath.Vector {
-	return camera.position
+func (this *Camera) SetProjectionMat(projectionMat gmath.Matrix44) {
+	this.prefs.AddMatrix44("projMat", projectionMat)
 }
 
-func (camera *Camera) Rotation() gmath.Vector {
-	return camera.rotation
+func (this *Camera) SetViewMat(viewMat gmath.Matrix44) {
+	this.prefs.AddMatrix44("viewMat", viewMat)
 }
 
-func (camera *Camera) Scale() gmath.Vector {
-	return camera.scale
+func CreateFrameBuffer() {
+}
+
+func CreateRenderBuffer() {
+
 }
