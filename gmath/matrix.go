@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Matrix contains an array of vectors and has methods to perform matrix mathematics.
+// Matrix contains a slice of vectors and has methods to perform matrix mathematics.
 type Matrix struct {
 	matrix []*Vector
 }
@@ -17,6 +17,12 @@ func NewIdentityMatrix(columns, rows int) *Matrix {
 	}
 	matrix.SetIdentity()
 	return matrix
+}
+
+func NewTransformMatrix(translation *Vector, rotation *Quaternion, scale *Vector) *Matrix {
+	rMat := NewIdentityMatrix(4, 4).SetRotate(rotation)
+	tsMat := NewIdentityMatrix(4, 4).SetTranslate(translation).SetScale(scale)
+	return tsMat.MulM(rMat)
 }
 
 func NewProjectionMatrix(aspectRatio, nearPlane, farPlane, fov float32) *Matrix {
@@ -65,20 +71,23 @@ func (this *Matrix) MulM(other *Matrix) *Matrix {
 	return mOut
 }
 
-func (this *Matrix) Translate(amount *Vector) *Matrix {
-	for i := 0; i < len(this.matrix)-1; i++ {
-		for j := 0; j < MinI(len(this.matrix)-1, len(amount.vector)-1); j++ {
-			this.matrix[len(this.matrix)-1].vector[i] += this.matrix[j].vector[i] * amount.vector[j]
-		}
+func (this *Matrix) SetTranslate(translation *Vector) *Matrix {
+	for i := 0; i < MinI(len(this.matrix), len(translation.vector)); i++ {
+		this.matrix[len(this.matrix)-1].vector[i] = translation.vector[i]
 	}
 	return this
 }
 
-func (this *Matrix) Scale(amount Vector) *Matrix {
+func (this *Matrix) SetRotate(rotation *Quaternion) *Matrix {
+	// TODO: Implement rotation maths.
+	return this
+}
+
+func (this *Matrix) SetScale(scale *Vector) *Matrix {
 	for i := 0; i < len(this.matrix); i++ {
-		for j := 0; j < MinI(len(this.matrix[i].vector), len(amount.vector)); j++ {
+		for j := 0; j < MinI(len(this.matrix[i].vector), len(scale.vector)); j++ {
 			if i == j {
-				this.matrix[i].vector[j] *= amount.vector[j]
+				this.matrix[i].vector[j] *= scale.vector[j]
 			}
 		}
 	}

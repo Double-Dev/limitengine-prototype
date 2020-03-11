@@ -20,8 +20,7 @@ func NewRenderSystem() *ecs.ECSSystem {
 		for _, entity := range entities {
 			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
 
-			transformMat := gmath.NewIdentityMatrix(4, 4)
-			transformMat.Translate(transform.Position)
+			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
 
 			render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
 			render.Instance.AddMatrix44("transformMat", transformMat)
@@ -43,8 +42,7 @@ func NewCameraMotionSystem() *ecs.ECSSystem {
 			camera := entity.GetComponent((*CameraComponent)(nil)).(*CameraComponent)
 			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
 
-			viewMat := gmath.NewIdentityMatrix(4, 4)
-			viewMat.Translate(transform.Position.Clone().AddV(camera.PosOffset).MulSc(-1.0))
+			viewMat := gmath.NewTransformMatrix(transform.Position.Clone().AddV(camera.PosOffset).MulSc(-1.0), transform.Rotation, transform.Scale)
 
 			camera.Camera.SetViewMat(viewMat)
 		}

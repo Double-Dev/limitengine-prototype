@@ -2,7 +2,7 @@ package gmath
 
 import "fmt"
 
-// Vector is an array of floats with util methods for vector mathematics.
+// Vector is a slice of floats with util methods for vector mathematics.
 type Vector struct {
 	vector []float32
 }
@@ -116,6 +116,14 @@ func (vector *Vector) DivV(other *Vector) *Vector {
 	return vector.Div(other.vector...)
 }
 
+// DivSc divides this Vector object by a single float32 scalar.
+func (vector *Vector) DivSc(scalar float32) *Vector {
+	for i := 0; i < len(vector.vector); i++ {
+		vector.vector[i] /= scalar
+	}
+	return vector
+}
+
 // Dot returns a float32 result of this Vector's dot product.
 func (vector *Vector) Dot(other *Vector) float32 {
 	dot := float32(0.0)
@@ -142,6 +150,11 @@ func (vector *Vector) LenSq() float32 {
 // Len returns a float32 result of this Vector's length.
 func (vector *Vector) Len() float32 {
 	return Sqrt(vector.LenSq())
+}
+
+// Normalize normalizes this Vector.
+func (vector *Vector) Normalize() *Vector {
+	return vector.DivSc(vector.Len())
 }
 
 // Dst returns a float32 result of this Vector's distance from another Vector.

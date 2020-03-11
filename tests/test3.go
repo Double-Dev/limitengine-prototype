@@ -76,8 +76,8 @@ void main()
 	camera := gfx.CreateCamera()
 	ecs.NewEntity(
 		&utils.TransformComponent{
-			Position: gmath.NewVector(0.0, 1.0, -10.0, 1.0),
-			Rotation: gmath.NewVector(0.0, 0.0, 0.0),
+			Position: gmath.NewVector(0.0, 1.0, -10.0),
+			Rotation: gmath.NewZeroQuaternion(3),
 			Scale:    gmath.NewVector(1.0, 1.0, 1.0),
 		},
 		&utils.MotionComponent{
@@ -105,8 +105,8 @@ void main()
 		randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
 		ecs.NewEntity(
 			&utils.TransformComponent{
-				Position: gmath.NewVector(rand.Float32()*10.0-5.0, rand.Float32()*10.0-5.0, rand.Float32()*10.0-25.0, 1.0),
-				Rotation: gmath.NewVector(0.0, 0.0, 0.0),
+				Position: gmath.NewVector(rand.Float32()*10.0-5.0, rand.Float32()*10.0-5.0, rand.Float32()*10.0-25.0),
+				Rotation: gmath.NewZeroQuaternion(3),
 				Scale:    gmath.NewVector(1.0, 1.0, 1.0),
 			},
 			&utils.MotionComponent{

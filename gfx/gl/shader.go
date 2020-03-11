@@ -51,20 +51,12 @@ func newShader(vertSrc, fragSrc string) *shader {
 		var xtype uint32
 		var length, size int32
 		gl.GetActiveUniform(shader.id, i, 256, &length, &size, &xtype, &name[0])
-		fmt.Println("Name:", gl.GoStr(&name[0]))
-		fmt.Println("Type:", xtype)
-		fmt.Println("Length:", length)
-		fmt.Println("Size:", size)
-		fmt.Println()
 		if shader.uniforms[xtype] == nil {
 			shader.uniforms[xtype] = make(map[string]int32)
 		}
 		shader.uniforms[xtype][gl.GoStr(&name[0])] = gl.GetUniformLocation(shader.id, &name[0])
 	}
 	shader.Stop()
-	for key, num := range shader.uniforms {
-		fmt.Println(key, num)
-	}
 
 	return shader
 }
