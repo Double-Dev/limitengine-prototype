@@ -29,13 +29,13 @@ func CreateShader(vertSrc, fragSrc string) *Shader {
 // TODO: Add support for more variables + array uniforms.
 type uniformLoader struct {
 	uniformInts      map[string]int32
-	uniformMatrix44s map[string]gmath.Matrix44
+	uniformMatrix44s map[string]*gmath.Matrix
 }
 
 func newUniformLoader() uniformLoader {
 	return uniformLoader{
 		uniformInts:      make(map[string]int32),
-		uniformMatrix44s: make(map[string]gmath.Matrix44),
+		uniformMatrix44s: make(map[string]*gmath.Matrix),
 	}
 }
 
@@ -44,7 +44,7 @@ func (this uniformLoader) loadTo(iShader framework.IShader) {
 		iShader.LoadUniform1I(varName, value)
 	}
 	for varName, value := range this.uniformMatrix44s {
-		iShader.LoadUniformMatrix4fv(varName, value)
+		iShader.LoadUniformMatrix4fv(varName, value.ToArray())
 	}
 }
 
@@ -52,6 +52,8 @@ func (this uniformLoader) AddInt(varName string, val int32) {
 	this.uniformInts[varName] = val
 }
 
-func (this uniformLoader) AddMatrix44(varName string, val gmath.Matrix44) {
-	this.uniformMatrix44s[varName] = val
+func (this uniformLoader) AddMatrix44(varName string, val *gmath.Matrix) {
+	if val.IsSize(4, 4) {
+		this.uniformMatrix44s[varName] = val
+	}
 }

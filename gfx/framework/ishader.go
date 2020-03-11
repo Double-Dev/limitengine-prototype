@@ -1,9 +1,5 @@
 package framework
 
-import (
-	"github.com/double-dev/limitengine/gmath"
-)
-
 type IShader interface {
 	Start()
 	Stop()
@@ -13,11 +9,11 @@ type IShader interface {
 	LoadUniform3I(uniformName string, i, j, k int32)
 	LoadUniform4I(uniformName string, i, j, k, l int32)
 	LoadUniform1F(uniformName string, x float32)
-	LoadUniform2F(uniformName string, v gmath.Vector2)
-	LoadUniform3F(uniformName string, v gmath.Vector3)
-	LoadUniform4F(uniformName string, v gmath.Vector4)
+	LoadUniform2F(uniformName string, x, y float32)
+	LoadUniform3F(uniformName string, x, y, z float32)
+	LoadUniform4F(uniformName string, x, y, z, w float32)
 
-	LoadUniformMatrix4fv(uniformName string, matrix gmath.Matrix44)
+	LoadUniformMatrix4fv(uniformName string, matrix []float32)
 	// TODO: Add other uniform methods.
 
 	Delete()

@@ -6,10 +6,10 @@ import (
 )
 
 type MotionComponent struct {
-	Velocity        gmath.Vector
-	Acceleration    gmath.Vector
-	AngVelocity     gmath.Vector
-	AngAcceleration gmath.Vector
+	Velocity        *gmath.Vector
+	Acceleration    *gmath.Vector
+	AngVelocity     *gmath.Vector
+	AngAcceleration *gmath.Vector
 }
 
 func NewMotionSystem(damping float32) *ecs.ECSSystem {
@@ -17,12 +17,12 @@ func NewMotionSystem(damping float32) *ecs.ECSSystem {
 		for _, entity := range entities {
 			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
 			motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
-			motion.Velocity.Add(motion.Acceleration.Clone().MulSc(delta)...)
+			motion.Velocity.AddV(motion.Acceleration.Clone().MulSc(delta))
 
 			// TODO: Implement proper damping.
 			motion.Velocity.MulSc(damping)
 
-			transform.Position.Add(motion.Velocity.Clone().MulSc(delta)...)
+			transform.Position.AddV(motion.Velocity.Clone().MulSc(delta))
 		}
 	}, (*MotionComponent)(nil), (*TransformComponent)(nil))
 }

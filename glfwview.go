@@ -20,13 +20,13 @@ func newGLFWView() *glfwView {
 	} else {
 		glfw.WindowHint(glfw.Resizable, glfw.False)
 	}
+	glfw.WindowHint(glfw.Samples, BufferSamples)
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 3)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	if runtime.GOOS == DARWIN {
 		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	}
-	glfw.WindowHint(glfw.Samples, BufferSamples)
 	window, err := glfw.CreateWindow(InitWidth, InitHeight, WindowTitle, nil, nil)
 	if err != nil {
 		log.Err("Error creating window.", err)

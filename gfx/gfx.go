@@ -17,7 +17,7 @@ var (
 	context framework.Context
 
 	fps        = float32(0.0)
-	projMatrix gmath.Matrix
+	projMatrix *gmath.Matrix
 
 	// renderBuffers map[uint32]uint32
 
@@ -91,7 +91,7 @@ func Sweep() {
 				iShader := shaders[shader.id]
 				iShader.Start()
 				camera.prefs.loadTo(iShader)
-				iShader.LoadUniformMatrix4fv("projMat", projMatrix.ToMatrix44())
+				iShader.LoadUniformMatrix4fv("projMat", projMatrix.ToArray())
 				// iShader.LoadUniformMatrix4fv("viewMat", gmath.NewIdentityMatrix(4, 4).Translate(camera.position).ToMatrix44())
 
 				for material, batch2 := range batch1 {

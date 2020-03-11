@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/double-dev/limitengine/gmath"
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
@@ -113,21 +112,21 @@ func (shader *shader) LoadUniform3I(uniformName string, i, j, k int32) {
 func (shader *shader) LoadUniform4I(uniformName string, i, j, k, l int32) {
 	gl.Uniform4i(shader.uniforms[gl.INT_VEC4][uniformName], i, j, k, l)
 }
-func (shader *shader) LoadUniform1F(uniformName string, f float32) {
-	gl.Uniform1f(shader.uniforms[gl.FLOAT][uniformName], f)
+func (shader *shader) LoadUniform1F(uniformName string, x float32) {
+	gl.Uniform1f(shader.uniforms[gl.FLOAT][uniformName], x)
 }
-func (shader *shader) LoadUniform2F(uniformName string, v gmath.Vector2) {
-	gl.Uniform2f(shader.uniforms[gl.FLOAT_VEC2][uniformName], v[0], v[1])
+func (shader *shader) LoadUniform2F(uniformName string, x, y float32) {
+	gl.Uniform2f(shader.uniforms[gl.FLOAT_VEC2][uniformName], x, y)
 }
-func (shader *shader) LoadUniform3F(uniformName string, v gmath.Vector3) {
-	gl.Uniform3f(shader.uniforms[gl.FLOAT_VEC3][uniformName], v[0], v[1], v[2])
+func (shader *shader) LoadUniform3F(uniformName string, x, y, z float32) {
+	gl.Uniform3f(shader.uniforms[gl.FLOAT_VEC3][uniformName], x, y, z)
 }
-func (shader *shader) LoadUniform4F(uniformName string, v gmath.Vector4) {
-	gl.Uniform4f(shader.uniforms[gl.FLOAT_VEC4][uniformName], v[0], v[1], v[2], v[3])
+func (shader *shader) LoadUniform4F(uniformName string, x, y, z, w float32) {
+	gl.Uniform4f(shader.uniforms[gl.FLOAT_VEC4][uniformName], x, y, z, w)
 }
 
-func (shader *shader) LoadUniformMatrix4fv(uniformName string, matrix gmath.Matrix44) {
-	gl.UniformMatrix4fv(shader.uniforms[gl.FLOAT_MAT4][uniformName], 1, false, &matrix.ToArray()[0])
+func (shader *shader) LoadUniformMatrix4fv(uniformName string, matrix []float32) {
+	gl.UniformMatrix4fv(shader.uniforms[gl.FLOAT_MAT4][uniformName], 1, false, &matrix[0])
 }
 
 // TODO: Add other uniform load functions.

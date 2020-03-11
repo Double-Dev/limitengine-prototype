@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	// model := gfx.CreateModel(gio.LoadOBJ("monkey.obj"))
-	model := &gfx.Model{}
+	model := gfx.CreateModel(gio.LoadOBJ("monkey.obj"))
+	// model := &gfx.Model{}
 	shader := gfx.CreateShader(`#version 330 core
 layout(location = 0) in vec3 coord;
 layout(location = 1) in vec2 texCoord;
@@ -33,7 +33,7 @@ void main()
 	gl_Position = projMat * viewMat * worldPos;
 
 	textureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
-	
+
 	interpNormal = normalize(normal);
 	toLight = normalize(lightPos - worldPos.xyz);
 }`, `#version 330 core
@@ -76,13 +76,13 @@ void main()
 	camera := gfx.CreateCamera()
 	ecs.NewEntity(
 		&utils.TransformComponent{
-			Position: gmath.Vector{0.0, 1.0, -10.0, 1.0},
-			Rotation: gmath.Vector{0.0, 0.0, 0.0},
-			Scale:    gmath.Vector{1.0, 1.0, 1.0},
+			Position: gmath.NewVector(0.0, 1.0, -10.0, 1.0),
+			Rotation: gmath.NewVector(0.0, 0.0, 0.0),
+			Scale:    gmath.NewVector(1.0, 1.0, 1.0),
 		},
 		&utils.MotionComponent{
-			Velocity:     gmath.Vector{0.0, 0.0, 0.0},
-			Acceleration: gmath.Vector{0.0, 0.0, 0.0},
+			Velocity:     gmath.NewVector(0.0, 0.0, 0.0),
+			Acceleration: gmath.NewVector(0.0, 0.0, 0.0),
 		},
 		&utils.MotionControlComponent{
 			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis},
@@ -90,7 +90,7 @@ void main()
 		},
 		&utils.CameraComponent{
 			Camera:    camera,
-			PosOffset: gmath.Vector{0.0, 2.0, 15.0},
+			PosOffset: gmath.NewVector(0.0, 2.0, 15.0),
 		},
 		&utils.RenderComponent{
 			Camera:   camera,
@@ -102,12 +102,12 @@ void main()
 	)
 
 	for i := 0; i < 3000; i++ {
-		randVelocity := gmath.Vector{rand.Float32()*500.0 - 250.0, rand.Float32()*500.0 - 250.0, rand.Float32()*500.0 - 250.0}
+		randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
 		ecs.NewEntity(
 			&utils.TransformComponent{
-				Position: gmath.Vector{rand.Float32()*10.0 - 5.0, rand.Float32()*10.0 - 5.0, rand.Float32()*10.0 - 25.0, 1.0},
-				Rotation: gmath.Vector{0.0, 0.0, 0.0},
-				Scale:    gmath.Vector{1.0, 1.0, 1.0},
+				Position: gmath.NewVector(rand.Float32()*10.0-5.0, rand.Float32()*10.0-5.0, rand.Float32()*10.0-25.0, 1.0),
+				Rotation: gmath.NewVector(0.0, 0.0, 0.0),
+				Scale:    gmath.NewVector(1.0, 1.0, 1.0),
 			},
 			&utils.MotionComponent{
 				Velocity:     randVelocity,
