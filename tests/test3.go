@@ -34,7 +34,7 @@ void main()
 
 	textureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
 
-	interpNormal = normalize(normal);
+	interpNormal = normalize((transformMat * vec4(normal, 0.0)).xyz);
 	toLight = normalize(lightPos - worldPos.xyz);
 }`, `#version 330 core
 in vec2 textureCoord;
@@ -51,7 +51,7 @@ void main()
 	float brightness = max(lightDot, ambient);
 	vec3 diffuse = brightness * lightColor;
 	// fragColor = vec4(diffuse, 1.0) * texture(tex, textureCoord);
-	fragColor = vec4(diffuse, 1.0) * vec4(interpNormal, 1.0);
+	fragColor = vec4(diffuse, 1.0) * vec4(abs(interpNormal), 1.0);
 	// fragColor = vec4(diffuse, 1.0) * vec4(1.0, 1.0, 1.0, 1.0);
 }`,
 	)
@@ -77,20 +77,24 @@ void main()
 	ecs.NewEntity(
 		&utils.TransformComponent{
 			Position: gmath.NewVector(0.0, 1.0, -10.0),
-			Rotation: gmath.NewZeroQuaternion(3),
+			Rotation: gmath.NewQuaternion(rand.Float32()*gmath.Pi, 0.0, 1.0, 0.0),
 			Scale:    gmath.NewVector(1.0, 1.0, 1.0),
 		},
 		&utils.MotionComponent{
-			Velocity:     gmath.NewVector(0.0, 0.0, 0.0),
-			Acceleration: gmath.NewVector(0.0, 0.0, 0.0),
+			Velocity:        gmath.NewVector(0.0, 0.0, 0.0),
+			Acceleration:    gmath.NewVector(0.0, 0.0, 0.0),
+			AngVelocity:     gmath.NewQuaternion(3),
+			AngAcceleration: gmath.NewIdentityQuaternion(3),
 		},
 		&utils.MotionControlComponent{
 			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis},
 			Speed: 100.0,
 		},
 		&utils.CameraComponent{
-			Camera:    camera,
-			PosOffset: gmath.NewVector(0.0, 2.0, 15.0),
+			Camera:      camera,
+			PosOffset:   gmath.NewVector(0.0, 0.0, 15.0),
+			RotOffset:   gmath.NewIdentityQuaternion(3),
+			ScaleOffset: gmath.NewVector(1.0, 1.0, 1.0),
 		},
 		&utils.RenderComponent{
 			Camera:   camera,
@@ -101,18 +105,18 @@ void main()
 		},
 	)
 
-	for i := 0; i < 3000; i++ {
-		randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
+	for i := 0; i < 4000; i++ {
+		// randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
 		ecs.NewEntity(
 			&utils.TransformComponent{
-				Position: gmath.NewVector(rand.Float32()*10.0-5.0, rand.Float32()*10.0-5.0, rand.Float32()*10.0-25.0),
-				Rotation: gmath.NewZeroQuaternion(3),
+				Position: gmath.NewVector(rand.Float32()*100.0-50.0, rand.Float32()*100.0-50.0, rand.Float32()*100.0-250.0),
+				Rotation: gmath.NewQuaternion(rand.Float32()*gmath.Pi, rand.Float32(), rand.Float32(), rand.Float32()),
 				Scale:    gmath.NewVector(1.0, 1.0, 1.0),
 			},
-			&utils.MotionComponent{
-				Velocity:     randVelocity,
-				Acceleration: randVelocity.Clone().MulSc(-0.5),
-			},
+			// &utils.MotionComponent{
+			// 	Velocity:     randVelocity,
+			// 	Acceleration: randVelocity.Clone().MulSc(-0.5),
+			// },
 			&utils.RenderComponent{
 				Camera:   camera,
 				Shader:   shader,

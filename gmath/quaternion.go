@@ -4,159 +4,112 @@ import "fmt"
 
 // Quaternion is a slice of floats with util methods for quaternion mathematics.
 type Quaternion struct {
-	quaternion []float32
+	quaternion *Vector
 }
 
-// NewZeroQuaternion returns a zero quaternion with the dimension specified.
-func NewZeroQuaternion(dimension int) *Quaternion {
-	return &Quaternion{make([]float32, dimension+1)}
+// NewIdentityQuaternion returns an identity quaternion with the dimension specified.
+func NewIdentityQuaternion(dimension int) *Quaternion {
+	axis := make([]float32, dimension)
+	axis[0] = 1.0
+	return NewQuaternion(0.0, axis...)
 }
 
-// NewQuaternion returns a quaternion with the dimen specified.
-func NewQuaternion(axis ...float32) *Quaternion {
-	return NewZeroQuaternion(len(axis)).Set(axis...)
+// NewQuaternion returns a quaternion with the axis vector specified.
+func NewQuaternion(angle float32, axis ...float32) *Quaternion {
+	return (&Quaternion{NewZeroVector(len(axis) + 1)}).Set(angle, axis...)
 }
 
-// SetAxis sets the specified axis of this Quaternion object to the float32 value.
-func (quaternion *Quaternion) SetAxis(index int, value float32) {
-	quaternion.quaternion[index] = value
+// SetElement sets the specified element of this Vector object to the float32 value.
+func (quaternion *Quaternion) SetElement(index int, value float32) {
+	quaternion.quaternion.SetElement(index, value)
 }
 
-// GetAxis returns the specified axis of this Quaternion object.
-func (quaternion *Quaternion) GetAxis(index int) float32 {
-	return quaternion.quaternion[index]
+// GetElement returns the specified element of this Vector object.
+func (quaternion *Quaternion) GetElement(index int) float32 {
+	return quaternion.quaternion.GetElement(index)
 }
 
 // Set sets each axis of this Quaternion object to the corresponding axis of a float32 vararg.
-func (quaternion *Quaternion) Set(other ...float32) *Quaternion {
-	for i := 0; i < MinI(len(quaternion.quaternion), len(other)); i++ {
-		quaternion.quaternion[i] = other[i]
+func (quaternion *Quaternion) Set(angle float32, axis ...float32) *Quaternion {
+	normAxis := NewVector(axis...)
+	normAxis.Normalize()
+	sin := Sin(angle)
+	for i := 0; i < MinI(quaternion.quaternion.Dimension()-1, len(normAxis.vector)); i++ {
+		quaternion.quaternion.SetElement(i, sin*normAxis.GetElement(i))
 	}
+	quaternion.quaternion.SetElement(quaternion.quaternion.Dimension()-1, Cos(angle))
 	return quaternion
 }
 
 // SetQ sets each axis of this Quaternion object to the corresponding axis of a Quaternion.
 func (quaternion *Quaternion) SetQ(other *Quaternion) *Quaternion {
-	return quaternion.Set(other.quaternion...)
-}
-
-// Add adds a float32 vararg to this Quaternion object.
-func (quaternion *Quaternion) Add(other ...float32) *Quaternion {
-	for i := 0; i < MinI(len(quaternion.quaternion), len(other)); i++ {
-		quaternion.quaternion[i] += other[i]
+	for i := 0; i < MinI(quaternion.quaternion.Dimension(), other.quaternion.Dimension()); i++ {
+		quaternion.quaternion.SetElement(i, other.quaternion.GetElement(i))
 	}
 	return quaternion
 }
 
-// AddQ adds a Quaternion vararg to this Quaternion object.
-func (quaternion *Quaternion) AddQ(other *Quaternion) *Quaternion {
-	return quaternion.Add(other.quaternion...)
+// Mul multiplies this Quaternion object by another quaternion.
+func (quaternion *Quaternion) Mul(angle float32, axis ...float32) *Quaternion {
+	other := NewQuaternion(angle, axis...)
+	return quaternion.MulQ(other)
 }
 
-// AddSc adds a float32 scalar to every axis within quaternion Quaternion object.
-func (quaternion *Quaternion) AddSc(scalar float32) *Quaternion {
-	for i := 0; i < len(quaternion.quaternion); i++ {
-		quaternion.quaternion[i] += scalar
-	}
-	return quaternion
-}
-
-// Sub subtracts a float32 vararg from this Quaternion object.
-func (quaternion *Quaternion) Sub(other ...float32) *Quaternion {
-	for i := 0; i < MinI(len(quaternion.quaternion), len(other)); i++ {
-		quaternion.quaternion[i] -= other[i]
-	}
-	return quaternion
-}
-
-// SubQ subtracts a quaternion from this Quaternion object.
-func (quaternion *Quaternion) SubQ(other *Quaternion) *Quaternion {
-	return quaternion.Sub(other.quaternion...)
-}
-
-// SubSc subtracts a float32 scalar from every axis within quaternion Quaternion object.
-func (quaternion *Quaternion) SubSc(scalar float32) *Quaternion {
-	for i := 0; i < len(quaternion.quaternion); i++ {
-		quaternion.quaternion[i] -= scalar
-	}
-	return quaternion
-}
-
-// Mul multiplies this Quaternion object by a float32 vararg.
-func (quaternion *Quaternion) Mul(other ...float32) *Quaternion {
-	for i := 0; i < MinI(len(quaternion.quaternion), len(other)); i++ {
-		quaternion.quaternion[i] *= other[i]
-	}
-	return quaternion
-}
-
-// MulQ multiplies this Quaternion object by a Quaternion.
+// MulQ multiplies this Quaternion object by another quaternion.
 func (quaternion *Quaternion) MulQ(other *Quaternion) *Quaternion {
-	return quaternion.Mul(other.quaternion...)
+	t0 := (quaternion.quaternion.GetElement(2) - quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(1) - other.quaternion.GetElement(2))
+	t1 := (quaternion.quaternion.GetElement(3) + quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(3) + other.quaternion.GetElement(0))
+	t2 := (quaternion.quaternion.GetElement(3) - quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(1) + other.quaternion.GetElement(2))
+	t3 := (quaternion.quaternion.GetElement(2) + quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(3) - other.quaternion.GetElement(0))
+	t4 := (quaternion.quaternion.GetElement(2) - quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(0) - other.quaternion.GetElement(1))
+	t5 := (quaternion.quaternion.GetElement(2) + quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(0) + other.quaternion.GetElement(1))
+	t6 := (quaternion.quaternion.GetElement(3) + quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(3) - other.quaternion.GetElement(2))
+	t7 := (quaternion.quaternion.GetElement(3) - quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(3) + other.quaternion.GetElement(2))
+	t8 := t5 + t6 + t7
+	t9 := 0.5 * (t4 + t8)
+	// TODO: Make this work for all dimensions.
+	quaternion.quaternion.Set(
+		t1+t9-t8,
+		t2+t9-t7,
+		t3+t9-t6,
+		t0+t9-t5,
+	)
+	return quaternion
 }
 
-// MulSc multiplies this Quaternion object by a single float32 scalar.
+// MulSc scales this Quaternion object by a float32.
 func (quaternion *Quaternion) MulSc(scalar float32) *Quaternion {
-	for i := 0; i < len(quaternion.quaternion); i++ {
-		quaternion.quaternion[i] *= scalar
-	}
+	quaternion.quaternion.MulSc(scalar)
+	quaternion.quaternion.Normalize()
 	return quaternion
 }
 
-// Div divides this Quaternion object by a float32 vararg.
-func (quaternion *Quaternion) Div(other ...float32) *Quaternion {
-	for i := 0; i < MinI(len(quaternion.quaternion), len(other)); i++ {
-		quaternion.quaternion[i] /= other[i]
+// // Sub subtracts a float32 vararg from this Quaternion object.
+// func (quaternion *Quaternion) Sub(angle float32, axis ...float32) *Quaternion {
+// 	other := NewQuaternion(angle, axis...)
+// 	return quaternion.SubQ(other)
+// }
+
+// // SubQ subtracts a quaternion from this Quaternion object.
+// func (quaternion *Quaternion) SubQ(other *Quaternion) *Quaternion {
+// 	quaternion.quaternion.DivV(other.quaternion)
+// 	return quaternion
+// }
+
+// Inverse inverts the quaternion.
+func (quaternion *Quaternion) Inverse() *Quaternion {
+	l := quaternion.quaternion.LenSq()
+	for i := 0; i < quaternion.quaternion.Dimension()-1; i++ {
+		quaternion.quaternion.SetElement(i, -1.0*quaternion.quaternion.GetElement(i))
 	}
+	quaternion.quaternion.DivSc(l)
+	quaternion.quaternion.Normalize()
 	return quaternion
-}
-
-// DivQ divides this Quaternion object by a Quaternion.
-func (quaternion *Quaternion) DivQ(other *Quaternion) *Quaternion {
-	return quaternion.Div(other.quaternion...)
-}
-
-// DivSc divides this Quaternion object by a single float32 scalar.
-func (quaternion *Quaternion) DivSc(scalar float32) *Quaternion {
-	for i := 0; i < len(quaternion.quaternion); i++ {
-		quaternion.quaternion[i] /= scalar
-	}
-	return quaternion
-}
-
-// Dot returns a float32 result of this Quaternion's dot product.
-func (quaternion *Quaternion) Dot(other *Quaternion) float32 {
-	dot := float32(0.0)
-	for i := 0; i < MinI(len(quaternion.quaternion), len(other.quaternion)); i++ {
-		dot += quaternion.quaternion[i] * other.quaternion[i]
-	}
-	return dot
-}
-
-// LenSq returns a float32 result of this Quaternion's length squared.
-func (quaternion *Quaternion) LenSq() float32 {
-	l := float32(0.0)
-	for i := 0; i < len(quaternion.quaternion); i++ {
-		l += quaternion.quaternion[i] * quaternion.quaternion[i]
-	}
-	return l
-}
-
-// Len returns a float32 result of this Quaternion's length.
-func (quaternion *Quaternion) Len() float32 {
-	return Sqrt(quaternion.LenSq())
-}
-
-// Normalize normalizes this Quaternion.
-func (quaternion *Quaternion) Normalize() *Quaternion {
-	return quaternion.DivSc(quaternion.Len())
 }
 
 // Clone returns a new Quaternion with components equal to this Quaternion.
 func (quaternion *Quaternion) Clone() *Quaternion {
-	out := make([]float32, len(quaternion.quaternion))
-	copy(out, quaternion.quaternion)
-	return &Quaternion{out}
+	return &Quaternion{quaternion.quaternion.Clone()}
 }
 
 func (quaternion *Quaternion) String() string {

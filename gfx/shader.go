@@ -1,6 +1,8 @@
 package gfx
 
 import (
+	"strings"
+
 	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/double-dev/limitengine/gmath"
 )
@@ -24,6 +26,34 @@ func CreateShader(vertSrc, fragSrc string) *Shader {
 	shaderIndex++
 	actionQueue = append(actionQueue, func() { shaders[shader.id] = context.CreateShader(vertSrc, fragSrc) })
 	return shader
+}
+
+func processVertShader(vertSrc string) string { // TODO: Parse custom shader
+	header := `#version 330 core
+layout(location = 0) in vec3 vertPosition;
+layout(location = 1) in vec2 vertTextureCoord;
+layout(location = 2) in vec3 vertNormal;
+uniform mat4 projMat;
+uniform mat4 viewMat;
+uniform mat4 transformMat;
+out vec3 fragPosition;
+out vec2 fragTextureCoord;
+out vec3 fragNormal;
+vec4 worldPos;
+`
+	footer := `void main()
+{
+	worldPos = transformMat * vec4(coord, 1.0);
+	gl_Position = projMat * viewMat * worldPos;
+	vertTextureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
+	fragTextureCoord = vertTextureCoord; 
+	fragNormal = vertNormal;
+	vert();
+}`
+	vertSrc = strings.ReplaceAll(vertSrc, "this.position", "vertPosition")
+	vertSrc = strings.ReplaceAll(vertSrc, "this.textureCoord", "vertTextureCoord")
+	vertSrc = strings.ReplaceAll(vertSrc, "this.normal", "vertNormal")
+	return header + vertSrc + footer
 }
 
 // TODO: Add support for more variables + array uniforms.

@@ -19,5 +19,5 @@ func NewMotionControlSystem() *ecs.ECSSystem {
 				motion.Acceleration.SetElement(i, axis.Amount()*control.Speed)
 			}
 		}
-	}, (*MotionControlComponent)(nil), (*MotionComponent)(nil))
+	}, (*MotionControlComponent)(nil), (*MotionComponent)(nil), (*TransformComponent)(nil))
 }

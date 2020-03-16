@@ -27,6 +27,11 @@ func (vector *Vector) GetElement(index int) float32 {
 	return vector.vector[index]
 }
 
+// Dimension returns the dimension of this Vector object.
+func (vector *Vector) Dimension() int {
+	return len(vector.vector)
+}
+
 // Set sets each element of this Vector object to the corresponding elements of a float32 vararg.
 func (vector *Vector) Set(other ...float32) *Vector {
 	for i := 0; i < MinI(len(vector.vector), len(other)); i++ {

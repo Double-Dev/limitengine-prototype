@@ -8,9 +8,11 @@ import (
 type MotionComponent struct {
 	Velocity        *gmath.Vector
 	Acceleration    *gmath.Vector
-	AngVelocity     *gmath.Vector
-	AngAcceleration *gmath.Vector
+	AngVelocity     *gmath.Quaternion
+	AngAcceleration *gmath.Quaternion
 }
+
+var theta = float32(0.0)
 
 func NewMotionSystem(damping float32) *ecs.ECSSystem {
 	return ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
@@ -23,6 +25,9 @@ func NewMotionSystem(damping float32) *ecs.ECSSystem {
 			motion.Velocity.MulSc(damping)
 
 			transform.Position.AddV(motion.Velocity.Clone().MulSc(delta))
+
+			theta += delta
+			transform.Rotation = gmath.NewQuaternion(theta, 1.0, 0.0, 0.0)
 		}
 	}, (*MotionComponent)(nil), (*TransformComponent)(nil))
 }
