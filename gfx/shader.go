@@ -59,13 +59,13 @@ vec4 worldPos;
 // TODO: Add support for more variables + array uniforms.
 type uniformLoader struct {
 	uniformInts      map[string]int32
-	uniformMatrix44s map[string]*gmath.Matrix
+	uniformMatrix44s map[string]gmath.Matrix
 }
 
 func newUniformLoader() uniformLoader {
 	return uniformLoader{
 		uniformInts:      make(map[string]int32),
-		uniformMatrix44s: make(map[string]*gmath.Matrix),
+		uniformMatrix44s: make(map[string]gmath.Matrix),
 	}
 }
 
@@ -82,7 +82,7 @@ func (this uniformLoader) AddInt(varName string, val int32) {
 	this.uniformInts[varName] = val
 }
 
-func (this uniformLoader) AddMatrix44(varName string, val *gmath.Matrix) {
+func (this uniformLoader) AddMatrix44(varName string, val gmath.Matrix) {
 	if val.IsSize(4, 4) {
 		this.uniformMatrix44s[varName] = val
 	}

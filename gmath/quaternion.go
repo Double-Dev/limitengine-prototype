@@ -1,74 +1,62 @@
 package gmath
 
-import "fmt"
-
 // Quaternion is a slice of floats with util methods for quaternion mathematics.
 type Quaternion struct {
-	quaternion *Vector
+	vector Vector4
 }
 
 // NewIdentityQuaternion returns an identity quaternion with the dimension specified.
-func NewIdentityQuaternion(dimension int) *Quaternion {
-	axis := make([]float32, dimension)
-	axis[0] = 1.0
-	return NewQuaternion(0.0, axis...)
+func NewIdentityQuaternion() Quaternion {
+	return NewQuaternion(0.0, 1.0, 0.0, 0.0)
 }
 
 // NewQuaternion returns a quaternion with the axis vector specified.
-func NewQuaternion(angle float32, axis ...float32) *Quaternion {
-	return (&Quaternion{NewZeroVector(len(axis) + 1)}).Set(angle, axis...)
+func NewQuaternion(angle, x, y, z float32) Quaternion {
+	return Quaternion{NewZeroVector4()}.Set(angle, x, y, z)
 }
 
-// SetElement sets the specified element of this Vector object to the float32 value.
-func (quaternion *Quaternion) SetElement(index int, value float32) {
-	quaternion.quaternion.SetElement(index, value)
-}
-
-// GetElement returns the specified element of this Vector object.
-func (quaternion *Quaternion) GetElement(index int) float32 {
-	return quaternion.quaternion.GetElement(index)
+// NewQuaternionV returns a quaternion with the axis vector specified.
+func NewQuaternionV(angle float32, axis Vector3) Quaternion {
+	return NewQuaternion(angle, axis[0], axis[1], axis[2])
 }
 
 // Set sets each axis of this Quaternion object to the corresponding axis of a float32 vararg.
-func (quaternion *Quaternion) Set(angle float32, axis ...float32) *Quaternion {
-	normAxis := NewVector(axis...)
-	normAxis.Normalize()
-	sin := Sin(angle)
-	for i := 0; i < MinI(quaternion.quaternion.Dimension()-1, len(normAxis.vector)); i++ {
-		quaternion.quaternion.SetElement(i, sin*normAxis.GetElement(i))
-	}
-	quaternion.quaternion.SetElement(quaternion.quaternion.Dimension()-1, Cos(angle))
+func (quaternion Quaternion) Set(angle, x, y, z float32) Quaternion {
+	l := Sqrt(x*x + y*y + z*z)
+	sin := Sin(angle / 2.0)
+	quaternion.vector[0] = sin * x / l
+	quaternion.vector[1] = sin * y / l
+	quaternion.vector[2] = sin * z / l
+	quaternion.vector[3] = Cos(angle / 2.0)
 	return quaternion
 }
 
 // SetQ sets each axis of this Quaternion object to the corresponding axis of a Quaternion.
-func (quaternion *Quaternion) SetQ(other *Quaternion) *Quaternion {
-	for i := 0; i < MinI(quaternion.quaternion.Dimension(), other.quaternion.Dimension()); i++ {
-		quaternion.quaternion.SetElement(i, other.quaternion.GetElement(i))
-	}
+func (quaternion Quaternion) SetQ(other Quaternion) Quaternion {
+
 	return quaternion
 }
 
 // Mul multiplies this Quaternion object by another quaternion.
-func (quaternion *Quaternion) Mul(angle float32, axis ...float32) *Quaternion {
-	other := NewQuaternion(angle, axis...)
+func (quaternion Quaternion) Mul(angle, x, y, z float32) Quaternion {
+	other := NewQuaternion(angle, x, y, z)
 	return quaternion.MulQ(other)
 }
 
 // MulQ multiplies this Quaternion object by another quaternion.
-func (quaternion *Quaternion) MulQ(other *Quaternion) *Quaternion {
-	t0 := (quaternion.quaternion.GetElement(2) - quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(1) - other.quaternion.GetElement(2))
-	t1 := (quaternion.quaternion.GetElement(3) + quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(3) + other.quaternion.GetElement(0))
-	t2 := (quaternion.quaternion.GetElement(3) - quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(1) + other.quaternion.GetElement(2))
-	t3 := (quaternion.quaternion.GetElement(2) + quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(3) - other.quaternion.GetElement(0))
-	t4 := (quaternion.quaternion.GetElement(2) - quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(0) - other.quaternion.GetElement(1))
-	t5 := (quaternion.quaternion.GetElement(2) + quaternion.quaternion.GetElement(0)) * (other.quaternion.GetElement(0) + other.quaternion.GetElement(1))
-	t6 := (quaternion.quaternion.GetElement(3) + quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(3) - other.quaternion.GetElement(2))
-	t7 := (quaternion.quaternion.GetElement(3) - quaternion.quaternion.GetElement(1)) * (other.quaternion.GetElement(3) + other.quaternion.GetElement(2))
+func (quaternion Quaternion) MulQ(other Quaternion) Quaternion {
+	t0 := (quaternion.vector[2] - quaternion.vector[1]) * (other.vector[1] - other.vector[2])
+	t1 := (quaternion.vector[3] + quaternion.vector[0]) * (other.vector[3] + other.vector[0])
+	t2 := (quaternion.vector[3] - quaternion.vector[0]) * (other.vector[1] + other.vector[2])
+	t3 := (quaternion.vector[2] + quaternion.vector[1]) * (other.vector[3] - other.vector[0])
+	t4 := (quaternion.vector[2] - quaternion.vector[0]) * (other.vector[0] - other.vector[1])
+	t5 := (quaternion.vector[2] + quaternion.vector[0]) * (other.vector[0] + other.vector[1])
+	t6 := (quaternion.vector[3] + quaternion.vector[1]) * (other.vector[3] - other.vector[2])
+	t7 := (quaternion.vector[3] - quaternion.vector[1]) * (other.vector[3] + other.vector[2])
 	t8 := t5 + t6 + t7
 	t9 := 0.5 * (t4 + t8)
 	// TODO: Make this work for all dimensions.
-	quaternion.quaternion.Set(
+	quaternion.Set(
 		t1+t9-t8,
 		t2+t9-t7,
 		t3+t9-t6,
@@ -78,40 +66,24 @@ func (quaternion *Quaternion) MulQ(other *Quaternion) *Quaternion {
 }
 
 // MulSc scales this Quaternion object by a float32.
-func (quaternion *Quaternion) MulSc(scalar float32) *Quaternion {
-	quaternion.quaternion.MulSc(scalar)
-	quaternion.quaternion.Normalize()
+func (quaternion Quaternion) MulSc(scalar float32) Quaternion {
+	quaternion.vector.MulSc(scalar)
+	quaternion.vector.Normalize()
 	return quaternion
 }
 
-// // Sub subtracts a float32 vararg from this Quaternion object.
-// func (quaternion *Quaternion) Sub(angle float32, axis ...float32) *Quaternion {
-// 	other := NewQuaternion(angle, axis...)
-// 	return quaternion.SubQ(other)
-// }
-
-// // SubQ subtracts a quaternion from this Quaternion object.
-// func (quaternion *Quaternion) SubQ(other *Quaternion) *Quaternion {
-// 	quaternion.quaternion.DivV(other.quaternion)
-// 	return quaternion
-// }
-
 // Inverse inverts the quaternion.
-func (quaternion *Quaternion) Inverse() *Quaternion {
-	l := quaternion.quaternion.LenSq()
-	for i := 0; i < quaternion.quaternion.Dimension()-1; i++ {
-		quaternion.quaternion.SetElement(i, -1.0*quaternion.quaternion.GetElement(i))
-	}
-	quaternion.quaternion.DivSc(l)
-	quaternion.quaternion.Normalize()
+func (quaternion Quaternion) Inverse() Quaternion {
+	l := quaternion.vector.LenSq()
+	quaternion.vector[0] *= -1.0
+	quaternion.vector[1] *= -1.0
+	quaternion.vector[2] *= -1.0
+	quaternion.vector.DivSc(l)
+	quaternion.vector.Normalize()
 	return quaternion
 }
 
 // Clone returns a new Quaternion with components equal to this Quaternion.
-func (quaternion *Quaternion) Clone() *Quaternion {
-	return &Quaternion{quaternion.quaternion.Clone()}
-}
-
-func (quaternion *Quaternion) String() string {
-	return fmt.Sprint(quaternion.quaternion)
+func (quaternion Quaternion) Clone() Quaternion {
+	return Quaternion{quaternion.vector.Clone()}
 }

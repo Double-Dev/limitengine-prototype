@@ -83,8 +83,8 @@ void main()
 		&utils.MotionComponent{
 			Velocity:        gmath.NewVector(0.0, 0.0, 0.0),
 			Acceleration:    gmath.NewVector(0.0, 0.0, 0.0),
-			AngVelocity:     gmath.NewQuaternion(3),
-			AngAcceleration: gmath.NewIdentityQuaternion(3),
+			AngVelocity:     gmath.NewIdentityQuaternion(),
+			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
 		&utils.MotionControlComponent{
 			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis},
@@ -93,7 +93,7 @@ void main()
 		&utils.CameraComponent{
 			Camera:      camera,
 			PosOffset:   gmath.NewVector(0.0, 0.0, 15.0),
-			RotOffset:   gmath.NewIdentityQuaternion(3),
+			RotOffset:   gmath.NewIdentityQuaternion(),
 			ScaleOffset: gmath.NewVector(1.0, 1.0, 1.0),
 		},
 		&utils.RenderComponent{
@@ -105,7 +105,7 @@ void main()
 		},
 	)
 
-	for i := 0; i < 4000; i++ {
+	for i := 0; i < 1000; i++ {
 		// randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
 		ecs.NewEntity(
 			&utils.TransformComponent{

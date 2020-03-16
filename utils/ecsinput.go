@@ -16,7 +16,7 @@ func NewMotionControlSystem() *ecs.ECSSystem {
 			control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
 			motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
 			for i, axis := range control.Axis {
-				motion.Acceleration.SetElement(i, axis.Amount()*control.Speed)
+				motion.Acceleration[i] = axis.Amount() * control.Speed
 			}
 		}
 	}, (*MotionControlComponent)(nil), (*MotionComponent)(nil), (*TransformComponent)(nil))

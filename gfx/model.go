@@ -83,13 +83,13 @@ func DeleteModel(model *Model) {
 
 type Instance struct {
 	uniformInts      map[string]int32
-	uniformMatrix44s map[string]*gmath.Matrix
+	uniformMatrix44s map[string]gmath.Matrix
 }
 
 func NewInstance() *Instance {
 	return &Instance{
 		uniformInts:      make(map[string]int32),
-		uniformMatrix44s: make(map[string]*gmath.Matrix),
+		uniformMatrix44s: make(map[string]gmath.Matrix),
 	}
 }
 
@@ -110,7 +110,7 @@ func (this *Instance) AddInt(varName string, val int32) {
 	gfxMutex.Unlock()
 }
 
-func (this *Instance) AddMatrix44(varName string, val *gmath.Matrix) {
+func (this *Instance) AddMatrix44(varName string, val gmath.Matrix) {
 	if val.IsSize(4, 4) {
 		gfxMutex.Lock()
 		this.uniformMatrix44s[varName] = val

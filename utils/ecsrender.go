@@ -33,9 +33,9 @@ func NewRenderSystem() *ecs.ECSSystem {
 
 type CameraComponent struct {
 	Camera      *gfx.Camera
-	PosOffset   *gmath.Vector
-	RotOffset   *gmath.Quaternion
-	ScaleOffset *gmath.Vector
+	PosOffset   gmath.Vector
+	RotOffset   gmath.Quaternion
+	ScaleOffset gmath.Vector
 }
 
 func NewCameraMotionSystem() *ecs.ECSSystem {

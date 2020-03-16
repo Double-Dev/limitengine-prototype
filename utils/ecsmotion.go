@@ -6,10 +6,10 @@ import (
 )
 
 type MotionComponent struct {
-	Velocity        *gmath.Vector
-	Acceleration    *gmath.Vector
-	AngVelocity     *gmath.Quaternion
-	AngAcceleration *gmath.Quaternion
+	Velocity        gmath.Vector
+	Acceleration    gmath.Vector
+	AngVelocity     gmath.Quaternion
+	AngAcceleration gmath.Quaternion
 }
 
 var theta = float32(0.0)
@@ -27,7 +27,7 @@ func NewMotionSystem(damping float32) *ecs.ECSSystem {
 			transform.Position.AddV(motion.Velocity.Clone().MulSc(delta))
 
 			theta += delta
-			transform.Rotation = gmath.NewQuaternion(theta, 1.0, 0.0, 0.0)
+			transform.Rotation = gmath.NewQuaternion(theta, 0.0, 0.0, 1.0)
 		}
 	}, (*MotionComponent)(nil), (*TransformComponent)(nil))
 }

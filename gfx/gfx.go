@@ -17,7 +17,7 @@ var (
 	context framework.Context
 
 	fps        = float32(0.0)
-	projMatrix *gmath.Matrix
+	projMatrix gmath.Matrix
 
 	// renderBuffers map[uint32]uint32
 
