@@ -20,7 +20,7 @@ func NewRenderSystem() *ecs.ECSSystem {
 		for _, entity := range entities {
 			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
 
-			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
+			transformMat := gmath.NewTransformMatrix(gmath.Vector(transform.Position), transform.Rotation, gmath.Vector(transform.Scale))
 
 			render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
 			render.Instance.AddMatrix44("transformMat", transformMat)
@@ -33,9 +33,9 @@ func NewRenderSystem() *ecs.ECSSystem {
 
 type CameraComponent struct {
 	Camera      *gfx.Camera
-	PosOffset   gmath.Vector
+	PosOffset   gmath.Vector3
 	RotOffset   gmath.Quaternion
-	ScaleOffset gmath.Vector
+	ScaleOffset gmath.Vector3
 }
 
 func NewCameraMotionSystem() *ecs.ECSSystem {
@@ -45,14 +45,14 @@ func NewCameraMotionSystem() *ecs.ECSSystem {
 			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
 
 			transformViewMat := gmath.NewViewMatrix(
-				transform.Position,
+				gmath.Vector(transform.Position),
 				transform.Rotation,
-				transform.Scale,
+				gmath.Vector(transform.Scale),
 			)
 			offsetViewMat := gmath.NewViewMatrix(
-				camera.PosOffset,
+				gmath.Vector(camera.PosOffset),
 				camera.RotOffset,
-				camera.ScaleOffset,
+				gmath.Vector(camera.ScaleOffset),
 			)
 
 			viewMat := offsetViewMat.MulM(transformViewMat)

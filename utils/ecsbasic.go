@@ -5,7 +5,7 @@ import (
 )
 
 type TransformComponent struct {
-	Position gmath.Vector
+	Position gmath.Vector3
 	Rotation gmath.Quaternion
-	Scale    gmath.Vector
+	Scale    gmath.Vector3
 }

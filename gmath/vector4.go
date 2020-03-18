@@ -1,9 +1,9 @@
 package gmath
 
-type Vector4 [4]float32
+type Vector4 []float32
 
 func NewZeroVector4() Vector4 {
-	return Vector4{}
+	return Vector4{0.0, 0.0, 0.0, 0.0}
 }
 
 func NewVector4(x, y, z, w float32) Vector4 {
@@ -122,6 +122,10 @@ func (vector Vector4) DstSq(other Vector4) float32 {
 
 func (vector Vector4) Dst(other Vector4) float32 {
 	return Sqrt(vector.DstSq(other))
+}
+
+func (vector Vector4) ToVector3() Vector3 {
+	return Vector3{vector[0], vector[1], vector[2]}
 }
 
 func (vector Vector4) Clone() Vector4 {

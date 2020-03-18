@@ -1,9 +1,9 @@
 package gmath
 
-type Vector3 [3]float32
+type Vector3 []float32
 
 func NewZeroVector3() Vector3 {
-	return Vector3{}
+	return Vector3{0.0, 0.0, 0.0}
 }
 
 func NewVector3(x, y, z float32) Vector3 {
@@ -86,8 +86,11 @@ func (vector Vector3) Dot(other Vector3) float32 {
 }
 
 func (vector Vector3) Cross(other Vector3) Vector3 {
-	// TODO: Implement cross product.
-	return Vector3{}
+	return Vector3{
+		vector[1]*other[2] - vector[2]*other[1],
+		vector[2]*other[0] - vector[0]*other[2],
+		vector[0]*other[1] - vector[1]*other[0],
+	}
 }
 
 func (vector Vector3) LenSq() float32 {
