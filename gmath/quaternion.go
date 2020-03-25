@@ -37,12 +37,6 @@ func (quaternion Quaternion) Mul(angle, x, y, z float32) Quaternion {
 	return quaternion.MulQ(other)
 }
 
-// RotateV multiplies this Quaternion object by another quaternion.
-func (quaternion Quaternion) RotateV(vector Vector3) Vector3 {
-	cross := quaternion.vector.ToVector3().Cross(vector).MulSc(2.0)
-	return vector.AddV(cross.Clone().MulSc(quaternion.vector[3])).AddV(quaternion.vector.ToVector3().Cross(cross))
-}
-
 // MulQ multiplies this Quaternion object by another quaternion.
 func (quaternion Quaternion) MulQ(other Quaternion) Quaternion {
 	t0 := (quaternion.vector[2] - quaternion.vector[1]) * (other.vector[1] - other.vector[2])
@@ -69,11 +63,10 @@ func (quaternion Quaternion) MulQ(other Quaternion) Quaternion {
 	return quaternion
 }
 
-// MulSc scales this Quaternion object by a float32.
-func (quaternion Quaternion) MulSc(scalar float32) Quaternion {
-	quaternion.vector.MulSc(scalar)
-	// quaternion.vector.Normalize()
-	return quaternion
+// RotateV rotates an input vector3 object by this quaternion.
+func (quaternion Quaternion) RotateV(vector Vector3) Vector3 {
+	cross := quaternion.vector.ToVector3().Cross(vector).MulSc(2.0)
+	return vector.AddV(cross.Clone().MulSc(quaternion.vector[3])).AddV(quaternion.vector.ToVector3().Cross(cross))
 }
 
 func (quaternion Quaternion) Slerp(other Quaternion, amt float32) Quaternion {

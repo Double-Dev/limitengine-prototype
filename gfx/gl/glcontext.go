@@ -47,22 +47,41 @@ func (glContext glContext) CreateShader(vertSrc, fragSrc string) framework.IShad
 	return shader
 }
 
+func (glContext glContext) CreateTexture(image []uint8, width, height int32) framework.ITexture {
+	texture := newTexture(image, width, height)
+	return texture
+}
+
 func (glContext glContext) CreateModel(indices []uint32, vertices, texCoords, normals []float32) framework.IModel {
 	model := newVAO()
 	model.bind()
-	model.addIndicesArr(indices)
-	model.addFloatAttribArr(vertices, 0, 3, false)
+	model.addIndices(indices)
+	model.addFloatAttrib(vertices, 0, 3, false)
 	if len(texCoords) > 0 {
-		model.addFloatAttribArr(texCoords, 1, 2, false)
+		model.addFloatAttrib(texCoords, 1, 2, false)
 	}
 	if len(normals) > 0 {
-		model.addFloatAttribArr(normals, 2, 3, false)
+		model.addFloatAttrib(normals, 2, 3, false)
 	}
+	// model.addInstancedFloatAttrib(
+	// 	glContext.GetMaxInstances()*glContext.GetMaxInstanceData(),
+	// 	3,
+	// 	4,
+	// 	int32(glContext.GetMaxInstanceData()),
+	// 	false,
+	// )
 	model.unbind()
 	return model
 }
 
-func (glContext glContext) CreateTexture(image []uint8, width, height int32) framework.ITexture {
-	texture := newTexture(image, width, height)
-	return texture
+func (glContext glContext) CreateInstanceBuffer(instanceDataSize int) framework.IInstanceBuffer {
+	instanceBuffer := newVBO(vboArrayBufferType)
+	instanceBuffer.Bind()
+	instanceBuffer.setEmpty(glContext.GetMaxInstances() * instanceDataSize)
+	instanceBuffer.Unbind()
+	return instanceBuffer
+}
+
+func (glContext glContext) GetMaxInstances() int {
+	return 10000
 }

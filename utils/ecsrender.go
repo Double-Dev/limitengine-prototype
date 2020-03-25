@@ -23,7 +23,7 @@ func NewRenderSystem() *ecs.ECSSystem {
 			transformMat := gmath.NewTransformMatrix(gmath.Vector(transform.Position), transform.Rotation, gmath.Vector(transform.Scale))
 
 			render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
-			render.Instance.AddMatrix44("transformMat", transformMat)
+			render.Instance.SetTransform(transformMat)
 
 			gfx.Render(render.Camera, render.Shader, render.Material, render.Model, render.Instance)
 		}

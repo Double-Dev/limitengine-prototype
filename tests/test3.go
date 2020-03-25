@@ -21,7 +21,11 @@ layout(location = 1) in vec2 texCoord;
 layout(location = 2) in vec3 normal;
 uniform mat4 projMat;
 uniform mat4 viewMat;
-uniform mat4 transformMat;
+
+layout(location = 3) in vec4 transformMat0;
+layout(location = 4) in vec4 transformMat1;
+layout(location = 5) in vec4 transformMat2;
+layout(location = 6) in vec4 transformMat3;
 
 out vec2 textureCoord;
 out vec3 interpNormal;
@@ -29,6 +33,8 @@ out vec3 toLight;
 const vec3 lightPos = vec3(-5.0, 10.0, 5.0);
 void main()
 {
+	mat4 transformMat = mat4(transformMat0, transformMat1, transformMat2, transformMat3);
+	// mat4 transformMat = mat4(vec4(1.0, 0.0, 0.0, 0.0), vec4(0.0, 1.0, 0.0, 0.0), vec4(0.0, 0.0, 1.0, 0.0), vec4(0.0, 0.0, -10.0, 1.0));
 	vec4 worldPos = transformMat * vec4(coord, 1.0);
 	gl_Position = projMat * viewMat * worldPos;
 
@@ -42,7 +48,7 @@ in vec3 interpNormal;
 in vec3 toLight;
 uniform sampler2D tex;
 
-out vec4 fragColor;
+out vec4 outColor;
 const vec3 lightColor = vec3(1.0, 1.0, 1.0);
 const float ambient = 0.1;
 void main()
@@ -51,7 +57,7 @@ void main()
 	float brightness = max(lightDot, ambient);
 	vec3 diffuse = brightness * lightColor;
 	// fragColor = vec4(diffuse, 1.0) * texture(tex, textureCoord);
-	fragColor = vec4(diffuse, 1.0) * vec4(abs(interpNormal), 1.0);
+	outColor = vec4(diffuse, 1.0) * vec4(abs(interpNormal), 1.0);
 	// fragColor = vec4(diffuse, 1.0) * vec4(1.0, 1.0, 1.0, 1.0);
 }`,
 	)
@@ -74,14 +80,14 @@ void main()
 
 	boost := ui.InputControl{}
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeySpace}, 1.0)
-	boost.AddTrigger(ui.InputEvent{Key: ui.KeyRightShift}, -0.15)
-	boost.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, -0.15)
+	boost.AddTrigger(ui.InputEvent{Key: ui.KeyRightShift}, 0.05)
+	boost.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, 0.05)
 
 	camera := gfx.CreateCamera()
 	ecs.NewEntity(
 		&utils.TransformComponent{
 			Position: gmath.NewVector3(0.0, 1.0, -10.0),
-			Rotation: gmath.NewQuaternion(rand.Float32()*gmath.Pi, 0.0, 0.0, 1.0),
+			Rotation: gmath.NewQuaternion(0.0, 0.0, 0.0, 1.0),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
 		&utils.MotionComponent{
@@ -109,7 +115,7 @@ void main()
 		},
 	)
 
-	for i := 0; i < 2000; i++ {
+	for i := 0; i < 3000; i++ {
 		// randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
 		ecs.NewEntity(
 			&utils.TransformComponent{
@@ -148,7 +154,7 @@ void main()
 
 			var speed float32
 			if control.Axis[3].Amount() == 0.0 {
-				speed = -control.Speed * 0.25
+				speed = -control.Speed * 0.2
 			} else {
 				speed = -control.Speed * control.Axis[3].Amount()
 			}

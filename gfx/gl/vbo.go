@@ -23,8 +23,12 @@ func newVBO(vboType uint32) vbo {
 	}
 }
 
-func (vbo *vbo) bind()   { gl.BindBuffer(vbo.vboType, vbo.id) }
-func (vbo *vbo) unbind() { gl.BindBuffer(vbo.vboType, 0) }
+func (vbo vbo) Bind()   { gl.BindBuffer(vbo.vboType, vbo.id) }
+func (vbo vbo) Unbind() { gl.BindBuffer(vbo.vboType, 0) }
+
+func (vbo *vbo) setEmpty(capacity int) {
+	gl.BufferData(vbo.vboType, 4*capacity, nil, gl.STREAM_DRAW)
+}
 
 func (vbo *vbo) storeUIntData(data []uint32) {
 	gl.BufferData(vbo.vboType, 4*len(data), gl.Ptr(data), gl.STATIC_DRAW)
@@ -36,6 +40,10 @@ func (vbo *vbo) storeIntData(data []int32) {
 
 func (vbo *vbo) storeFloatData(data []float32) {
 	gl.BufferData(vbo.vboType, 4*len(data), gl.Ptr(data), gl.STATIC_DRAW)
+}
+
+func (vbo vbo) StoreInstancedData(data []float32) {
+	gl.BufferData(vbo.vboType, 4*len(data), gl.Ptr(data), gl.STREAM_DRAW)
 }
 
 func (vbo *vbo) delete() {

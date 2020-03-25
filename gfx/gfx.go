@@ -102,10 +102,20 @@ func Sweep() {
 						model.prefs.loadTo(iShader)
 						iModel := models[model.id]
 						iModel.Enable()
+
+						data := []float32{}
+
 						for _, instance := range instances {
-							instance.loadTo(iShader)
-							iModel.Render()
+							orderedVars, varMap := shader.GetInstanceVarsSize()
+							for _, varName := range orderedVars {
+								instance.dataMutex.RLock()
+								data = append(data, instance.data[varName][0:varMap[varName]]...)
+								instance.dataMutex.RUnlock()
+							}
 						}
+
+						iModel.Render(shader.instanceBuffer, data, int32(len(instances)))
+
 						iModel.Disable()
 					}
 					iTexture.Unbind()

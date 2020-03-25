@@ -1,8 +1,6 @@
 package gfx
 
 import (
-	"strings"
-
 	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/double-dev/limitengine/gmath"
 )
@@ -15,8 +13,9 @@ var (
 func init() { shaders[0] = nil }
 
 type Shader struct {
-	id            uint32
-	uniformLoader uniformLoader
+	id             uint32
+	uniformLoader  uniformLoader
+	instanceBuffer framework.IInstanceBuffer
 }
 
 func CreateShader(vertSrc, fragSrc string) *Shader {
@@ -24,36 +23,30 @@ func CreateShader(vertSrc, fragSrc string) *Shader {
 		id: shaderIndex,
 	}
 	shaderIndex++
-	actionQueue = append(actionQueue, func() { shaders[shader.id] = context.CreateShader(vertSrc, fragSrc) })
+	actionQueue = append(actionQueue, func() {
+		shaders[shader.id] = context.CreateShader(vertSrc, fragSrc)
+		totalInstanceSize := 0
+		_, varMap := shader.GetInstanceVarsSize()
+		for _, size := range varMap {
+			totalInstanceSize += size
+		}
+		shader.instanceBuffer = context.CreateInstanceBuffer(totalInstanceSize)
+	})
 	return shader
 }
 
-func processVertShader(vertSrc string) string { // TODO: Parse custom shader
-	header := `#version 330 core
-layout(location = 0) in vec3 vertPosition;
-layout(location = 1) in vec2 vertTextureCoord;
-layout(location = 2) in vec3 vertNormal;
-uniform mat4 projMat;
-uniform mat4 viewMat;
-uniform mat4 transformMat;
-out vec3 fragPosition;
-out vec2 fragTextureCoord;
-out vec3 fragNormal;
-vec4 worldPos;
-`
-	footer := `void main()
-{
-	worldPos = transformMat * vec4(coord, 1.0);
-	gl_Position = projMat * viewMat * worldPos;
-	vertTextureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
-	fragTextureCoord = vertTextureCoord; 
-	fragNormal = vertNormal;
-	vert();
-}`
-	vertSrc = strings.ReplaceAll(vertSrc, "this.position", "vertPosition")
-	vertSrc = strings.ReplaceAll(vertSrc, "this.textureCoord", "vertTextureCoord")
-	vertSrc = strings.ReplaceAll(vertSrc, "this.normal", "vertNormal")
-	return header + vertSrc + footer
+func (shader *Shader) GetInstanceVarsSize() ([]string, map[string]int) {
+	return []string{
+			"transformMat0",
+			"transformMat1",
+			"transformMat2",
+			"transformMat3",
+		}, map[string]int{
+			"transformMat0": 4,
+			"transformMat1": 4,
+			"transformMat2": 4,
+			"transformMat3": 4,
+		}
 }
 
 // TODO: Add support for more variables + array uniforms.

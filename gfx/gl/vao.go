@@ -1,6 +1,7 @@
 package gl
 
 import (
+	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
@@ -31,8 +32,37 @@ func (vao *vao) Enable() {
 	}
 }
 
-func (vao *vao) Render() {
-	gl.DrawElements(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0))
+func (vao *vao) Render(instanceBuffer framework.IInstanceBuffer, instanceData []float32, numInstances int32) {
+	instanceBuffer.Bind()
+	instanceBuffer.StoreInstancedData(instanceData)
+
+	gl.VertexAttribPointer(3, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(0))
+	gl.VertexAttribDivisor(3, 1)
+
+	gl.VertexAttribPointer(4, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(4*4))
+	gl.VertexAttribDivisor(4, 1)
+
+	gl.VertexAttribPointer(5, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(8*4))
+	gl.VertexAttribDivisor(5, 1)
+
+	gl.VertexAttribPointer(6, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(12*4))
+	gl.VertexAttribDivisor(6, 1)
+
+	instanceBuffer.Unbind()
+
+	gl.EnableVertexAttribArray(3)
+	gl.EnableVertexAttribArray(4)
+	gl.EnableVertexAttribArray(5)
+	gl.EnableVertexAttribArray(6)
+
+	gl.DrawElementsInstanced(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0), numInstances)
+
+	gl.DisableVertexAttribArray(3)
+	gl.DisableVertexAttribArray(4)
+	gl.DisableVertexAttribArray(5)
+	gl.DisableVertexAttribArray(6)
+
+	// gl.DrawElements(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0))
 }
 
 func (vao *vao) Disable() {
@@ -42,30 +72,30 @@ func (vao *vao) Disable() {
 	vao.unbind()
 }
 
-func (vao *vao) addIndicesArr(indices []uint32) {
+func (vao *vao) addIndices(indices []uint32) {
 	vbo := newVBO(vboElementArrayBufferType)
-	vbo.bind()
+	vbo.Bind()
 	vbo.storeUIntData(indices)
 	vao.vertexNum = int32(len(indices))
 	vao.vbos = append(vao.vbos, vbo)
 }
 
-func (vao *vao) addIntAttribArr(data []int32, index uint32, varsPerVertex int32, normalized bool) {
+func (vao *vao) addIntAttrib(data []int32, index uint32, varsPerVertex int32, normalized bool) {
 	vbo := newVBO(vboArrayBufferType)
-	vbo.bind()
+	vbo.Bind()
 	vbo.storeIntData(data)
 	gl.VertexAttribPointer(index, varsPerVertex, gl.INT, normalized, 0, nil)
-	vbo.unbind()
+	vbo.Unbind()
 	vao.attributes = append(vao.attributes, index)
 	vao.vbos = append(vao.vbos, vbo)
 }
 
-func (vao *vao) addFloatAttribArr(data []float32, index uint32, varsPerVertex int32, normalized bool) {
+func (vao *vao) addFloatAttrib(data []float32, index uint32, varsPerVertex int32, normalized bool) {
 	vbo := newVBO(vboArrayBufferType)
-	vbo.bind()
+	vbo.Bind()
 	vbo.storeFloatData(data)
 	gl.VertexAttribPointer(index, varsPerVertex, gl.FLOAT, normalized, 0, nil)
-	vbo.unbind()
+	vbo.Unbind()
 	vao.attributes = append(vao.attributes, index)
 	vao.vbos = append(vao.vbos, vbo)
 }

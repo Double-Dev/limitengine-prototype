@@ -5,7 +5,7 @@ import (
 )
 
 // Version is the current engine version string.
-const Version = "0.0.1"
+const Version = "0.3.0"
 
 // Const variables that store supported platform names.
 const (
