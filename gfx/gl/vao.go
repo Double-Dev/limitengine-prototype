@@ -32,37 +32,39 @@ func (vao *vao) Enable() {
 	}
 }
 
-func (vao *vao) Render(instanceBuffer framework.IInstanceBuffer, instanceData []float32, numInstances int32) {
+func (vao *vao) Render(instanceBuffer framework.IInstanceBuffer, instanceDefs []struct {
+	Name  string
+	Size  int
+	Index int
+}, instanceData []float32, numInstances int32) {
 	instanceBuffer.Bind()
 	instanceBuffer.StoreInstancedData(instanceData)
 
-	gl.VertexAttribPointer(3, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(0))
-	gl.VertexAttribDivisor(3, 1)
+	stride := 0
+	for _, instanceDef := range instanceDefs {
+		stride += instanceDef.Size
+	}
 
-	gl.VertexAttribPointer(4, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(4*4))
-	gl.VertexAttribDivisor(4, 1)
-
-	gl.VertexAttribPointer(5, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(8*4))
-	gl.VertexAttribDivisor(5, 1)
-
-	gl.VertexAttribPointer(6, 4, gl.FLOAT, false, 4*16, gl.PtrOffset(12*4))
-	gl.VertexAttribDivisor(6, 1)
+	for i, instanceDef := range instanceDefs {
+		gl.VertexAttribPointer(uint32(i+3), int32(instanceDef.Size), gl.FLOAT, false, int32(stride*4), gl.PtrOffset(instanceDef.Index*4))
+		gl.VertexAttribDivisor(uint32(i+3), 1)
+	}
 
 	instanceBuffer.Unbind()
 
-	gl.EnableVertexAttribArray(3)
-	gl.EnableVertexAttribArray(4)
-	gl.EnableVertexAttribArray(5)
-	gl.EnableVertexAttribArray(6)
+	for i := range instanceDefs {
+		gl.EnableVertexAttribArray(uint32(i + 3))
+	}
 
-	gl.DrawElementsInstanced(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0), numInstances)
+	if numInstances > 1 {
+		gl.DrawElementsInstanced(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0), numInstances)
+	} else {
+		gl.DrawElements(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0))
+	}
 
-	gl.DisableVertexAttribArray(3)
-	gl.DisableVertexAttribArray(4)
-	gl.DisableVertexAttribArray(5)
-	gl.DisableVertexAttribArray(6)
-
-	// gl.DrawElements(gl.TRIANGLES, vao.vertexNum, gl.UNSIGNED_INT, gl.PtrOffset(0))
+	for i := range instanceDefs {
+		gl.DisableVertexAttribArray(uint32(i + 3))
+	}
 }
 
 func (vao *vao) Disable() {

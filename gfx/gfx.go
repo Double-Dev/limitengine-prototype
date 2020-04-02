@@ -106,15 +106,15 @@ func Sweep() {
 						data := []float32{}
 
 						for _, instance := range instances {
-							orderedVars, varMap := shader.GetInstanceVarsSize()
-							for _, varName := range orderedVars {
+							instanceDefs := shader.GetInstanceDefs()
+							for _, instanceDef := range instanceDefs {
 								instance.dataMutex.RLock()
-								data = append(data, instance.data[varName][0:varMap[varName]]...)
+								data = append(data, instance.data[instanceDef.Name][0:instanceDef.Size]...)
 								instance.dataMutex.RUnlock()
 							}
 						}
 
-						iModel.Render(shader.instanceBuffer, data, int32(len(instances)))
+						iModel.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
 
 						iModel.Disable()
 					}

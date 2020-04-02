@@ -26,27 +26,30 @@ func CreateShader(vertSrc, fragSrc string) *Shader {
 	actionQueue = append(actionQueue, func() {
 		shaders[shader.id] = context.CreateShader(vertSrc, fragSrc)
 		totalInstanceSize := 0
-		_, varMap := shader.GetInstanceVarsSize()
-		for _, size := range varMap {
-			totalInstanceSize += size
+		instanceDefs := shader.GetInstanceDefs()
+		for _, instanceDef := range instanceDefs {
+			totalInstanceSize += instanceDef.Size
 		}
 		shader.instanceBuffer = context.CreateInstanceBuffer(totalInstanceSize)
 	})
 	return shader
 }
 
-func (shader *Shader) GetInstanceVarsSize() ([]string, map[string]int) {
-	return []string{
-			"transformMat0",
-			"transformMat1",
-			"transformMat2",
-			"transformMat3",
-		}, map[string]int{
-			"transformMat0": 4,
-			"transformMat1": 4,
-			"transformMat2": 4,
-			"transformMat3": 4,
-		}
+func (shader *Shader) GetInstanceDefs() []struct {
+	Name  string
+	Size  int
+	Index int
+} {
+	return []struct {
+		Name  string
+		Size  int
+		Index int
+	}{
+		{"transformMat0", 4, 0},
+		{"transformMat1", 4, 4},
+		{"transformMat2", 4, 8},
+		{"transformMat3", 4, 12},
+	}
 }
 
 // TODO: Add support for more variables + array uniforms.

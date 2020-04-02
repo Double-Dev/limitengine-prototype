@@ -91,8 +91,8 @@ void main()
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
 		&utils.MotionComponent{
-			Velocity:        gmath.NewVector3(0.0, 0.0, 0.0),
-			Acceleration:    gmath.NewVector3(0.0, 0.0, 0.0),
+			Velocity:        gmath.NewZeroVector3(),
+			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewIdentityQuaternion(),
 			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
@@ -115,8 +115,8 @@ void main()
 		},
 	)
 
-	for i := 0; i < 3000; i++ {
-		// randVelocity := gmath.NewVector(rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0, rand.Float32()*500.0-250.0)
+	for i := 0; i < 4000; i++ {
+		// randAxis := gmath.NewVector3(rand.Float32()-0.5, rand.Float32()-0.5, rand.Float32()-0.5).Normalize()
 		ecs.NewEntity(
 			&utils.TransformComponent{
 				Position: gmath.NewVector3(rand.Float32()*1000.0-500.0, rand.Float32()*1000.0-500.0, rand.Float32()*1000.0-750.0),
@@ -124,8 +124,10 @@ void main()
 				Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 			},
 			// &utils.MotionComponent{
-			// 	Velocity:     randVelocity,
-			// 	Acceleration: randVelocity.Clone().MulSc(-0.5),
+			// 	Velocity:        gmath.NewZeroVector3(),
+			// 	Acceleration:    gmath.NewZeroVector3(),
+			// 	AngVelocity:     gmath.NewIdentityQuaternion(),
+			// 	AngAcceleration: gmath.NewQuaternionV(rand.Float32(), randAxis),
 			// },
 			&utils.RenderComponent{
 				Camera:   camera,
