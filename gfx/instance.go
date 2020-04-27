@@ -23,7 +23,7 @@ func NewInstance() *Instance {
 	}
 }
 
-func (instance *Instance) SetTransform(transform gmath.Matrix) {
+func (instance *Instance) SetTransform(transform gmath.Matrix4) {
 	instance.dataMutex.Lock()
 	instance.data["transformMat0"] = transform[0]
 	instance.data["transformMat1"] = transform[1]

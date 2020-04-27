@@ -26,12 +26,12 @@ func CreateCamera() *Camera {
 	}
 }
 
-func (this *Camera) SetProjectionMat(projectionMat gmath.Matrix) {
-	this.prefs.AddMatrix44("projMat", projectionMat)
+func (camera *Camera) SetProjectionMat(projectionMat gmath.Matrix4) {
+	camera.prefs.AddMatrix4("projMat", projectionMat)
 }
 
-func (this *Camera) SetViewMat(viewMat gmath.Matrix) {
-	this.prefs.AddMatrix44("viewMat", viewMat)
+func (camera *Camera) SetViewMat(viewMat gmath.Matrix4) {
+	camera.prefs.AddMatrix4("viewMat", viewMat)
 }
 
 func CreateFrameBuffer() {

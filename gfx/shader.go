@@ -54,32 +54,30 @@ func (shader *Shader) GetInstanceDefs() []struct {
 
 // TODO: Add support for more variables + array uniforms.
 type uniformLoader struct {
-	uniformInts      map[string]int32
-	uniformMatrix44s map[string]gmath.Matrix
+	uniformInts     map[string]int32
+	uniformMatrix4s map[string]gmath.Matrix4
 }
 
 func newUniformLoader() uniformLoader {
 	return uniformLoader{
-		uniformInts:      make(map[string]int32),
-		uniformMatrix44s: make(map[string]gmath.Matrix),
+		uniformInts:     make(map[string]int32),
+		uniformMatrix4s: make(map[string]gmath.Matrix4),
 	}
 }
 
-func (this uniformLoader) loadTo(iShader framework.IShader) {
-	for varName, value := range this.uniformInts {
+func (uniformLoader uniformLoader) loadTo(iShader framework.IShader) {
+	for varName, value := range uniformLoader.uniformInts {
 		iShader.LoadUniform1I(varName, value)
 	}
-	for varName, value := range this.uniformMatrix44s {
+	for varName, value := range uniformLoader.uniformMatrix4s {
 		iShader.LoadUniformMatrix4fv(varName, value.ToArray())
 	}
 }
 
-func (this uniformLoader) AddInt(varName string, val int32) {
-	this.uniformInts[varName] = val
+func (uniformLoader uniformLoader) AddInt(varName string, val int32) {
+	uniformLoader.uniformInts[varName] = val
 }
 
-func (this uniformLoader) AddMatrix44(varName string, val gmath.Matrix) {
-	if val.IsSize(4, 4) {
-		this.uniformMatrix44s[varName] = val
-	}
+func (uniformLoader uniformLoader) AddMatrix4(varName string, val gmath.Matrix4) {
+	uniformLoader.uniformMatrix4s[varName] = val
 }

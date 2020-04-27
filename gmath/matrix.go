@@ -17,145 +17,117 @@ func NewIdentityMatrix(columns, rows int) Matrix {
 	return matrix
 }
 
-func NewTransformMatrix(translation Vector, rotation Quaternion, scale Vector) Matrix {
-	rMat := NewIdentityMatrix(4, 4).SetRotate(rotation)
-	tsMat := NewIdentityMatrix(4, 4).SetTranslate(translation).SetScale(scale)
-	return tsMat.MulM(rMat)
-}
-
-func NewViewMatrix(translation Vector, rotation Quaternion, scale Vector) Matrix {
-	rMat := NewIdentityMatrix(4, 4).SetRotate(rotation.Clone().Inverse())
-	tsMat := NewIdentityMatrix(4, 4).SetTranslate(translation.Clone().MulSc(-1.0)).SetScale(scale)
-	return rMat.MulM(tsMat)
-}
-
-func NewProjectionMatrix(aspectRatio, nearPlane, farPlane, fov float32) Matrix {
-	matrix := NewIdentityMatrix(4, 4)
-	yScale := 1.0 / Tan(ToRadians(fov/2.0))
-	xScale := yScale * aspectRatio
-	frustumLen := farPlane - nearPlane
-
-	matrix[0][0] = xScale
-	matrix[1][1] = yScale
-	matrix[2][2] = -((farPlane + nearPlane) / frustumLen)
-	matrix[2][3] = -1.0
-	matrix[3][2] = -((2.0 * nearPlane * farPlane) / frustumLen)
-	matrix[3][3] = 0.0
-
-	return matrix
-}
-
 // SetIdentity sets this Matrix equal to the identity Matrix.
-func (this Matrix) SetIdentity() {
-	for i := 0; i < len(this); i++ {
-		for j := 0; j < len(this[i]); j++ {
+func (matrix Matrix) SetIdentity() {
+	for i := 0; i < len(matrix); i++ {
+		for j := 0; j < len(matrix[i]); j++ {
 			if i == j {
-				this[i][j] = 1.0
+				matrix[i][j] = 1.0
 			} else {
-				this[i][j] = 0.0
+				matrix[i][j] = 0.0
 			}
 		}
 	}
 }
 
-func (this Matrix) MulV(vector Vector) Vector {
-	size := MinI(len(vector), len(this))
+func (matrix Matrix) MulV(vector Vector) Vector {
+	size := MinI(len(vector), len(matrix))
 	vOut := NewZeroVector(size)
 	for i := 0; i < size; i++ {
-		vOut.Add(this[i].Clone().MulSc(vector[i])...)
+		vOut.Add(matrix[i].Clone().MulSc(vector[i])...)
 	}
 	return vOut
 }
 
-func (this Matrix) MulM(other Matrix) Matrix {
+func (matrix Matrix) MulM(other Matrix) Matrix {
 	mOut := Matrix{}
-	for i := 0; i < MinI(len(this), len(other)); i++ {
-		mOut = append(mOut, this.MulV(other[i]))
+	for i := 0; i < MinI(len(matrix), len(other)); i++ {
+		mOut = append(mOut, matrix.MulV(other[i]))
 	}
 	return mOut
 }
 
-func (this Matrix) SetTranslate(translation Vector) Matrix {
-	for i := 0; i < MinI(len(this), len(translation)); i++ {
-		this[len(this)-1][i] = translation[i]
+func (matrix Matrix) SetTranslate(translation Vector) Matrix {
+	for i := 0; i < MinI(len(matrix), len(translation)); i++ {
+		matrix[len(matrix)-1][i] = translation[i]
 	}
-	return this
+	return matrix
 }
 
-func (this Matrix) SetRotate(rotation Quaternion) Matrix {
+func (matrix Matrix) SetRotate(rotation Quaternion) Matrix {
 	squares := make([]float32, len(rotation.vector))
 	for i := 0; i < len(rotation.vector); i++ {
 		squares[i] = rotation.vector[i] * rotation.vector[i]
 	}
-	this[0][0] = 1 - 2*(squares[1]+squares[2])
-	this[1][1] = 1 - 2*(squares[0]+squares[2])
-	this[2][2] = 1 - 2*(squares[0]+squares[1])
+	matrix[0][0] = 1 - 2*(squares[1]+squares[2])
+	matrix[1][1] = 1 - 2*(squares[0]+squares[2])
+	matrix[2][2] = 1 - 2*(squares[0]+squares[1])
 
-	this[1][0] = 2.0 * (rotation.vector[0]*rotation.vector[1] - rotation.vector[2]*rotation.vector[3])
-	this[0][1] = 2.0 * (rotation.vector[0]*rotation.vector[1] + rotation.vector[2]*rotation.vector[3])
+	matrix[1][0] = 2.0 * (rotation.vector[0]*rotation.vector[1] - rotation.vector[2]*rotation.vector[3])
+	matrix[0][1] = 2.0 * (rotation.vector[0]*rotation.vector[1] + rotation.vector[2]*rotation.vector[3])
 
-	this[2][0] = 2.0 * (rotation.vector[0]*rotation.vector[2] + rotation.vector[1]*rotation.vector[3])
-	this[0][2] = 2.0 * (rotation.vector[0]*rotation.vector[2] - rotation.vector[1]*rotation.vector[3])
+	matrix[2][0] = 2.0 * (rotation.vector[0]*rotation.vector[2] + rotation.vector[1]*rotation.vector[3])
+	matrix[0][2] = 2.0 * (rotation.vector[0]*rotation.vector[2] - rotation.vector[1]*rotation.vector[3])
 
-	this[2][1] = 2.0 * (rotation.vector[1]*rotation.vector[2] - rotation.vector[0]*rotation.vector[3])
-	this[1][2] = 2.0 * (rotation.vector[1]*rotation.vector[2] + rotation.vector[0]*rotation.vector[3])
+	matrix[2][1] = 2.0 * (rotation.vector[1]*rotation.vector[2] - rotation.vector[0]*rotation.vector[3])
+	matrix[1][2] = 2.0 * (rotation.vector[1]*rotation.vector[2] + rotation.vector[0]*rotation.vector[3])
 	// TODO: Fix rotation maths.
-	return this
+	return matrix
 }
 
-func (this Matrix) SetScale(scale Vector) Matrix {
-	for i := 0; i < len(this); i++ {
-		for j := 0; j < MinI(len(this[i]), len(scale)); j++ {
+func (matrix Matrix) SetScale(scale Vector) Matrix {
+	for i := 0; i < len(matrix); i++ {
+		for j := 0; j < MinI(len(matrix[i]), len(scale)); j++ {
 			if i == j {
-				this[i][j] = this[i][j] * scale[j]
+				matrix[i][j] = matrix[i][j] * scale[j]
 			}
 		}
 	}
-	return this
+	return matrix
 }
 
 // TODO: Finish Matrix.go
 
-func (this Matrix) IsSize(rows, columns int) bool {
-	if len(this) != columns || len(this[0]) != rows {
+func (matrix Matrix) IsSize(rows, columns int) bool {
+	if len(matrix) != columns || len(matrix[0]) != rows {
 		return false
 	}
 	return true
 }
 
-func (this Matrix) ToArray() []float32 {
+func (matrix Matrix) ToArray() []float32 {
 	arr := []float32{}
-	for i := 0; i < len(this); i++ {
-		for j := 0; j < len(this[i]); j++ {
-			arr = append(arr, this[i][j])
+	for i := 0; i < len(matrix); i++ {
+		for j := 0; j < len(matrix[i]); j++ {
+			arr = append(arr, matrix[i][j])
 		}
 	}
 	return arr
 }
 
-func (this Matrix) Set(row, col int, val float32) {
-	this[col][row] = val
+func (matrix Matrix) Set(row, col int, val float32) {
+	matrix[col][row] = val
 }
 
-func (this Matrix) Get(row, col int) float32 {
-	return this[col][row]
+func (matrix Matrix) Get(row, col int) float32 {
+	return matrix[col][row]
 }
 
-// Clone returns a new Matrix with components equal to this Matrix.
-func (this Matrix) Clone() Matrix {
+// Clone returns a new Matrix with components equal to matrix Matrix.
+func (matrix Matrix) Clone() Matrix {
 	out := Matrix{}
-	for _, v := range this {
+	for _, v := range matrix {
 		out = append(out, v.Clone())
 	}
 	return out
 }
 
-func (this Matrix) String() string {
+func (matrix Matrix) String() string {
 	s := "\n"
-	for i := 0; i < len(this[0]); i++ {
-		s += "[" + fmt.Sprintf("%f\t", this[0][i])
-		for j := 1; j < len(this); j++ {
-			s += " " + fmt.Sprintf("%f\t", this[j][i])
+	for i := 0; i < len(matrix[0]); i++ {
+		s += "[" + fmt.Sprintf("%f\t", matrix[0][i])
+		for j := 1; j < len(matrix); j++ {
+			s += " " + fmt.Sprintf("%f\t", matrix[j][i])
 		}
 		s += "]\n"
 	}

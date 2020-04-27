@@ -17,7 +17,7 @@ var (
 	context framework.Context
 
 	fps        = float32(0.0)
-	projMatrix gmath.Matrix
+	projMatrix gmath.Matrix4
 
 	AdvanceFrames = 2
 
@@ -40,11 +40,11 @@ func init() {
 			}
 
 			limitengine.AddResizeCallback(func(width, height int) {
-				projMatrix = gmath.NewProjectionMatrix(float32(height)/float32(width), 0.001, 1000.0, 60.0)
+				projMatrix = gmath.NewProjectionMatrix3D(float32(height)/float32(width), 0.001, 1000.0, 60.0)
 				fmt.Println(width, height)
 				actionQueue = append(actionQueue, func() { context.Resize(width, height) })
 			})
-			projMatrix = gmath.NewProjectionMatrix(float32(limitengine.InitHeight)/float32(limitengine.InitWidth), 0.001, 1000.0, 60.0)
+			projMatrix = gmath.NewProjectionMatrix3D(float32(limitengine.InitHeight)/float32(limitengine.InitWidth), 0.001, 1000.0, 60.0)
 
 			currentTime := time.Now().UnixNano()
 			for limitengine.Running() {

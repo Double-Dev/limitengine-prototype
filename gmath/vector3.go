@@ -1,5 +1,10 @@
 package gmath
 
+// Vector3 is an alternative to Vector optimized to perform operations on 3
+// floats.
+// NOTE: While Vector3 is a slice and can have elements appended and deleted
+// from it, it was never designed to do so and game devs that do so will do
+// at their own risk!
 type Vector3 []float32
 
 func NewZeroVector3() Vector3 {

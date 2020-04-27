@@ -72,10 +72,12 @@ func Ceil(f float32) float32 {
 	return float32(math.Ceil(float64(f)))
 }
 
+// ToRadians converts degrees to radians.
 func ToRadians(degrees float32) float32 {
 	return degrees * DtoR
 }
 
+// ToDegrees converts radians to degrees.
 func ToDegrees(radians float32) float32 {
 	return radians / DtoR
 }

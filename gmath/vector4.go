@@ -1,5 +1,10 @@
 package gmath
 
+// Vector4 is an alternative to Vector optimized to perform operations on 4
+// floats.
+// NOTE: While Vector4 is a slice and can have elements appended and deleted
+// from it, it was never designed to do so and game devs that do so will do
+// at their own risk!
 type Vector4 []float32
 
 func NewZeroVector4() Vector4 {
