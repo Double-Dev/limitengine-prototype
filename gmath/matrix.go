@@ -76,12 +76,8 @@ func (matrix Matrix) SetRotate(rotation Quaternion) Matrix {
 }
 
 func (matrix Matrix) SetScale(scale Vector) Matrix {
-	for i := 0; i < len(matrix); i++ {
-		for j := 0; j < MinI(len(matrix[i]), len(scale)); j++ {
-			if i == j {
-				matrix[i][j] = matrix[i][j] * scale[j]
-			}
-		}
+	for i := 0; i < MinI(MinI(len(matrix), len(matrix[i])), len(scale)); i++ {
+		matrix[i][i] = matrix[i][i] * scale[i]
 	}
 	return matrix
 }
@@ -103,14 +99,6 @@ func (matrix Matrix) ToArray() []float32 {
 		}
 	}
 	return arr
-}
-
-func (matrix Matrix) Set(row, col int, val float32) {
-	matrix[col][row] = val
-}
-
-func (matrix Matrix) Get(row, col int) float32 {
-	return matrix[col][row]
 }
 
 // Clone returns a new Matrix with components equal to matrix Matrix.

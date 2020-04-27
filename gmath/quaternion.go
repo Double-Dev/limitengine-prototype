@@ -20,7 +20,15 @@ func NewQuaternionV(angle float32, axis Vector3) Quaternion {
 	return NewQuaternion(angle, axis[0], axis[1], axis[2])
 }
 
-// Set sets each axis of this Quaternion object to the corresponding axis of a float32 vararg.
+func (quaternion Quaternion) SetFrom2D(angle float32) Quaternion {
+	sin := Sin(angle / 2.0)
+	quaternion.vector[0] = 0.0
+	quaternion.vector[1] = 0.0
+	quaternion.vector[2] = sin
+	quaternion.vector[3] = Cos(angle / 2.0)
+	return quaternion
+}
+
 func (quaternion Quaternion) Set(angle, x, y, z float32) Quaternion {
 	l := Sqrt(x*x + y*y + z*z)
 	sin := Sin(angle / 2.0)

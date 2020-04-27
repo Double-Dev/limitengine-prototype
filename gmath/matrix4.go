@@ -17,16 +17,22 @@ func NewIdentityMatrix4() Matrix4 {
 	return matrix
 }
 
-func NewTransformMatrix3D(translation Vector3, rotation Quaternion, scale Vector3) Matrix4 {
+func NewTransformMatrix(translation Vector3, rotation Quaternion, scale Vector3) Matrix4 {
 	rMat := NewIdentityMatrix4().SetRotate(rotation)
 	tsMat := NewIdentityMatrix4().SetTranslate(translation).SetScale(scale)
 	return tsMat.MulM(rMat)
 }
 
-func NewViewMatrix3D(translation Vector3, rotation Quaternion, scale Vector3) Matrix4 {
+func NewViewMatrix(translation Vector3, rotation Quaternion, scale Vector3) Matrix4 {
 	rMat := NewIdentityMatrix4().SetRotate(rotation.Clone().Inverse())
 	tsMat := NewIdentityMatrix4().SetTranslate(translation.Clone().MulSc(-1.0)).SetScale(scale)
 	return rMat.MulM(tsMat)
+}
+
+func NewProjectionMatrix2D(aspectRatio float32) Matrix4 {
+	matrix := NewIdentityMatrix4()
+	matrix[0][0] = aspectRatio
+	return matrix
 }
 
 func NewProjectionMatrix3D(aspectRatio, nearPlane, farPlane, fov float32) Matrix4 {
@@ -140,8 +146,8 @@ func (matrix Matrix4) Clone() Matrix4 {
 }
 
 func (this Matrix4) String() string {
-	return fmt.Sprintf("[%f\t%f\t%f\t%f\t]", this[0][0], this[1][0], this[2][0], this[3][0]) +
-		fmt.Sprintf("[%f\t%f\t%f\t%f\t]", this[0][1], this[1][1], this[2][1], this[3][1]) +
-		fmt.Sprintf("[%f\t%f\t%f\t%f\t]", this[0][2], this[1][2], this[2][2], this[3][2]) +
-		fmt.Sprintf("[%f\t%f\t%f\t%f\t]", this[0][3], this[1][3], this[2][3], this[3][3])
+	return fmt.Sprintf("[%f\t %f\t %f\t %f\t]", this[0][0], this[1][0], this[2][0], this[3][0]) +
+		fmt.Sprintf("[%f\t %f\t %f\t %f\t]", this[0][1], this[1][1], this[2][1], this[3][1]) +
+		fmt.Sprintf("[%f\t %f\t %f\t %f\t]", this[0][2], this[1][2], this[2][2], this[3][2]) +
+		fmt.Sprintf("[%f\t %f\t %f\t %f\t]", this[0][3], this[1][3], this[2][3], this[3][3])
 }
