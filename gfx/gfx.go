@@ -19,12 +19,10 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix
 
-	// renderBuffers map[uint32]uint32
-
 	AdvanceFrames = 2
 
 	gfxMutex      = sync.RWMutex{}
-	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Model][]*Instance{}
+	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance{}
 	actionQueue   = []func(){}
 	gfxPipeline   = [](chan func()){}
 )
@@ -98,10 +96,10 @@ func Sweep() {
 					material.prefs.loadTo(iShader)
 					iTexture := textures[material.texture.id]
 					iTexture.Bind()
-					for model, instances := range batch2 {
-						model.prefs.loadTo(iShader)
-						iModel := models[model.id]
-						iModel.Enable()
+					for mesh, instances := range batch2 {
+						mesh.prefs.loadTo(iShader)
+						iMesh := meshes[mesh.id]
+						iMesh.Enable()
 
 						data := []float32{}
 
@@ -113,10 +111,9 @@ func Sweep() {
 								instance.dataMutex.RUnlock()
 							}
 						}
+						iMesh.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
 
-						iModel.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
-
-						iModel.Disable()
+						iMesh.Disable()
 					}
 					iTexture.Unbind()
 				}
@@ -138,28 +135,28 @@ func Sweep() {
 	}()
 }
 
-func Render(camera *Camera, shader *Shader, material *Material, model *Model, instance *Instance) {
+func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, instance *Instance) {
 	actionQueue = append(actionQueue, func() {
 		if len(renderBatches) == 0 {
-			renderBatches = append(renderBatches, make(map[*Camera]map[*Shader]map[*Material]map[*Model][]*Instance))
+			renderBatches = append(renderBatches, make(map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance))
 		}
 		renderBatch := renderBatches[len(renderBatches)-1]
 		batch0 := renderBatch[camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[*Material]map[*Model][]*Instance)
+			batch0 = make(map[*Shader]map[*Material]map[*Mesh][]*Instance)
 			renderBatch[camera] = batch0
 		}
 		batch1 := batch0[shader]
 		if batch1 == nil {
-			batch1 = make(map[*Material]map[*Model][]*Instance)
+			batch1 = make(map[*Material]map[*Mesh][]*Instance)
 			batch0[shader] = batch1
 		}
 		batch2 := batch1[material]
 		if batch2 == nil {
-			batch2 = make(map[*Model][]*Instance)
+			batch2 = make(map[*Mesh][]*Instance)
 			batch1[material] = batch2
 		}
-		batch2[model] = append(batch2[model], instance)
+		batch2[mesh] = append(batch2[mesh], instance)
 
 		// iShader := shaders[shader.id]
 		// var iModel framework.IModel

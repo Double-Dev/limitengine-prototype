@@ -52,26 +52,26 @@ func (glContext glContext) CreateTexture(image []uint8, width, height int32) fra
 	return texture
 }
 
-func (glContext glContext) CreateModel(indices []uint32, vertices, texCoords, normals []float32) framework.IModel {
-	model := newVAO()
-	model.bind()
-	model.addIndices(indices)
-	model.addFloatAttrib(vertices, 0, 3, false)
+func (glContext glContext) CreateMesh(indices []uint32, vertices, texCoords, normals []float32) framework.IMesh {
+	mesh := newVAO()
+	mesh.bind()
+	mesh.addIndices(indices)
+	mesh.addFloatAttrib(vertices, 0, 3, false)
 	if len(texCoords) > 0 {
-		model.addFloatAttrib(texCoords, 1, 2, false)
+		mesh.addFloatAttrib(texCoords, 1, 2, false)
 	}
 	if len(normals) > 0 {
-		model.addFloatAttrib(normals, 2, 3, false)
+		mesh.addFloatAttrib(normals, 2, 3, false)
 	}
-	// model.addInstancedFloatAttrib(
+	// mesh.addInstancedFloatAttrib(
 	// 	glContext.GetMaxInstances()*glContext.GetMaxInstanceData(),
 	// 	3,
 	// 	4,
 	// 	int32(glContext.GetMaxInstanceData()),
 	// 	false,
 	// )
-	model.unbind()
-	return model
+	mesh.unbind()
+	return mesh
 }
 
 func (glContext glContext) CreateInstanceBuffer(instanceDataSize int) framework.IInstanceBuffer {

@@ -8,7 +8,7 @@ type Context interface {
 	CreateRenderBuffer()
 	CreateShader(vertSrc, fragSrc string) IShader
 	CreateTexture(image []byte, width, height int32) ITexture
-	CreateModel(indices []uint32, vertices, texCoords, normals []float32) IModel
+	CreateMesh(indices []uint32, vertices, texCoords, normals []float32) IMesh
 	CreateInstanceBuffer(instanceDataSize int) IInstanceBuffer
 
 	GetMaxInstances() int

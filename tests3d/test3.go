@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	model := gfx.CreateModel(gio.LoadOBJ("monkey.obj"))
-	// model := &gfx.Model{}
+	mesh := gfx.CreateMesh(gio.LoadOBJ("monkey.obj"))
+	// mesh := &gfx.Mesh{}
 	shader := gfx.CreateShader(`#version 330 core
 layout(location = 0) in vec3 coord;
 layout(location = 1) in vec2 texCoord;
@@ -110,7 +110,7 @@ void main()
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Model:    model,
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 	)
@@ -133,7 +133,7 @@ void main()
 				Camera:   camera,
 				Shader:   shader,
 				Material: material,
-				Model:    model,
+				Mesh:     mesh,
 				Instance: gfx.NewInstance(),
 			},
 		)

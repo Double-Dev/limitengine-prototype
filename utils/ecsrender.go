@@ -10,7 +10,7 @@ type RenderComponent struct {
 	Camera   *gfx.Camera
 	Shader   *gfx.Shader
 	Material *gfx.Material
-	Model    *gfx.Model
+	Mesh     *gfx.Mesh
 	Instance *gfx.Instance
 }
 
@@ -25,7 +25,7 @@ func NewRenderSystem() *ecs.ECSSystem {
 			render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
 			render.Instance.SetTransform(transformMat)
 
-			gfx.Render(render.Camera, render.Shader, render.Material, render.Model, render.Instance)
+			gfx.Render(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 		}
 		gfx.Sweep()
 	}, (*RenderComponent)(nil), (*TransformComponent)(nil))

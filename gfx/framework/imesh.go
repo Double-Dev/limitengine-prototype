@@ -1,6 +1,6 @@
 package framework
 
-type IModel interface {
+type IMesh interface {
 	Enable()
 	Render(instanceBuffer IInstanceBuffer, instanceDefs []struct {
 		Name  string

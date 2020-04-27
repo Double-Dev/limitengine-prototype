@@ -46,9 +46,5 @@ void main()
 
 func processLESL(src string) Shader { // TODO: Parse custom shader
 
-	// vertSrc = strings.ReplaceAll(vertSrc, "this.position", "vertPosition")
-	// vertSrc = strings.ReplaceAll(vertSrc, "this.textureCoord", "vertTextureCoord")
-	// vertSrc = strings.ReplaceAll(vertSrc, "this.normal", "vertNormal")
-
 	return *(*Shader)(nil)
 }
