@@ -1,4 +1,4 @@
-package main
+package tests3d
 
 import (
 	"math/rand"
@@ -38,7 +38,7 @@ func main() {
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeyRightShift}, 0.05)
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, 0.05)
 
-	camera := gfx.CreateCamera()
+	camera := gfx.CreateCamera3D(0.001, 1000.0, 60.0)
 	ecs.NewEntity(
 		&utils.TransformComponent{
 			Position: gmath.NewVector3(0.0, 1.0, -10.0),

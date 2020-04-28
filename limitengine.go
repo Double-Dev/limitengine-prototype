@@ -24,18 +24,19 @@ const (
 )
 
 var (
-	log                  = NewLogger("core")
-	running              bool
-	view                 View
-	closeCallbacks       []func()
-	resizeCallbacks      []func(width, height int)
-	joystickCallbacks    []func(joy Joystick, event Action)
-	keyCallbacks         []func(key Key, scancode int, action Action, mods ModKey)
-	mouseButtonCallbacks []func(button MouseButton, action Action, mod ModKey)
-	mouseMotionCallbacks []func(x, y float32)
-	mouseScrollCallbacks []func(x, y float32)
-	touchMotionCallbacks []func(x, y []float32)
-	typingCallbacks      []func(char rune, mods ModKey)
+	log                   = NewLogger("core")
+	running               bool
+	view                  View
+	viewWidth, viewHeight int
+	closeCallbacks        []func()
+	resizeCallbacks       []func(width, height int)
+	joystickCallbacks     []func(joy Joystick, event Action)
+	keyCallbacks          []func(key Key, scancode int, action Action, mods ModKey)
+	mouseButtonCallbacks  []func(button MouseButton, action Action, mod ModKey)
+	mouseMotionCallbacks  []func(x, y float32)
+	mouseScrollCallbacks  []func(x, y float32)
+	touchMotionCallbacks  []func(x, y []float32)
+	typingCallbacks       []func(char rune, mods ModKey)
 )
 
 func init() {
@@ -58,6 +59,8 @@ func init() {
 		view.delete()
 	})
 	view.setResizeCallback(func(width, height int) {
+		viewWidth = width
+		viewHeight = height
 		for _, resizeCallback := range resizeCallbacks {
 			resizeCallback(width, height)
 		}
@@ -107,6 +110,15 @@ func AppView() View { return view }
 
 // Running returns whether the engine is running.
 func Running() bool { return running }
+
+// GetWidth returns the current width (in pixels) of the view.
+func GetWidth() int { return viewWidth }
+
+// GetHeight returns the current height (in pixels) of the view.
+func GetHeight() int { return viewHeight }
+
+// GetAspectRatio returns the current aspect ratio of the view.
+func GetAspectRatio() float32 { return float32(viewHeight) / float32(viewWidth) }
 
 // AddCloseCallback adds a close callback function to the application.
 func AddCloseCallback(callback func()) {

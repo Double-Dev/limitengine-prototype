@@ -14,7 +14,7 @@ func init() {
 	actionQueue = append(actionQueue, func() {
 		meshes[0] = context.CreateMesh(
 			[]uint32{
-				3, 1, 0, 2, 1, 3,
+				0, 1, 3, 3, 1, 2,
 			},
 			[]float32{
 				-1.0, 1.0, 0.0,

@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-type VertexLESL string
-type FragmentLESL string
-
 const (
 	vertHeader = `#version 330 core
 layout(location = 0) in vec3 vertposition;
@@ -34,7 +31,7 @@ void main()
 	vertworldPos = verttransformMat * vec4(vertposition, 1.0);
 	gl_Position = vertprojMat * vertviewMat * vertworldPos;
 	fragposition = vertposition;
-	fragtextureCoord = vec2(verttextureCoord.x, 1.0 - verttextureCoord.y);
+	fragtextureCoord = verttextureCoord;
 	fragnormal = vertnormal;
 	vert();
 }`
