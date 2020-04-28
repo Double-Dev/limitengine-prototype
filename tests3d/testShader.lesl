@@ -14,7 +14,7 @@ void vert() {
 in vec3 interpNormal;
 in vec3 toLight;
 
-// texture0 tex;
+texture0 tex;
 
 const vec3 lightColor = vec3(1.0, 1.0, 1.0);
 const float ambient = 0.1;

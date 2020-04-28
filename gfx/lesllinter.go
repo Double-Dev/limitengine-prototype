@@ -63,7 +63,21 @@ var (
 	}
 )
 
-func processLESL(src string) (string, string) { // TODO: Parse custom shader
+func processLESL(src string) (string, string, map[string]int32) { // TODO: Parse custom shader
+	textureVars := make(map[string]int32)
+	for i := int32(0); i < 10; i++ {
+		if strings.Contains(src, fmt.Sprintf("texture%d", i)) {
+			varNameStart := strings.Index(src, fmt.Sprintf("texture%d", i)) + 9
+			varNameEnd := strings.Index(src[varNameStart:], ";")
+			textureVars[src[varNameStart:varNameStart+varNameEnd]] = i
+			src = strings.Replace(src, fmt.Sprintf("texture%d", i), "uniform sampler2D", 1)
+			if strings.Contains(src, fmt.Sprintf("texture%d", i)) {
+				log.ForceErr(fmt.Sprintf("LESL: Multiple uses of type 'texture%d' not allowed.", i))
+			}
+		}
+	}
+	fmt.Println(textureVars)
+
 	vertStart := strings.Index(src, "#vert")
 	vertEnd := len(src[:vertStart]) + strings.Index(src[vertStart:], "#end")
 
@@ -102,8 +116,8 @@ func processLESL(src string) (string, string) { // TODO: Parse custom shader
 	fragCode = fragHeader + strings.ReplaceAll(fragCode, "lesl.", "frag") + fragFooter
 	src = src[:fragStart] + src[fragEnd+4:]
 
-	fmt.Println("VERTEX CODE:\n" + vertCode)
-	fmt.Println("FRAGMENT CODE:\n" + fragCode)
+	// fmt.Println("VERTEX CODE:\n" + vertCode)
+	// fmt.Println("FRAGMENT CODE:\n" + fragCode)
 
-	return vertCode, fragCode
+	return vertCode, fragCode, textureVars
 }

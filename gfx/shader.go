@@ -24,11 +24,16 @@ func CreateShader(leslSrc string) *Shader {
 	}
 	shaderIndex++
 	actionQueue = append(actionQueue, func() {
-		shaders[shader.id] = context.CreateShader(processLESL(leslSrc))
+		vertSrc, fragSrc, textureVars := processLESL(leslSrc)
+		shaders[shader.id] = context.CreateShader(vertSrc, fragSrc)
 		totalInstanceSize := 0
 		instanceDefs := shader.GetInstanceDefs()
 		for _, instanceDef := range instanceDefs {
 			totalInstanceSize += instanceDef.Size
+		}
+		shader.uniformLoader = newUniformLoader()
+		for key, value := range textureVars {
+			shader.uniformLoader.AddInt(key, value)
 		}
 		shader.instanceBuffer = context.CreateInstanceBuffer(totalInstanceSize)
 	})
@@ -50,6 +55,10 @@ func (shader *Shader) GetInstanceDefs() []struct {
 		{"verttransformMat2", 4, 8},
 		{"verttransformMat3", 4, 12},
 	}
+}
+
+func (shader *Shader) GetUniformLoader() uniformLoader {
+	return shader.uniformLoader
 }
 
 // TODO: Add support for more variables + array uniforms.
