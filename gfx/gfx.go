@@ -89,7 +89,7 @@ func Sweep() {
 				iShader := shaders[shader.id]
 				iShader.Start()
 				camera.prefs.loadTo(iShader)
-				iShader.LoadUniformMatrix4fv("projMat", projMatrix.ToArray())
+				iShader.LoadUniformMatrix4fv("vertprojMat", projMatrix.ToArray())
 				// iShader.LoadUniformMatrix4fv("viewMat", gmath.NewIdentityMatrix(4, 4).Translate(camera.position).ToMatrix44())
 
 				for material, batch2 := range batch1 {

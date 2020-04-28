@@ -14,10 +14,10 @@ type Instance struct {
 func NewInstance() *Instance {
 	return &Instance{
 		data: map[string][]float32{
-			"transformMat0": []float32{1.0, 0.0, 0.0, 0.0},
-			"transformMat1": []float32{0.0, 1.0, 0.0, 0.0},
-			"transformMat2": []float32{0.0, 0.0, 1.0, 0.0},
-			"transformMat3": []float32{0.0, 0.0, 0.0, 1.0},
+			"verttransformMat0": []float32{1.0, 0.0, 0.0, 0.0},
+			"verttransformMat1": []float32{0.0, 1.0, 0.0, 0.0},
+			"verttransformMat2": []float32{0.0, 0.0, 1.0, 0.0},
+			"verttransformMat3": []float32{0.0, 0.0, 0.0, 1.0},
 		},
 		dataMutex: sync.RWMutex{},
 	}
@@ -25,10 +25,10 @@ func NewInstance() *Instance {
 
 func (instance *Instance) SetTransform(transform gmath.Matrix4) {
 	instance.dataMutex.Lock()
-	instance.data["transformMat0"] = transform[0]
-	instance.data["transformMat1"] = transform[1]
-	instance.data["transformMat2"] = transform[2]
-	instance.data["transformMat3"] = transform[3]
+	instance.data["verttransformMat0"] = transform[0]
+	instance.data["verttransformMat1"] = transform[1]
+	instance.data["verttransformMat2"] = transform[2]
+	instance.data["verttransformMat3"] = transform[3]
 	instance.dataMutex.Unlock()
 }
 

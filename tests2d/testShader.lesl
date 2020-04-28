@@ -25,7 +25,6 @@ void frag() {
 	vec3 diffuse = brightness * lightColor;
 	// fragColor = vec4(diffuse, 1.0) * texture(tex, lesl.textureCoord);
 	lesl.outColor = vec4(diffuse, 1.0) * vec4(abs(interpNormal), 1.0);
-	// lesl.outColor = vec4(1.0, 1.0, 1.0, 1.0);
 	// fragColor = vec4(diffuse, 1.0) * vec4(1.0, 1.0, 1.0, 1.0);
 }
 #end

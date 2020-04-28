@@ -18,13 +18,13 @@ type Shader struct {
 	instanceBuffer framework.IInstanceBuffer
 }
 
-func CreateShader(vertSrc, fragSrc string) *Shader {
+func CreateShader(leslSrc string) *Shader {
 	shader := &Shader{
 		id: shaderIndex,
 	}
 	shaderIndex++
 	actionQueue = append(actionQueue, func() {
-		shaders[shader.id] = context.CreateShader(vertSrc, fragSrc)
+		shaders[shader.id] = context.CreateShader(processLESL(leslSrc))
 		totalInstanceSize := 0
 		instanceDefs := shader.GetInstanceDefs()
 		for _, instanceDef := range instanceDefs {
@@ -45,10 +45,10 @@ func (shader *Shader) GetInstanceDefs() []struct {
 		Size  int
 		Index int
 	}{
-		{"transformMat0", 4, 0},
-		{"transformMat1", 4, 4},
-		{"transformMat2", 4, 8},
-		{"transformMat3", 4, 12},
+		{"verttransformMat0", 4, 0},
+		{"verttransformMat1", 4, 4},
+		{"verttransformMat2", 4, 8},
+		{"verttransformMat3", 4, 12},
 	}
 }
 

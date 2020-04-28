@@ -15,52 +15,7 @@ import (
 func main() {
 	mesh := gfx.CreateMesh(gio.LoadOBJ("monkey.obj"))
 	// mesh := &gfx.Mesh{}
-	shader := gfx.CreateShader(`#version 330 core
-layout(location = 0) in vec3 coord;
-layout(location = 1) in vec2 texCoord;
-layout(location = 2) in vec3 normal;
-uniform mat4 projMat;
-uniform mat4 viewMat;
-
-layout(location = 3) in vec4 transformMat0;
-layout(location = 4) in vec4 transformMat1;
-layout(location = 5) in vec4 transformMat2;
-layout(location = 6) in vec4 transformMat3;
-
-out vec2 textureCoord;
-out vec3 interpNormal;
-out vec3 toLight;
-const vec3 lightPos = vec3(-5.0, 10.0, 5.0);
-void main()
-{
-	mat4 transformMat = mat4(transformMat0, transformMat1, transformMat2, transformMat3);
-	// mat4 transformMat = mat4(vec4(1.0, 0.0, 0.0, 0.0), vec4(0.0, 1.0, 0.0, 0.0), vec4(0.0, 0.0, 1.0, 0.0), vec4(0.0, 0.0, -10.0, 1.0));
-	vec4 worldPos = transformMat * vec4(coord, 1.0);
-	gl_Position = projMat * viewMat * worldPos;
-
-	textureCoord = vec2(texCoord.x, 1.0 - texCoord.y);
-
-	interpNormal = normalize((transformMat * vec4(normal, 0.0)).xyz);
-	toLight = normalize(lightPos - worldPos.xyz);
-}`, `#version 330 core
-in vec2 textureCoord;
-in vec3 interpNormal;
-in vec3 toLight;
-uniform sampler2D tex;
-
-out vec4 outColor;
-const vec3 lightColor = vec3(1.0, 1.0, 1.0);
-const float ambient = 0.1;
-void main()
-{
-	float lightDot = dot(interpNormal, toLight);
-	float brightness = max(lightDot, ambient);
-	vec3 diffuse = brightness * lightColor;
-	// fragColor = vec4(diffuse, 1.0) * texture(tex, textureCoord);
-	outColor = vec4(diffuse, 1.0) * vec4(abs(interpNormal), 1.0);
-	// fragColor = vec4(diffuse, 1.0) * vec4(1.0, 1.0, 1.0, 1.0);
-}`,
-	)
+	shader := gfx.CreateShader(gio.LoadAsString("testShader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("lamp.png"))
 	material := gfx.CreateTextureMaterial(texture)
 
@@ -115,7 +70,7 @@ void main()
 		},
 	)
 
-	for i := 0; i < 4000; i++ {
+	for i := 0; i < 2000; i++ {
 		// randAxis := gmath.NewVector3(rand.Float32()-0.5, rand.Float32()-0.5, rand.Float32()-0.5).Normalize()
 		ecs.NewEntity(
 			&utils.TransformComponent{
