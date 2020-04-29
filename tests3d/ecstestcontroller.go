@@ -1,7 +1,7 @@
-package utils
+package tests3d
 
 import (
-	"github.com/double-dev/limitengine/ecs"
+	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/ui"
 )
@@ -11,12 +11,12 @@ type MotionControlComponent struct {
 	Speed float32
 }
 
-func NewMotionControlSystem() *ecs.ECSSystem {
-	return ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
+func NewMotionControlSystem() *limitengine.ECSSystem {
+	return limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
 			control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
-			motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
-			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
+			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
+			transform := entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
 
 			motion.Acceleration.Set(0.0, 0.0, 0.0)
 			for i, axis := range control.Axis {
@@ -26,5 +26,5 @@ func NewMotionControlSystem() *ecs.ECSSystem {
 				motion.Acceleration.AddV(direction.MulSc(control.Speed))
 			}
 		}
-	}, (*MotionControlComponent)(nil), (*MotionComponent)(nil), (*TransformComponent)(nil))
+	}, (*MotionControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil))
 }

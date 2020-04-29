@@ -1,35 +1,29 @@
-package ecs
+package limitengine
 
 import (
 	"reflect"
 	"sync"
 	"time"
-
-	"github.com/double-dev/limitengine"
 )
 
 var (
-	log         = limitengine.NewLogger("ecs")
 	entityIndex = uint32(0)
 	ecs         = make(map[ECSEntity]map[reflect.Type]interface{})
 	ecsMutex    = sync.RWMutex{}
 	listeners   = []ECSListener{}
 )
 
-func init() {
-	if limitengine.Running() {
-		go func() {
-			currentTime := time.Now().UnixNano()
-			for limitengine.Running() {
-				lastTime := currentTime
-				currentTime = time.Now().UnixNano()
-				delta := float32(currentTime-lastTime) / 1000000000.0
-				UpdateSystems(delta)
-			}
-		}()
-		// TODO: Sort out ECS threading.
-		log.Log("ECS online...")
-	}
+func initECS() {
+	go func() {
+		currentTime := time.Now().UnixNano()
+		for Running() {
+			lastTime := currentTime
+			currentTime = time.Now().UnixNano()
+			delta := float32(currentTime-lastTime) / 1000000000.0
+			UpdateSystems(delta)
+		}
+	}()
+	// TODO: Sort out ECS threading.
 }
 
 type ECSEntity uint32

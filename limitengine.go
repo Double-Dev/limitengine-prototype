@@ -94,6 +94,7 @@ func init() {
 	// TODO: Handle touch input callbacks.
 
 	running = true
+	initECS()
 	log.Log("Core online...")
 }
 

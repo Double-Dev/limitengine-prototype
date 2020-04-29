@@ -4,12 +4,10 @@ import (
 	"math/rand"
 
 	"github.com/double-dev/limitengine"
-	"github.com/double-dev/limitengine/ecs"
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gio"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/ui"
-	"github.com/double-dev/limitengine/utils"
 )
 
 func main() {
@@ -39,29 +37,29 @@ func main() {
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, 0.05)
 
 	camera := gfx.CreateCamera3D(0.001, 1000.0, 60.0)
-	ecs.NewEntity(
-		&utils.TransformComponent{
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, 1.0, -10.0),
 			Rotation: gmath.NewQuaternion(0.0, 0.0, 0.0, 1.0),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
-		&utils.MotionComponent{
+		&gmath.MotionComponent{
 			Velocity:        gmath.NewZeroVector3(),
 			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewIdentityQuaternion(),
 			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
-		&utils.MotionControlComponent{
+		&MotionControlComponent{
 			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis, &boost},
 			Speed: 600.0,
 		},
-		&utils.CameraComponent{
+		&gfx.CameraComponent{
 			Camera:      camera,
 			PosOffset:   gmath.NewVector3(0.0, 0.0, 15.0),
 			RotOffset:   gmath.NewIdentityQuaternion(),
 			ScaleOffset: gmath.NewVector3(1.0, 1.0, 1.0),
 		},
-		&utils.RenderComponent{
+		&gfx.RenderComponent{
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
@@ -72,19 +70,19 @@ func main() {
 
 	for i := 0; i < 2000; i++ {
 		// randAxis := gmath.NewVector3(rand.Float32()-0.5, rand.Float32()-0.5, rand.Float32()-0.5).Normalize()
-		ecs.NewEntity(
-			&utils.TransformComponent{
+		limitengine.NewEntity(
+			&gmath.TransformComponent{
 				Position: gmath.NewVector3(rand.Float32()*1000.0-500.0, rand.Float32()*1000.0-500.0, rand.Float32()*1000.0-750.0),
 				Rotation: gmath.NewQuaternion(rand.Float32()*gmath.Pi, rand.Float32(), rand.Float32(), rand.Float32()),
 				Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 			},
-			// &utils.MotionComponent{
+			// &gmath.MotionComponent{
 			// 	Velocity:        gmath.NewZeroVector3(),
 			// 	Acceleration:    gmath.NewZeroVector3(),
 			// 	AngVelocity:     gmath.NewIdentityQuaternion(),
 			// 	AngAcceleration: gmath.NewQuaternionV(rand.Float32(), randAxis),
 			// },
-			&utils.RenderComponent{
+			&gfx.RenderComponent{
 				Camera:   camera,
 				Shader:   shader,
 				Material: material,
@@ -94,12 +92,12 @@ func main() {
 		)
 	}
 
-	// ecs.AddSystem(utils.NewMotionControlSystem())
-	ecs.AddSystem(ecs.NewSystem(func(delta float32, entities []ecs.ECSEntity) {
+	// limitengine.AddSystem(utils.NewMotionControlSystem())
+	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
-			control := entity.GetComponent((*utils.MotionControlComponent)(nil)).(*utils.MotionControlComponent)
-			motion := entity.GetComponent((*utils.MotionComponent)(nil)).(*utils.MotionComponent)
-			transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
+			control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
+			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
+			transform := entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
 
 			direction := gmath.NewVector3(control.Axis[2].Amount(), control.Axis[0].Amount(), control.Axis[1].Amount())
 
@@ -118,10 +116,10 @@ func main() {
 
 			motion.Acceleration = transform.Rotation.RotateV(gmath.NewVector3(0.0, 0.0, speed))
 		}
-	}, (*utils.MotionControlComponent)(nil), (*utils.MotionComponent)(nil), (*utils.TransformComponent)(nil)))
-	ecs.AddSystem(utils.NewMotionSystem(0.95))
-	ecs.AddSystem(utils.NewCameraMotionSystem())
-	ecs.AddSystem(utils.NewRenderSystem())
+	}, (*MotionControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
+	limitengine.AddSystem(gmath.NewMotionSystem(0.95))
+	limitengine.AddSystem(gfx.NewCameraMotionSystem())
+	limitengine.AddSystem(gfx.NewRenderSystem())
 
 	limitengine.Launch()
 }
