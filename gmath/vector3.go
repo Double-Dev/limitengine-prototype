@@ -98,6 +98,34 @@ func (vector Vector3) Cross(other Vector3) Vector3 {
 	}
 }
 
+func (vector Vector3) IsGreater(other Vector3) bool {
+	if vector[0] <= other[0] || vector[1] <= other[1] || vector[2] <= other[2] {
+		return false
+	}
+	return true
+}
+
+func (vector Vector3) IsLess(other Vector3) bool {
+	if vector[0] >= other[0] || vector[1] >= other[1] || vector[2] >= other[2] {
+		return false
+	}
+	return true
+}
+
+func (vector Vector3) IsGreaterOrEqual(other Vector3) bool {
+	if vector[0] < other[0] || vector[1] < other[1] || vector[2] < other[2] {
+		return false
+	}
+	return true
+}
+
+func (vector Vector3) IsLessOrEqual(other Vector3) bool {
+	if vector[0] > other[0] || vector[1] > other[1] || vector[2] > other[2] {
+		return false
+	}
+	return true
+}
+
 func (vector Vector3) LenSq() float32 {
 	return vector[0]*vector[0] +
 		vector[1]*vector[1] +

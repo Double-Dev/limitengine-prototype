@@ -98,9 +98,32 @@ func (vector Vector4) Dot(other Vector4) float32 {
 		vector[3]*other[3]
 }
 
-func (vector Vector4) Cross(other Vector4) Vector4 {
-	// TODO: Implement cross product.
-	return Vector4{}
+func (vector Vector4) IsGreater(other Vector4) bool {
+	if vector[0] <= other[0] || vector[1] <= other[1] || vector[2] <= other[2] || vector[3] <= other[3] {
+		return false
+	}
+	return true
+}
+
+func (vector Vector4) IsLess(other Vector4) bool {
+	if vector[0] >= other[0] || vector[1] >= other[1] || vector[2] >= other[2] || vector[3] >= other[3] {
+		return false
+	}
+	return true
+}
+
+func (vector Vector4) IsGreaterOrEqual(other Vector4) bool {
+	if vector[0] < other[0] || vector[1] < other[1] || vector[2] < other[2] || vector[3] < other[3] {
+		return false
+	}
+	return true
+}
+
+func (vector Vector4) IsLessOrEqual(other Vector4) bool {
+	if vector[0] > other[0] || vector[1] > other[1] || vector[2] > other[2] || vector[3] > other[3] {
+		return false
+	}
+	return true
 }
 
 func (vector Vector4) LenSq() float32 {

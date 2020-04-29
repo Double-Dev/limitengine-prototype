@@ -72,3 +72,5 @@ func (system *ECSSystem) GetTargetComponents() []reflect.Type {
 func (system *ECSSystem) GetEntities() []ECSEntity {
 	return system.entities
 }
+
+func (system *ECSSystem) ShouldListenForAllComponents() bool { return false }

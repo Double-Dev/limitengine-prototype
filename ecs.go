@@ -35,6 +35,7 @@ type ECSListener interface {
 	OnRemoveEntity(entity ECSEntity)
 	GetTargetComponents() []reflect.Type
 	GetEntities() []ECSEntity
+	ShouldListenForAllComponents() bool
 }
 
 func NewEntity(components ...interface{}) ECSEntity {
@@ -61,10 +62,14 @@ func (entity ECSEntity) AddComponent(component interface{}) {
 	ecs[entity][componentType] = component
 	ecsMutex.Unlock()
 	for _, listener := range listeners {
-		for _, target := range listener.GetTargetComponents() {
-			if target == componentType {
-				listener.OnAddComponent(entity, component)
-				break
+		if listener.ShouldListenForAllComponents() {
+			listener.OnAddComponent(entity, component)
+		} else {
+			for _, target := range listener.GetTargetComponents() {
+				if target == componentType {
+					listener.OnAddComponent(entity, component)
+					break
+				}
 			}
 		}
 	}
@@ -77,10 +82,14 @@ func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool {
 		component := ecs[entity][componentType]
 		ecsMutex.RUnlock()
 		for _, listener := range listeners {
-			for _, target := range listener.GetTargetComponents() {
-				if target == componentType {
-					listener.OnRemoveComponent(entity, component)
-					break
+			if listener.ShouldListenForAllComponents() {
+				listener.OnAddComponent(entity, component)
+			} else {
+				for _, target := range listener.GetTargetComponents() {
+					if target == componentType {
+						listener.OnRemoveComponent(entity, component)
+						break
+					}
 				}
 			}
 		}

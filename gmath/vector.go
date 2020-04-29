@@ -119,9 +119,40 @@ func (vector Vector) Dot(other Vector) float32 {
 	return dot
 }
 
-// Cross TODO: implement cross product math
-func (vector Vector) Cross(other Vector) Vector {
-	return nil
+func (vector Vector) IsGreater(other Vector) bool {
+	for i := 0; i < MinI(len(vector), len(other)); i++ {
+		if vector[i] <= other[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (vector Vector) IsLess(other Vector) bool {
+	for i := 0; i < MinI(len(vector), len(other)); i++ {
+		if vector[i] >= other[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (vector Vector) IsGreaterOrEqual(other Vector) bool {
+	for i := 0; i < MinI(len(vector), len(other)); i++ {
+		if vector[i] < other[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (vector Vector) IsLessOrEqual(other Vector) bool {
+	for i := 0; i < MinI(len(vector), len(other)); i++ {
+		if vector[i] > other[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // LenSq returns a float32 result of this Vector's length squared.
