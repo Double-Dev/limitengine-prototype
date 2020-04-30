@@ -157,11 +157,7 @@ func (vector Vector) IsLessOrEqual(other Vector) bool {
 
 // LenSq returns a float32 result of this Vector's length squared.
 func (vector Vector) LenSq() float32 {
-	l := float32(0.0)
-	for i := 0; i < len(vector); i++ {
-		l += vector[i] * vector[i]
-	}
-	return l
+	return vector.Dot(vector)
 }
 
 // Len returns a float32 result of this Vector's length.

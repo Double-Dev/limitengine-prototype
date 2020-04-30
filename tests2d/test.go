@@ -5,6 +5,7 @@ import (
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gio"
 	"github.com/double-dev/limitengine/gmath"
+	"github.com/double-dev/limitengine/interaction"
 	"github.com/double-dev/limitengine/ui"
 )
 
@@ -53,15 +54,42 @@ func main() {
 	// Entities
 	limitengine.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.5),
+			Position: gmath.NewVector3(-0.5, 0.0, -0.5),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
 		&gmath.MotionComponent{
-			Velocity:        gmath.NewZeroVector3(),
+			Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
 			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
 			AngAcceleration: gmath.NewIdentityQuaternion(),
+		},
+		&interaction.ColliderComponent{
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Mesh:     &gfx.Mesh{},
+			Instance: gfx.NewInstance(),
+		},
+	)
+
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.5, 0.0, -0.5),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
+		},
+		&gmath.MotionComponent{
+			Velocity:        gmath.NewVector3(-0.1, 0.0, 0.0),
+			Acceleration:    gmath.NewZeroVector3(),
+			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
+			AngAcceleration: gmath.NewIdentityQuaternion(),
+		},
+		&interaction.ColliderComponent{
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,
@@ -73,8 +101,18 @@ func main() {
 	)
 
 	// Systems
+	interactionWorld := interaction.NewInteractionWorld()
+
 	limitengine.AddSystem(gfx.NewRenderSystem())
+	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
 	limitengine.AddSystem(NewPlatformControlSystem())
+	limitengine.AddECSListener(interactionWorld)
+
+	go func() {
+		for limitengine.Running() {
+			interactionWorld.ProcessInteractions(1.0)
+		}
+	}()
 
 	// Launch!
 	limitengine.Launch()

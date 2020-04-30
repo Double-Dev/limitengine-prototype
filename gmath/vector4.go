@@ -127,10 +127,7 @@ func (vector Vector4) IsLessOrEqual(other Vector4) bool {
 }
 
 func (vector Vector4) LenSq() float32 {
-	return vector[0]*vector[0] +
-		vector[1]*vector[1] +
-		vector[2]*vector[2] +
-		vector[3]*vector[3]
+	return vector.Dot(vector)
 }
 
 func (vector Vector4) Len() float32 {

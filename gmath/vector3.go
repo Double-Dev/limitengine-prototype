@@ -127,9 +127,7 @@ func (vector Vector3) IsLessOrEqual(other Vector3) bool {
 }
 
 func (vector Vector3) LenSq() float32 {
-	return vector[0]*vector[0] +
-		vector[1]*vector[1] +
-		vector[2]*vector[2]
+	return vector.Dot(vector)
 }
 
 func (vector Vector3) Len() float32 {
