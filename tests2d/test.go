@@ -101,7 +101,7 @@ func main() {
 	)
 
 	// Systems
-	interactionWorld := interaction.NewInteractionWorld()
+	interactionWorld := interaction.NewWorld()
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
 	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
