@@ -16,10 +16,12 @@ var (
 	log     = limitengine.NewLogger("gfx")
 	context framework.Context
 
+	// TargetFPS is the amount of frames gfx will attempt to output per second.
+	TargetFPS     = float32(100.0)
+	AdvanceFrames = 2
+
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
-
-	AdvanceFrames = 2
 
 	gfxMutex      = sync.RWMutex{}
 	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance{}
@@ -49,7 +51,7 @@ func init() {
 
 			currentTime := time.Now().UnixNano()
 			for limitengine.Running() {
-				if len(gfxPipeline) > 0 {
+				if len(gfxPipeline) > 0 && time.Now().UnixNano()-currentTime > int64((1.0/TargetFPS)*1000000000.0) {
 					lastTime := currentTime
 					currentTime = time.Now().UnixNano()
 					delta := float32(currentTime-lastTime) / 1000000000.0

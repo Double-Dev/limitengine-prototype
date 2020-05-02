@@ -7,6 +7,8 @@ import (
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/interaction"
 	"github.com/double-dev/limitengine/ui"
+
+	"github.com/pkg/profile"
 )
 
 type PlatformControlComponent struct {
@@ -29,6 +31,9 @@ func NewPlatformControlSystem() *limitengine.ECSSystem {
 }
 
 func main() {
+	// Profile
+	defer profile.Start().Stop()
+
 	// Assets
 	shader := gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
@@ -101,18 +106,18 @@ func main() {
 	)
 
 	// Systems
-	interactionWorld := interaction.NewWorld()
+	interactionWorld := interaction.NewWorld(20.0)
+
+	interaction := TestInteraction{
+		test: "Hello",
+	}
+
+	interactionWorld.AddInteraction(interaction)
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
 	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
 	limitengine.AddSystem(NewPlatformControlSystem())
 	limitengine.AddECSListener(interactionWorld)
-
-	go func() {
-		for limitengine.Running() {
-			interactionWorld.ProcessInteractions(1.0)
-		}
-	}()
 
 	// Launch!
 	limitengine.Launch()

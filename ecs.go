@@ -7,20 +7,27 @@ import (
 )
 
 var (
-	entityIndex = uint32(0)
-	ecs         = make(map[ECSEntity]map[reflect.Type]interface{})
-	ecsMutex    = sync.RWMutex{}
-	listeners   = []ECSListener{}
+	// TargetUpdatesPerSecond determine the amount of updates ECSSystems will attempt to perform per second.
+	TargetUpdatesPerSecond = float32(100.0)
+	entityIndex            = uint32(0)
+	ecs                    = make(map[ECSEntity]map[reflect.Type]interface{})
+	ecsMutex               = sync.RWMutex{}
+	listeners              = []ECSListener{}
 )
 
 func initECS() {
 	go func() {
 		currentTime := time.Now().UnixNano()
 		for Running() {
-			lastTime := currentTime
-			currentTime = time.Now().UnixNano()
-			delta := float32(currentTime-lastTime) / 1000000000.0
-			UpdateSystems(delta)
+			if time.Now().UnixNano()-currentTime > int64((1.0/TargetUpdatesPerSecond)*1000000000.0) {
+				lastTime := currentTime
+				currentTime = time.Now().UnixNano()
+				delta := float32(currentTime-lastTime) / 1000000000.0
+				UpdateSystems(delta)
+			} else {
+				time.Sleep(time.Millisecond * 10)
+			}
+
 		}
 	}()
 	// TODO: Sort out ECS threading.

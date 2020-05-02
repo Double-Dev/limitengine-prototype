@@ -11,6 +11,6 @@ texture0 tex;
 
 void frag() {
 	// lesl.outColor = texture(tex, lesl.textureCoord);
-	lesl.outColor = vec4(1.0, 1.0, 1.0, 1.0);
+	lesl.outColor = vec4(lesl.textureCoord.x, lesl.textureCoord.y, cos(lesl.textureCoord.x), 1.0);
 }
 #end
