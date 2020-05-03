@@ -1,6 +1,23 @@
 package limitengine
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
+
+var messageQueue []string
+
+func init() {
+	go func() {
+		if len(messageQueue) > 0 {
+			for _, message := range messageQueue {
+				fmt.Println(message)
+			}
+		} else {
+			time.Sleep(time.Millisecond * 100)
+		}
+	}()
+}
 
 // TODO: Add cross-platform support.
 type logger struct {
@@ -14,7 +31,7 @@ func NewLogger(pkg string) logger {
 }
 
 func (logger *logger) Log(msg interface{}) {
-	fmt.Println(logger.pkg+":", msg)
+	messageQueue = append(messageQueue, fmt.Sprintf(logger.pkg+":", msg))
 }
 
 func (logger *logger) ForceErr(msg interface{}) {

@@ -1,5 +1,5 @@
 package interaction
 
 type SpacialStructure interface {
-	Add()
+	Add(entity interactEntity)
 }

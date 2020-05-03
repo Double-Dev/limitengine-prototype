@@ -1,9 +1,13 @@
 package interaction
 
-import "reflect"
+import (
+	"reflect"
+
+	"github.com/double-dev/limitengine"
+)
 
 type Interaction interface {
-	Interact(delta float32, interactorComponents, interacteeComponents []reflect.Type)
+	Interact(delta float32, interactor, interactee limitengine.ECSEntity)
 	GetInteractorComponents() []reflect.Type
 	GetInteracteeComponents() []reflect.Type
 }

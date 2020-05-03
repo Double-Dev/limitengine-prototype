@@ -1,6 +1,8 @@
 package main
 
 import (
+	"reflect"
+
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gio"
@@ -105,6 +107,33 @@ func main() {
 		},
 	)
 
+	// Stress test...
+	for i := 0; i < 2000; i++ {
+		limitengine.NewEntity(
+			&gmath.TransformComponent{
+				Position: gmath.NewVector3(-0.5, -0.5, -0.5),
+				Rotation: gmath.NewIdentityQuaternion(),
+				Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
+			},
+			&gmath.MotionComponent{
+				Velocity:        gmath.NewVector3(0.1, 0.1, 0.0),
+				Acceleration:    gmath.NewZeroVector3(),
+				AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
+				AngAcceleration: gmath.NewIdentityQuaternion(),
+			},
+			&interaction.ColliderComponent{
+				AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+			},
+			&gfx.RenderComponent{
+				Camera:   camera,
+				Shader:   shader,
+				Material: material,
+				Mesh:     &gfx.Mesh{},
+				Instance: gfx.NewInstance(),
+			},
+		)
+	}
+
 	// Systems
 	interactionWorld := interaction.NewWorld(20.0)
 
@@ -121,4 +150,26 @@ func main() {
 
 	// Launch!
 	limitengine.Launch()
+}
+
+type TestInteraction struct {
+	test string
+}
+
+func (test TestInteraction) Interact(delta float32, interactor, interactee limitengine.ECSEntity) {
+	interactor.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent).Velocity.MulSc(-1.0)
+}
+
+func (test TestInteraction) GetInteractorComponents() []reflect.Type {
+	return []reflect.Type{
+		reflect.TypeOf((*gmath.TransformComponent)(nil)),
+		reflect.TypeOf((*interaction.ColliderComponent)(nil)),
+	}
+}
+
+func (test TestInteraction) GetInteracteeComponents() []reflect.Type {
+	return []reflect.Type{
+		reflect.TypeOf((*gmath.TransformComponent)(nil)),
+		reflect.TypeOf((*interaction.ColliderComponent)(nil)),
+	}
 }

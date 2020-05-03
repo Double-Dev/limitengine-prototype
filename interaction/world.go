@@ -1,7 +1,6 @@
 package interaction
 
 import (
-	"fmt"
 	"reflect"
 	"time"
 
@@ -91,7 +90,6 @@ func (world *World) updateInteraction(entity *interactEntity, interaction Intera
 			break
 		}
 	}
-	fmt.Println(isInteractor)
 	if isInteractor {
 		entity.interactors = append(entity.interactors, interaction)
 	}
@@ -103,7 +101,6 @@ func (world *World) updateInteraction(entity *interactEntity, interaction Intera
 		}
 	}
 	if isInteractee {
-		fmt.Println(interaction)
 		entity.interactees = append(entity.interactees, interaction)
 	}
 }
@@ -148,7 +145,7 @@ func (world *World) ProcessInteractions(delta float32) {
 	}
 	world.entitiesToRemove = nil
 
-	// TODO: Optimize collision loops.
+	// TODO: Optimize collision loops. (I know that this is an awful way to do it.)
 	for i := 0; i < len(world.entities); i++ {
 		aabbA := world.entities[i].entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent).AABB
 		transformA := world.entities[i].entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
@@ -161,19 +158,23 @@ func (world *World) ProcessInteractions(delta float32) {
 				colliderA.ContainsAABB2D(colliderB) ||
 				colliderB.ContainsAABB2D(colliderA) {
 
-				for _, interactEntity := range world.entities {
-					fmt.Println(len(interactEntity.interactees))
+				for _, interactor := range world.entities[i].interactors {
+					for _, interactee := range world.entities[j].interactees {
+						if interactor == interactee {
+							interactor.Interact(delta, world.entities[i].entity, world.entities[j].entity)
+							break
+						}
+					}
 				}
 
-				// TODO: Perform interactions
-				// world.entities[i]
-				// world.entities[j]
-
-				// world.entities[i].GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent).Velocity.Set(0.0, 0.0, 0.0)
-				// world.entities[j].GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent).Velocity.Set(0.0, 0.0, 0.0)
-
-				world.entities[i].entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent).Velocity.MulSc(-1.0)
-				world.entities[j].entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent).Velocity.MulSc(-1.0)
+				for _, interactor := range world.entities[j].interactors {
+					for _, interactee := range world.entities[i].interactees {
+						if interactor == interactee {
+							interactor.Interact(delta, world.entities[j].entity, world.entities[i].entity)
+							break
+						}
+					}
+				}
 			}
 		}
 	}
