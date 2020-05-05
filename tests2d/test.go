@@ -29,7 +29,7 @@ func NewPlatformControlSystem() *limitengine.ECSSystem {
 		// motion := entity.GetComponent((*utils.MotionComponent)(nil)).(*utils.MotionComponent)
 		// transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
 		// }
-	}, (*PlatformControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil))
+	}, (*PlatformControlComponent)(nil), (*interaction.PhysicsComponent)(nil), (*gmath.TransformComponent)(nil))
 }
 
 func main() {
@@ -65,7 +65,7 @@ func main() {
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
-		&gmath.MotionComponent{
+		&interaction.PhysicsComponent{
 			Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
 			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
@@ -89,7 +89,7 @@ func main() {
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
-		&gmath.MotionComponent{
+		&interaction.PhysicsComponent{
 			Velocity:        gmath.NewVector3(-0.1, 0.0, 0.0),
 			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
@@ -107,44 +107,17 @@ func main() {
 		},
 	)
 
-	// Stress test...
-	for i := 0; i < 2000; i++ {
-		limitengine.NewEntity(
-			&gmath.TransformComponent{
-				Position: gmath.NewVector3(-0.5, -0.5, -0.5),
-				Rotation: gmath.NewIdentityQuaternion(),
-				Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
-			},
-			&gmath.MotionComponent{
-				Velocity:        gmath.NewVector3(0.1, 0.1, 0.0),
-				Acceleration:    gmath.NewZeroVector3(),
-				AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
-				AngAcceleration: gmath.NewIdentityQuaternion(),
-			},
-			&interaction.ColliderComponent{
-				AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
-			},
-			&gfx.RenderComponent{
-				Camera:   camera,
-				Shader:   shader,
-				Material: material,
-				Mesh:     &gfx.Mesh{},
-				Instance: gfx.NewInstance(),
-			},
-		)
-	}
-
 	// Systems
-	interactionWorld := interaction.NewWorld(20.0)
+	interactionWorld := interaction.NewWorld(interaction.NewGrid2D(0.5), 20.0)
 
-	interaction := TestInteraction{
+	myInteraction := TestInteraction{
 		test: "Hello",
 	}
 
-	interactionWorld.AddInteraction(interaction)
+	interactionWorld.AddInteraction(myInteraction)
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
-	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
+	limitengine.AddSystem(interaction.NewPhysicsSystem(1.0))
 	limitengine.AddSystem(NewPlatformControlSystem())
 	limitengine.AddECSListener(interactionWorld)
 
@@ -157,7 +130,7 @@ type TestInteraction struct {
 }
 
 func (test TestInteraction) Interact(delta float32, interactor, interactee limitengine.ECSEntity) {
-	interactor.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent).Velocity.MulSc(-1.0)
+	interactor.GetComponent((*interaction.PhysicsComponent)(nil)).(*interaction.PhysicsComponent).Velocity.MulSc(-1.0)
 }
 
 func (test TestInteraction) GetInteractorComponents() []reflect.Type {

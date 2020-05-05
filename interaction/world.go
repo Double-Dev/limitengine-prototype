@@ -8,16 +8,6 @@ import (
 	"github.com/double-dev/limitengine/gmath"
 )
 
-type ColliderComponent struct {
-	AABB gmath.AABB
-}
-
-type interactEntity struct {
-	entity      limitengine.ECSEntity
-	interactors []Interaction
-	interactees []Interaction
-}
-
 var (
 	targets = []reflect.Type{
 		reflect.TypeOf((*ColliderComponent)(nil)),
@@ -26,13 +16,17 @@ var (
 )
 
 type World struct {
-	entities         []*interactEntity
+	spacialStructure SpacialStructure
+	entities         map[limitengine.ECSEntity]*InteractEntity
 	entitiesToRemove []limitengine.ECSEntity
 	interactions     []Interaction
 }
 
-func NewWorld(targetUpdatesPerSecond float32) *World {
-	world := World{}
+func NewWorld(spacialStructure SpacialStructure, targetUpdatesPerSecond float32) *World {
+	world := World{
+		spacialStructure: spacialStructure,
+		entities:         make(map[limitengine.ECSEntity]*InteractEntity),
+	}
 	go func() {
 		currentTime := time.Now().UnixNano()
 		for limitengine.Running() {
@@ -51,13 +45,17 @@ func NewWorld(targetUpdatesPerSecond float32) *World {
 }
 
 func (world *World) OnAddEntity(entity limitengine.ECSEntity) {
-	world.entities = append(world.entities, world.createInteractEntity(entity))
+	interactEntity := world.createInteractEntity(entity)
+	world.entities[entity] = interactEntity
+	world.spacialStructure.Add(interactEntity)
 }
 
 func (world *World) OnAddComponent(entity limitengine.ECSEntity, component interface{}) {
 	if (reflect.TypeOf(component) == targets[0] && entity.HasComponent(targets[1])) ||
 		(reflect.TypeOf(component) == targets[1] && entity.HasComponent(targets[0])) {
-		world.entities = append(world.entities, world.createInteractEntity(entity))
+		interactEntity := world.createInteractEntity(entity)
+		world.entities[entity] = interactEntity
+		world.spacialStructure.Add(interactEntity)
 	} else if entity.HasComponent(targets[0]) && entity.HasComponent(targets[1]) {
 		for _, interactEntity := range world.entities {
 			if interactEntity.entity == entity {
@@ -72,9 +70,12 @@ func (world *World) OnAddComponent(entity limitengine.ECSEntity, component inter
 	}
 }
 
-func (world *World) createInteractEntity(entity limitengine.ECSEntity) *interactEntity {
-	interactEntity := &interactEntity{
-		entity: entity,
+func (world *World) createInteractEntity(entity limitengine.ECSEntity) *InteractEntity {
+	interactEntity := &InteractEntity{
+		entity:    entity,
+		transform: entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent),
+		collider:  entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent),
+		physics:   entity.GetComponent((*PhysicsComponent)(nil)).(*PhysicsComponent),
 	}
 	for _, interaction := range world.interactions {
 		world.updateInteraction(interactEntity, interaction)
@@ -82,7 +83,7 @@ func (world *World) createInteractEntity(entity limitengine.ECSEntity) *interact
 	return interactEntity
 }
 
-func (world *World) updateInteraction(entity *interactEntity, interaction Interaction) {
+func (world *World) updateInteraction(entity *InteractEntity, interaction Interaction) {
 	isInteractor := true
 	for _, target := range interaction.GetInteractorComponents() {
 		if !entity.entity.HasComponent(target) {
@@ -135,42 +136,35 @@ func (world *World) OnRemoveEntity(entity limitengine.ECSEntity) {
 
 func (world *World) ProcessInteractions(delta float32) {
 	for _, removeEntity := range world.entitiesToRemove {
-		for i, interactEntity := range world.entities {
-			if interactEntity.entity == removeEntity {
-				world.entities[i] = world.entities[len(world.entities)-1]
-				world.entities = world.entities[:len(world.entities)-1]
-				break
-			}
-		}
+		world.spacialStructure.Remove(world.entities[removeEntity])
+		delete(world.entities, removeEntity)
 	}
 	world.entitiesToRemove = nil
 
-	// TODO: Optimize collision loops. (I know that this is an awful way to do it.)
-	for i := 0; i < len(world.entities); i++ {
-		aabbA := world.entities[i].entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent).AABB
-		transformA := world.entities[i].entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
-		colliderA := gmath.NewAABB(aabbA.Min.Clone().AddV(transformA.Position), aabbA.Max.Clone().AddV(transformA.Position))
-		for j := i + 1; j < len(world.entities); j++ {
-			aabbB := world.entities[j].entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent).AABB
-			transformB := world.entities[j].entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
-			colliderB := gmath.NewAABB(aabbB.Min.Clone().AddV(transformB.Position), aabbB.Max.Clone().AddV(transformB.Position))
-			if colliderA.IntersectsAABB2D(colliderB) ||
-				colliderA.ContainsAABB2D(colliderB) ||
-				colliderB.ContainsAABB2D(colliderA) {
+	for _, interactEntity := range world.entities {
+		if interactEntity.physics.awake {
+			world.spacialStructure.Update(interactEntity)
+		}
+	}
 
-				for _, interactor := range world.entities[i].interactors {
-					for _, interactee := range world.entities[j].interactees {
-						if interactor == interactee {
-							interactor.Interact(delta, world.entities[i].entity, world.entities[j].entity)
-							break
-						}
-					}
+	for _, interactEntityA := range world.entities {
+		if interactEntityA.physics != nil && interactEntityA.physics.awake {
+			potentialCollisions := world.spacialStructure.Query(gmath.NewAABB(
+				interactEntityA.collider.AABB.Min.Clone().AddV(interactEntityA.transform.Position),
+				interactEntityA.collider.AABB.Max.Clone().AddV(interactEntityA.transform.Position),
+			))
+			for _, interactEntityB := range potentialCollisions {
+				if interactEntityA == interactEntityB {
+					continue
 				}
+				// TODO: For other shapes, additional collision checks would be made here.
+				// Additionally, the collision normal and penetration should be calculated
+				// here for every collision and passed to the interactions.
 
-				for _, interactor := range world.entities[j].interactors {
-					for _, interactee := range world.entities[i].interactees {
+				for _, interactor := range interactEntityA.interactors {
+					for _, interactee := range interactEntityB.interactees {
 						if interactor == interactee {
-							interactor.Interact(delta, world.entities[j].entity, world.entities[i].entity)
+							interactor.Interact(delta, interactEntityA.entity, interactEntityB.entity)
 							break
 						}
 					}
