@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"reflect"
 
 	"github.com/double-dev/limitengine"
@@ -35,6 +36,13 @@ func NewPlatformControlSystem() *limitengine.ECSSystem {
 func main() {
 	// Profile
 	defer profile.Start().Stop()
+
+	// Setup Window
+	limitengine.AppView().SetTitle("2D Tests!")
+	limitengine.AppView().SetPosition(0, 50)
+	limitengine.AppView().SetAspectRatio(12, 8)
+	// TODO: Fix setting icons.
+	limitengine.AppView().SetIcons([]image.Image{gio.LoadIcon("Test.png")})
 
 	// Assets
 	shader := gfx.CreateShader(gio.LoadAsString("testshader.lesl"))

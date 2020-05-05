@@ -1,6 +1,7 @@
 package limitengine
 
 import (
+	"image"
 	"runtime"
 
 	"github.com/vulkan-go/glfw/v3.3/glfw"
@@ -58,6 +59,26 @@ func (*glfwView) pollEvents() {
 
 func (glfwView *glfwView) SwapBuffers() {
 	glfwView.window.SwapBuffers()
+}
+
+func (glfwView *glfwView) SetPosition(x, y int) {
+	glfwView.window.SetPos(x, y)
+}
+
+func (glfwView *glfwView) SetSize(width, height int) {
+	glfwView.window.SetSize(width, height)
+}
+
+func (glfwView *glfwView) SetAspectRatio(numer, denom int) {
+	glfwView.window.SetAspectRatio(numer, denom)
+}
+
+func (glfwView *glfwView) SetTitle(title string) {
+	glfwView.window.SetTitle(title)
+}
+
+func (glfwView *glfwView) SetIcons(icons []image.Image) {
+	glfwView.window.SetIcon(icons)
 }
 
 func (glfwView *glfwView) setCloseCallback(callback func()) {

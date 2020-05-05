@@ -5,16 +5,17 @@ import (
 	"time"
 )
 
-var messageQueue []string
+var messageQueue = []string{}
 
 func init() {
 	go func() {
-		if len(messageQueue) > 0 {
-			for _, message := range messageQueue {
-				fmt.Println(message)
+		for Running() {
+			if len(messageQueue) > 0 {
+				fmt.Println(messageQueue[0])
+				messageQueue = messageQueue[1:]
+			} else {
+				time.Sleep(time.Millisecond * 100)
 			}
-		} else {
-			time.Sleep(time.Millisecond * 100)
 		}
 	}()
 }
@@ -31,7 +32,7 @@ func NewLogger(pkg string) logger {
 }
 
 func (logger *logger) Log(msg interface{}) {
-	messageQueue = append(messageQueue, fmt.Sprintf(logger.pkg+":", msg))
+	messageQueue = append(messageQueue, fmt.Sprint(logger.pkg+":", msg))
 }
 
 func (logger *logger) ForceErr(msg interface{}) {
