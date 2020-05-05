@@ -40,7 +40,7 @@ func main() {
 	// Setup Window
 	limitengine.AppView().SetTitle("2D Tests!")
 	limitengine.AppView().SetPosition(0, 50)
-	limitengine.AppView().SetAspectRatio(12, 8)
+	limitengine.AppView().SetAspectRatio(3, 2)
 	// TODO: Fix setting icons.
 	limitengine.AppView().SetIcons([]image.Image{gio.LoadIcon("Test.png")})
 
@@ -115,15 +115,15 @@ func main() {
 		},
 	)
 
-	// Walls
+	// Left Wall
 	limitengine.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(-1.0, 0.0, -0.4),
+			Position: gmath.NewVector3(-1.5, 0.0, -0.4),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 1.0, 1.0),
 		},
 		&interaction.ColliderComponent{
-			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -1.0, 0.0), gmath.NewVector3(0.1, 1.0, 0.0)),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,
@@ -133,14 +133,51 @@ func main() {
 			Instance: gfx.NewInstance(),
 		},
 	)
+	// Right Wall
 	limitengine.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(1.0, 0.0, -0.4),
+			Position: gmath.NewVector3(1.5, 0.0, -0.4),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 1.0, 1.0),
 		},
 		&interaction.ColliderComponent{
-			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -1.0, 0.0), gmath.NewVector3(0.1, 1.0, 0.0)),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Mesh:     &gfx.Mesh{},
+			Instance: gfx.NewInstance(),
+		},
+	)
+	// Top Wall
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.0, 1.0, -0.4),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(1.5, 0.1, 1.0),
+		},
+		&interaction.ColliderComponent{
+			AABB: gmath.NewAABB(gmath.NewVector3(-1.5, -0.1, 0.0), gmath.NewVector3(1.5, 0.1, 0.0)),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Mesh:     &gfx.Mesh{},
+			Instance: gfx.NewInstance(),
+		},
+	)
+	// Bottom Wall
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.0, -1.0, -0.4),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(1.5, 0.1, 1.0),
+		},
+		&interaction.ColliderComponent{
+			AABB: gmath.NewAABB(gmath.NewVector3(-1.5, -0.1, 0.0), gmath.NewVector3(1.5, 0.1, 0.0)),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,
@@ -173,8 +210,8 @@ type TestInteraction struct {
 	test string
 }
 
-func (test TestInteraction) Interact(delta float32, interactor, interactee limitengine.ECSEntity) {
-	interactor.GetComponent((*interaction.PhysicsComponent)(nil)).(*interaction.PhysicsComponent).Velocity.MulSc(-1.0)
+func (test TestInteraction) Interact(delta float32, interactor, interactee interaction.InteractEntity) {
+	interactor.Physics.Velocity.MulSc(-1.0)
 }
 
 func (test TestInteraction) GetInteractorComponents() []reflect.Type {

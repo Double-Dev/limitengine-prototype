@@ -6,10 +6,10 @@ import (
 )
 
 type InteractEntity struct {
-	entity      limitengine.ECSEntity
-	transform   *gmath.TransformComponent
-	collider    *ColliderComponent
-	physics     *PhysicsComponent
+	Entity      limitengine.ECSEntity
+	Transform   *gmath.TransformComponent
+	Collider    *ColliderComponent
+	Physics     *PhysicsComponent
 	interactors []Interaction
 	interactees []Interaction
 }

@@ -19,8 +19,8 @@ func NewGrid2D(size float32) *Grid2D {
 }
 
 func (grid *Grid2D) Add(entity *InteractEntity) {
-	min := entity.collider.AABB.Min.Clone().AddV(entity.transform.Position).DivSc(grid.size)
-	max := entity.collider.AABB.Max.Clone().AddV(entity.transform.Position).DivSc(grid.size)
+	min := entity.Collider.AABB.Min.Clone().AddV(entity.Transform.Position).DivSc(grid.size)
+	max := entity.Collider.AABB.Max.Clone().AddV(entity.Transform.Position).DivSc(grid.size)
 	for i := int32(min[0]); i <= int32(max[0]); i++ {
 		if _, ok := grid.grid[i]; !ok {
 			grid.grid[i] = make(map[int32][]*InteractEntity)
@@ -69,8 +69,8 @@ func (grid *Grid2D) Query(aabb gmath.AABB) []*InteractEntity {
 	var entities []*InteractEntity
 	for entity := range entityMap {
 		checkAABB := gmath.NewAABB(
-			entity.collider.AABB.Min.Clone().AddV(entity.transform.Position),
-			entity.collider.AABB.Max.Clone().AddV(entity.transform.Position),
+			entity.Collider.AABB.Min.Clone().AddV(entity.Transform.Position),
+			entity.Collider.AABB.Max.Clone().AddV(entity.Transform.Position),
 		)
 		if aabb.IntersectsAABB2D(checkAABB) || aabb.ContainsAABB2D(checkAABB) || checkAABB.ContainsAABB2D(aabb) {
 			entities = append(entities, entity)

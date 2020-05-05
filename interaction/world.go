@@ -58,7 +58,7 @@ func (world *World) OnAddComponent(entity limitengine.ECSEntity, component inter
 		world.spacialStructure.Add(interactEntity)
 	} else if entity.HasComponent(targets[0]) && entity.HasComponent(targets[1]) {
 		for _, interactEntity := range world.entities {
-			if interactEntity.entity == entity {
+			if interactEntity.Entity == entity {
 				for _, interaction := range world.interactions {
 					if interactionHasComponent(interaction, reflect.TypeOf(component)) {
 						world.updateInteraction(interactEntity, interaction)
@@ -76,10 +76,10 @@ func (world *World) createInteractEntity(entity limitengine.ECSEntity) *Interact
 		physics = entity.GetComponent((*PhysicsComponent)(nil)).(*PhysicsComponent)
 	}
 	interactEntity := &InteractEntity{
-		entity:    entity,
-		transform: entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent),
-		collider:  entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent),
-		physics:   physics,
+		Entity:    entity,
+		Transform: entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent),
+		Collider:  entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent),
+		Physics:   physics,
 	}
 	for _, interaction := range world.interactions {
 		world.updateInteraction(interactEntity, interaction)
@@ -90,7 +90,7 @@ func (world *World) createInteractEntity(entity limitengine.ECSEntity) *Interact
 func (world *World) updateInteraction(entity *InteractEntity, interaction Interaction) {
 	isInteractor := true
 	for _, target := range interaction.GetInteractorComponents() {
-		if !entity.entity.HasComponent(target) {
+		if !entity.Entity.HasComponent(target) {
 			isInteractor = false
 			break
 		}
@@ -100,7 +100,7 @@ func (world *World) updateInteraction(entity *InteractEntity, interaction Intera
 	}
 	isInteractee := true
 	for _, target := range interaction.GetInteracteeComponents() {
-		if !entity.entity.HasComponent(target) {
+		if !entity.Entity.HasComponent(target) {
 			isInteractee = false
 			break
 		}
@@ -115,7 +115,7 @@ func (world *World) OnRemoveComponent(entity limitengine.ECSEntity, component in
 		world.entitiesToRemove = append(world.entitiesToRemove, entity)
 	} else if entity.HasComponent(targets[0]) && entity.HasComponent(targets[1]) {
 		for _, interactEntity := range world.entities {
-			if interactEntity.entity == entity {
+			if interactEntity.Entity == entity {
 				for i, interaction := range interactEntity.interactors {
 					if interactionHasComponent(interaction, reflect.TypeOf(component)) {
 						interactEntity.interactors[i] = interactEntity.interactors[len(interactEntity.interactors)-1]
@@ -146,16 +146,16 @@ func (world *World) ProcessInteractions(delta float32) {
 	world.entitiesToRemove = nil
 
 	for _, interactEntity := range world.entities {
-		if interactEntity.physics != nil && interactEntity.physics.awake {
+		if interactEntity.Physics != nil && interactEntity.Physics.awake {
 			world.spacialStructure.Update(interactEntity)
 		}
 	}
 
 	for _, interactEntityA := range world.entities {
-		if interactEntityA.physics != nil && interactEntityA.physics.awake {
+		if interactEntityA.Physics != nil && interactEntityA.Physics.awake {
 			potentialCollisions := world.spacialStructure.Query(gmath.NewAABB(
-				interactEntityA.collider.AABB.Min.Clone().AddV(interactEntityA.transform.Position),
-				interactEntityA.collider.AABB.Max.Clone().AddV(interactEntityA.transform.Position),
+				interactEntityA.Collider.AABB.Min.Clone().AddV(interactEntityA.Transform.Position),
+				interactEntityA.Collider.AABB.Max.Clone().AddV(interactEntityA.Transform.Position),
 			))
 			for _, interactEntityB := range potentialCollisions {
 				if interactEntityA == interactEntityB {
@@ -168,7 +168,7 @@ func (world *World) ProcessInteractions(delta float32) {
 				for _, interactor := range interactEntityA.interactors {
 					for _, interactee := range interactEntityB.interactees {
 						if interactor == interactee {
-							interactor.Interact(delta, interactEntityA.entity, interactEntityB.entity)
+							interactor.Interact(delta, *interactEntityA, *interactEntityB)
 							break
 						}
 					}
@@ -215,7 +215,7 @@ func (world *World) GetTargetComponents() []reflect.Type { return targets }
 func (world *World) GetEntities() []limitengine.ECSEntity {
 	entities := []limitengine.ECSEntity{}
 	for _, interactEntity := range world.entities {
-		entities = append(entities, interactEntity.entity)
+		entities = append(entities, interactEntity.Entity)
 	}
 	return entities
 }
