@@ -107,6 +107,42 @@ func main() {
 		},
 	)
 
+	// Walls
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(-1.0, 0.0, -0.4),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.1, 1.0, 1.0),
+		},
+		&interaction.ColliderComponent{
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Mesh:     &gfx.Mesh{},
+			Instance: gfx.NewInstance(),
+		},
+	)
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(1.0, 0.0, -0.4),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.1, 1.0, 1.0),
+		},
+		&interaction.ColliderComponent{
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Mesh:     &gfx.Mesh{},
+			Instance: gfx.NewInstance(),
+		},
+	)
+
 	// Systems
 	interactionWorld := interaction.NewWorld(interaction.NewGrid2D(0.5), 20.0)
 

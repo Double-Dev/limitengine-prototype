@@ -52,15 +52,15 @@ func (grid *Grid2D) Update(entity *InteractEntity) {
 }
 
 func (grid *Grid2D) Query(aabb gmath.AABB) []*InteractEntity {
-	entityMap := make(map[*InteractEntity]int8)
+	entityMap := make(map[*InteractEntity]bool)
 
-	min := aabb.Min.DivSc(grid.size)
-	max := aabb.Max.DivSc(grid.size)
+	min := aabb.Min.Clone().DivSc(grid.size)
+	max := aabb.Max.Clone().DivSc(grid.size)
 	for i := int32(min[0]); i <= int32(max[0]); i++ {
 		if _, ok := grid.grid[i]; ok {
 			for j := int32(min[1]); j <= int32(max[1]); j++ {
 				for _, entity := range grid.grid[i][j] {
-					entityMap[entity] = 0
+					entityMap[entity] = false
 				}
 			}
 		}

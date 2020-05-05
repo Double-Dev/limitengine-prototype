@@ -71,11 +71,15 @@ func (world *World) OnAddComponent(entity limitengine.ECSEntity, component inter
 }
 
 func (world *World) createInteractEntity(entity limitengine.ECSEntity) *InteractEntity {
+	var physics *PhysicsComponent
+	if entity.GetComponent((*PhysicsComponent)(nil)) != nil {
+		physics = entity.GetComponent((*PhysicsComponent)(nil)).(*PhysicsComponent)
+	}
 	interactEntity := &InteractEntity{
 		entity:    entity,
 		transform: entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent),
 		collider:  entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent),
-		physics:   entity.GetComponent((*PhysicsComponent)(nil)).(*PhysicsComponent),
+		physics:   physics,
 	}
 	for _, interaction := range world.interactions {
 		world.updateInteraction(interactEntity, interaction)
@@ -142,7 +146,7 @@ func (world *World) ProcessInteractions(delta float32) {
 	world.entitiesToRemove = nil
 
 	for _, interactEntity := range world.entities {
-		if interactEntity.physics.awake {
+		if interactEntity.physics != nil && interactEntity.physics.awake {
 			world.spacialStructure.Update(interactEntity)
 		}
 	}
