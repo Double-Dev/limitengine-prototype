@@ -120,7 +120,7 @@ func main() {
 	// Left Wall
 	limitengine.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(-1.5, 0.0, -0.4),
+			Position: gmath.NewVector3(-1.5, 0.0, -0.45),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 1.0, 1.0),
 		},
@@ -138,7 +138,7 @@ func main() {
 	// Right Wall
 	limitengine.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(1.5, 0.0, -0.4),
+			Position: gmath.NewVector3(1.5, 0.0, -0.45),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 1.0, 1.0),
 		},
@@ -200,7 +200,7 @@ func main() {
 	interactionWorld.AddInteraction(myInteraction)
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
-	limitengine.AddSystem(interaction.NewPhysicsSystem(1.0))
+	limitengine.AddSystem(interaction.NewPhysicsSystem(0.99))
 	limitengine.AddSystem(NewPlatformControlSystem())
 	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
@@ -215,11 +215,9 @@ func main() {
 				motion.Acceleration[0] = 0.0
 			}
 			if yAxis.Amount() > 0.01 {
-				motion.Acceleration[1] = speed
-			} else if yAxis.Amount() < -0.01 {
-				motion.Acceleration[1] = -speed
+				motion.Acceleration[1] = speed * 30.0
 			} else {
-				motion.Acceleration[1] = 0.0
+				motion.Acceleration[1] = -2.45
 			}
 		}
 	}, (*ControlComponent)(nil), (*interaction.PhysicsComponent)(nil), (*gmath.TransformComponent)(nil)))
@@ -241,6 +239,7 @@ func (test TestInteraction) Interact(delta float32, interactor, interactee inter
 	interactor.Transform.Position.SubV(normal.Clone().MulSc(penetration))
 	// Basic vector reflection of velocity over normal.
 	newVelocity := interactor.Physics.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactor.Physics.Velocity)))
+	// newVelocity := gmath.NewZeroVector3()
 	interactor.Physics.Velocity.SetV(newVelocity)
 }
 

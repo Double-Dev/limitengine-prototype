@@ -206,14 +206,14 @@ func (world *World) ProcessInteractions(delta float32) {
 				// TODO: Implement this so that B's interactions won't be performed twice.
 				// This code makes B's interactions much more consistent when position corrections
 				// are applied.
-				// for _, interactor := range interactEntityB.interactors {
-				// 	for _, interactee := range interactEntityA.interactees {
-				// 		if interactor == interactee {
-				// 			interactor.Interact(delta, *interactEntityB, *interactEntityA, normal.Clone().MulSc(-1.0), penetration)
-				// 			break
-				// 		}
-				// 	}
-				// }
+				for _, interactor := range interactEntityB.interactors {
+					for _, interactee := range interactEntityA.interactees {
+						if interactor == interactee {
+							interactor.Interact(delta, *interactEntityB, *interactEntityA, normal.Clone().MulSc(-1.0), penetration)
+							break
+						}
+					}
+				}
 			}
 		}
 	}
