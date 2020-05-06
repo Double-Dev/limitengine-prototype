@@ -1,34 +1,34 @@
 package limitengine
 
 import (
+	"go/build"
 	"image"
 	"image/png"
 	"os"
 )
 
 // Variables used for default initialization.
-var (
+const (
 	InitWidth       = 600
 	InitHeight      = 600
-	WindowTitle     = "Hello World!"
-	WindowIcons     []image.Image
+	WindowTitle     = "Hello Limitengine!"
 	WindowResizable = true
 	BufferSamples   = 8
 )
 
-// // Variables used to change operating parameters.
-// var (
-// 	TargetFPS = 60
-// )
+// Variables used for default initialization.
+var (
+	WindowIcons []image.Image
+)
 
 func init() {
-	reader, err := os.Open("../DefaultIcon.png")
+	reader, err := os.Open(build.Default.GOPATH + "/src/github.com/double-dev/limitengine/limitengine.png")
 	if err != nil {
-		log.Err("Error loading default icon.", err)
+		log.Log("Could not load limitengine icon: " + err.Error())
 	}
 	icon, err := png.Decode(reader)
 	if err != nil {
-		log.Err("Error decoding default icon.", err)
+		log.Log("Could not decode limitengine icon: " + err.Error())
 	}
 	WindowIcons = []image.Image{icon}
 }

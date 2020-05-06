@@ -32,9 +32,13 @@ func newGLFWView() *glfwView {
 	if err != nil {
 		log.Err("Error creating window.", err)
 	}
-	return &glfwView{
+	glfwView := &glfwView{
 		window: window,
 	}
+	if WindowIcons != nil {
+		glfwView.SetIcons(WindowIcons)
+	}
+	return glfwView
 }
 
 func (glfwView *glfwView) SetContext() {
@@ -48,9 +52,6 @@ func (glfwView *glfwView) ReleaseContext() {
 
 func (glfwView *glfwView) show() {
 	glfwView.window.Show()
-	if WindowIcons != nil {
-		glfwView.window.SetIcon(WindowIcons)
-	}
 }
 
 func (*glfwView) pollEvents() {

@@ -41,7 +41,6 @@ func main() {
 	limitengine.AppView().SetTitle("2D Tests!")
 	limitengine.AppView().SetPosition(0, 50)
 	limitengine.AppView().SetAspectRatio(3, 2)
-	// TODO: Fix setting icons.
 	limitengine.AppView().SetIcons([]image.Image{gio.LoadIcon("Test.png")})
 
 	// Assets
