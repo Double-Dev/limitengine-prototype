@@ -89,6 +89,9 @@ func main() {
 			Mesh:     &gfx.Mesh{},
 			Instance: gfx.NewInstance(),
 		},
+		&ControlComponent{
+			randomTestVar: "kasdfkjsdahflksahndnhslk",
+		},
 	)
 
 	limitengine.NewEntity(
@@ -189,7 +192,7 @@ func main() {
 	)
 
 	// Systems
-	interactionWorld := interaction.NewWorld(interaction.NewGrid2D(0.5), 20.0)
+	interactionWorld := interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
 
 	myInteraction := TestInteraction{
 		test: "Hello",
@@ -200,30 +203,54 @@ func main() {
 	limitengine.AddSystem(gfx.NewRenderSystem())
 	limitengine.AddSystem(interaction.NewPhysicsSystem(1.0))
 	limitengine.AddSystem(NewPlatformControlSystem())
+	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
+		for _, entity := range entities {
+			motion := entity.GetComponent((*interaction.PhysicsComponent)(nil)).(*interaction.PhysicsComponent)
+
+			speed := float32(0.5)
+			if xAxis.Amount() > 0.01 {
+				motion.Acceleration[0] = speed
+			} else if xAxis.Amount() < -0.01 {
+				motion.Acceleration[0] = -speed
+			} else {
+				motion.Acceleration[0] = 0.0
+			}
+			if yAxis.Amount() > 0.01 {
+				motion.Acceleration[1] = speed
+			} else if yAxis.Amount() < -0.01 {
+				motion.Acceleration[1] = -speed
+			} else {
+				motion.Acceleration[1] = 0.0
+			}
+		}
+	}, (*ControlComponent)(nil), (*interaction.PhysicsComponent)(nil), (*gmath.TransformComponent)(nil)))
 	limitengine.AddECSListener(interactionWorld)
 
 	// Launch!
 	limitengine.Launch()
 }
 
+type ControlComponent struct {
+	randomTestVar string
+}
+
 type TestInteraction struct {
 	test string
 }
 
-func (test TestInteraction) Interact(delta float32, interactor, interactee interaction.InteractEntity) {
-	interactor.Physics.Velocity.MulSc(-1.0)
+func (test TestInteraction) Interact(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
+	interactor.Transform.Position.SubV(normal.Clone().MulSc(penetration))
+	// Basic vector reflection of velocity over normal.
+	newVelocity := interactor.Physics.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactor.Physics.Velocity)))
+	interactor.Physics.Velocity.SetV(newVelocity)
 }
 
 func (test TestInteraction) GetInteractorComponents() []reflect.Type {
 	return []reflect.Type{
-		reflect.TypeOf((*gmath.TransformComponent)(nil)),
-		reflect.TypeOf((*interaction.ColliderComponent)(nil)),
+		reflect.TypeOf((*interaction.PhysicsComponent)(nil)),
 	}
 }
 
 func (test TestInteraction) GetInteracteeComponents() []reflect.Type {
-	return []reflect.Type{
-		reflect.TypeOf((*gmath.TransformComponent)(nil)),
-		reflect.TypeOf((*interaction.ColliderComponent)(nil)),
-	}
+	return []reflect.Type{}
 }

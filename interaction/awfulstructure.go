@@ -40,9 +40,7 @@ func (awfulStructure *AwfulStructure) Query(aabb gmath.AABB) []*InteractEntity {
 			entity.Collider.AABB.Min.Clone().AddV(entity.Transform.Position),
 			entity.Collider.AABB.Max.Clone().AddV(entity.Transform.Position),
 		)
-		if aabb.IntersectsAABB2D(checkAABB) ||
-			aabb.ContainsAABB2D(checkAABB) ||
-			checkAABB.ContainsAABB2D(aabb) {
+		if aabb.IntersectsAABB2D(checkAABB) || aabb.ContainsAABB2D(checkAABB) || checkAABB.ContainsAABB2D(aabb) {
 			query = append(query, entity)
 		}
 	}

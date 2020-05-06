@@ -164,11 +164,40 @@ func (world *World) ProcessInteractions(delta float32) {
 				// TODO: For other shapes, additional collision checks would be made here.
 				// Additionally, the collision normal and penetration should be calculated
 				// here for every collision and passed to the interactions.
+				// TEMPORARY CODE TO ALLOW FOR BETTER COLLISIONS IN THE DEMOS
+				normal := gmath.NewZeroVector3()
+				penetration := float32(0.0)
+				AABB1 := gmath.NewAABB(
+					interactEntityA.Collider.AABB.Min.Clone().AddV(interactEntityA.Transform.Position),
+					interactEntityA.Collider.AABB.Max.Clone().AddV(interactEntityA.Transform.Position),
+				)
+				AABB2 := gmath.NewAABB(
+					interactEntityB.Collider.AABB.Min.Clone().AddV(interactEntityB.Transform.Position),
+					interactEntityB.Collider.AABB.Max.Clone().AddV(interactEntityB.Transform.Position),
+				)
+				xDiffMin := gmath.Min(gmath.Abs(AABB1.Min[0]-AABB2.Max[0]), gmath.Abs(AABB1.Max[0]-AABB2.Min[0]))
+				yDiffMin := gmath.Min(gmath.Abs(AABB1.Min[1]-AABB2.Max[1]), gmath.Abs(AABB1.Max[1]-AABB2.Min[1]))
+				if xDiffMin < yDiffMin {
+					penetration = xDiffMin
+					if gmath.Abs(AABB1.Min[0]-AABB2.Max[0]) < gmath.Abs(AABB1.Max[0]-AABB2.Min[0]) {
+						normal.Set(-1.0, 0.0, 0.0)
+					} else {
+						normal.Set(1.0, 0.0, 0.0)
+					}
+				} else {
+					penetration = yDiffMin
+					if gmath.Abs(AABB1.Min[1]-AABB2.Max[1]) < gmath.Abs(AABB1.Max[1]-AABB2.Min[1]) {
+						normal.Set(0.0, -1.0, 0.0)
+					} else {
+						normal.Set(0.0, 1.0, 0.0)
+					}
+				}
+				// END TEMPORARY CODE
 
 				for _, interactor := range interactEntityA.interactors {
 					for _, interactee := range interactEntityB.interactees {
 						if interactor == interactee {
-							interactor.Interact(delta, *interactEntityA, *interactEntityB)
+							interactor.Interact(delta, *interactEntityA, *interactEntityB, normal, penetration)
 							break
 						}
 					}
