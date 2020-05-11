@@ -7,7 +7,8 @@ import (
 )
 
 type Interaction interface {
-	Interact(delta float32, interactor, interactee InteractEntity, normal gmath.Vector3, penetration float32)
+	StartInteract(delta float32, interactor, interactee InteractEntity, normal gmath.Vector3, penetration float32)
+	EndInteract(delta float32, interactor, interactee InteractEntity, normal gmath.Vector3)
 	GetInteractorComponents() []reflect.Type
 	GetInteracteeComponents() []reflect.Type
 }

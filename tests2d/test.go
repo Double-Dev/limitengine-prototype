@@ -2,6 +2,7 @@ package main
 
 import (
 	"image"
+	"math/rand"
 	"reflect"
 
 	"github.com/double-dev/limitengine"
@@ -30,7 +31,7 @@ func NewPlatformControlSystem() *limitengine.ECSSystem {
 		// motion := entity.GetComponent((*utils.MotionComponent)(nil)).(*utils.MotionComponent)
 		// transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
 		// }
-	}, (*PlatformControlComponent)(nil), (*interaction.PhysicsComponent)(nil), (*gmath.TransformComponent)(nil))
+	}, (*PlatformControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil))
 }
 
 func main() {
@@ -72,7 +73,7 @@ func main() {
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
-		&interaction.PhysicsComponent{
+		&gmath.MotionComponent{
 			Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
 			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
@@ -99,7 +100,7 @@ func main() {
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
-		&interaction.PhysicsComponent{
+		&gmath.MotionComponent{
 			Velocity:        gmath.NewVector3(-0.1, 0.0, 0.0),
 			Acceleration:    gmath.NewZeroVector3(),
 			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
@@ -116,6 +117,23 @@ func main() {
 			Instance: gfx.NewInstance(),
 		},
 	)
+
+	for i := 0; i < 2; i++ {
+		limitengine.NewEntity(
+			&gmath.TransformComponent{
+				Position: gmath.NewVector3(rand.Float32()*2.0-1.0, rand.Float32()*2.0-1.0, -0.1),
+				Rotation: gmath.NewIdentityQuaternion(),
+				Scale:    gmath.NewVector3(0.2, 0.2, 1.0),
+			},
+			&gfx.RenderComponent{
+				Camera:   camera,
+				Shader:   shader,
+				Material: material,
+				Mesh:     &gfx.Mesh{},
+				Instance: gfx.NewInstance(),
+			},
+		)
+	}
 
 	// Left Wall
 	limitengine.NewEntity(
@@ -200,11 +218,11 @@ func main() {
 	interactionWorld.AddInteraction(myInteraction)
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
-	limitengine.AddSystem(interaction.NewPhysicsSystem(0.99))
+	limitengine.AddSystem(gmath.NewMotionSystem(0.99))
 	limitengine.AddSystem(NewPlatformControlSystem())
 	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
-			motion := entity.GetComponent((*interaction.PhysicsComponent)(nil)).(*interaction.PhysicsComponent)
+			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
 
 			speed := float32(0.5)
 			if xAxis.Amount() > 0.01 {
@@ -220,7 +238,7 @@ func main() {
 				motion.Acceleration[1] = -2.45
 			}
 		}
-	}, (*ControlComponent)(nil), (*interaction.PhysicsComponent)(nil), (*gmath.TransformComponent)(nil)))
+	}, (*ControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
 	limitengine.AddECSListener(interactionWorld)
 
 	// Launch!
@@ -235,17 +253,15 @@ type TestInteraction struct {
 	test string
 }
 
-func (test TestInteraction) Interact(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
-	interactor.Transform.Position.SubV(normal.Clone().MulSc(penetration))
-	// Basic vector reflection of velocity over normal.
-	newVelocity := interactor.Physics.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactor.Physics.Velocity)))
-	// newVelocity := gmath.NewZeroVector3()
-	interactor.Physics.Velocity.SetV(newVelocity)
+func (test TestInteraction) StartInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
+}
+
+func (test TestInteraction) EndInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3) {
 }
 
 func (test TestInteraction) GetInteractorComponents() []reflect.Type {
 	return []reflect.Type{
-		reflect.TypeOf((*interaction.PhysicsComponent)(nil)),
+		reflect.TypeOf((*gmath.MotionComponent)(nil)),
 	}
 }
 

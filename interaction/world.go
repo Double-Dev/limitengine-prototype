@@ -71,15 +71,17 @@ func (world *World) OnAddComponent(entity limitengine.ECSEntity, component inter
 }
 
 func (world *World) createInteractEntity(entity limitengine.ECSEntity) *InteractEntity {
-	var physics *PhysicsComponent
-	if entity.GetComponent((*PhysicsComponent)(nil)) != nil {
-		physics = entity.GetComponent((*PhysicsComponent)(nil)).(*PhysicsComponent)
+	var motion *gmath.MotionComponent
+	if entity.GetComponent((*gmath.MotionComponent)(nil)) != nil {
+		motion = entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
 	}
 	interactEntity := &InteractEntity{
-		Entity:    entity,
-		Transform: entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent),
-		Collider:  entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent),
-		Physics:   physics,
+		Entity:                    entity,
+		Transform:                 entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent),
+		Collider:                  entity.GetComponent((*ColliderComponent)(nil)).(*ColliderComponent),
+		Motion:                    motion,
+		previousCollidingEntities: make(map[*InteractEntity]gmath.Vector3),
+		collidingEntities:         make(map[*InteractEntity]gmath.Vector3),
 	}
 	for _, interaction := range world.interactions {
 		world.updateInteraction(interactEntity, interaction)
@@ -146,13 +148,13 @@ func (world *World) ProcessInteractions(delta float32) {
 	world.entitiesToRemove = nil
 
 	for _, interactEntity := range world.entities {
-		if interactEntity.Physics != nil && interactEntity.Physics.awake {
+		if interactEntity.Motion != nil && interactEntity.Motion.IsAwake() {
 			world.spacialStructure.Update(interactEntity)
 		}
 	}
 
 	for _, interactEntityA := range world.entities {
-		if interactEntityA.Physics != nil && interactEntityA.Physics.awake {
+		if interactEntityA.Motion != nil && interactEntityA.Motion.IsAwake() {
 			potentialCollisions := world.spacialStructure.Query(gmath.NewAABB(
 				interactEntityA.Collider.AABB.Min.Clone().AddV(interactEntityA.Transform.Position),
 				interactEntityA.Collider.AABB.Max.Clone().AddV(interactEntityA.Transform.Position),
@@ -161,6 +163,7 @@ func (world *World) ProcessInteractions(delta float32) {
 				if interactEntityA == interactEntityB {
 					continue
 				}
+
 				// TODO: For other shapes, additional collision checks would be made here.
 				// Additionally, the collision normal and penetration should be calculated
 				// here for every collision and passed to the interactions.
@@ -194,27 +197,50 @@ func (world *World) ProcessInteractions(delta float32) {
 				}
 				// END TEMPORARY CODE
 
-				for _, interactor := range interactEntityA.interactors {
-					for _, interactee := range interactEntityB.interactees {
-						if interactor == interactee {
-							interactor.Interact(delta, *interactEntityA, *interactEntityB, normal, penetration)
-							break
+				interactEntityA.collidingEntities[interactEntityB] = normal
+				if _, ok := interactEntityA.previousCollidingEntities[interactEntityB]; !ok {
+					for _, interactor := range interactEntityA.interactors {
+						for _, interactee := range interactEntityB.interactees {
+							if interactor == interactee {
+								interactor.StartInteract(delta, *interactEntityA, *interactEntityB, normal, penetration)
+								break
+							}
+						}
+					}
+				}
+				interactEntityB.collidingEntities[interactEntityA] = normal.Clone().MulSc(-1.0)
+				if _, ok := interactEntityB.previousCollidingEntities[interactEntityA]; !ok {
+					for _, interactor := range interactEntityB.interactors {
+						for _, interactee := range interactEntityA.interactees {
+							if interactor == interactee {
+								interactor.StartInteract(delta, *interactEntityB, *interactEntityA, normal.Clone().MulSc(-1.0), penetration)
+								break
+							}
 						}
 					}
 				}
 
-				// TODO: Implement this so that B's interactions won't be performed twice.
-				// This code makes B's interactions much more consistent when position corrections
-				// are applied.
-				for _, interactor := range interactEntityB.interactors {
-					for _, interactee := range interactEntityA.interactees {
-						if interactor == interactee {
-							interactor.Interact(delta, *interactEntityB, *interactEntityA, normal.Clone().MulSc(-1.0), penetration)
-							break
+				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
+					// TODO: Replace with proper physics equations.
+					interactEntityA.Transform.Position.SubV(normal.Clone().MulSc(penetration))
+					newVelocity := interactEntityA.Motion.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactEntityA.Motion.Velocity)))
+					interactEntityA.Motion.Velocity.SetV(newVelocity)
+				}
+			}
+			for previousEntity, normal := range interactEntityA.previousCollidingEntities {
+				if _, ok := interactEntityA.collidingEntities[previousEntity]; !ok {
+					for _, interactor := range interactEntityA.interactors {
+						for _, interactee := range previousEntity.interactees {
+							if interactor == interactee {
+								interactor.EndInteract(delta, *interactEntityA, *previousEntity, normal.Clone())
+								break
+							}
 						}
 					}
 				}
 			}
+			interactEntityA.previousCollidingEntities = interactEntityA.collidingEntities
+			interactEntityA.collidingEntities = make(map[*InteractEntity]gmath.Vector3)
 		}
 	}
 }
