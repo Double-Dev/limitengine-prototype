@@ -46,6 +46,9 @@ out vec4 fragoutColor;
 void main()
 {
 	frag();
+	if (fragoutColor.a < 0.1) {
+		discard;
+	}
 }`
 )
 

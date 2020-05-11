@@ -161,29 +161,20 @@ func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, inst
 			batch2 = make(map[*Mesh][]*Instance)
 			batch1[material] = batch2
 		}
-		batch2[mesh] = append(batch2[mesh], instance)
 
-		// iShader := shaders[shader.id]
-		// var iModel framework.IModel
-		// if model != nil {
-		// 	iModel = models[model.id]
-		// } else {
-		// 	iModel = models[0]
-		// }
-		// iTexture := textures[texture.id]
-		// iShader.Start()
-		// iTexture.Bind()
-		// iModel.Enable()
-
-		// iShader.LoadUniformMatrix4fv("projMat", projMatrix.ToMatrix44())
-		// vMat := gmath.NewIdentityMatrix(4, 4).Translate(camera.Position())
-
-		// iShader.LoadUniformMatrix4fv("viewMat", vMat.ToMatrix44())
-		// iShader.LoadUniformMatrix4fv("transformMat", transform.ToMatrix44())
-		// iShader.LoadUniform1I("tex", 0)
-
-		// iModel.Render()
-		// iModel.Disable()
-		// iShader.Stop()
+		// TODO: Fix transparency sorting for translucent objects.
+		if material.Transparency {
+			instances := batch2[mesh]
+			i := 0
+			for i < len(instances) && instances[i].data["verttransformMat3"][2] < instance.data["verttransformMat3"][2] {
+				i++
+			}
+			instances = append(instances, nil)
+			copy(instances[i+1:], instances[i:])
+			instances[i] = instance
+			batch2[mesh] = instances
+		} else {
+			batch2[mesh] = append(batch2[mesh], instance)
+		}
 	})
 }
