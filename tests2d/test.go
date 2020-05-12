@@ -2,7 +2,6 @@ package main
 
 import (
 	"image"
-	"math/rand"
 	"reflect"
 
 	"github.com/double-dev/limitengine"
@@ -51,20 +50,16 @@ func main() {
 	camera := gfx.CreateCamera2D()
 
 	// Controls
-	xAxis := ui.InputControl{}
+	xAxis := &ui.InputControl{}
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyA}, -1.0)
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyLeft}, -1.0)
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyD}, 1.0)
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyRight}, 1.0)
-	yAxis := ui.InputControl{}
+	yAxis := &ui.InputControl{}
 	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyW}, 1.0)
 	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyUp}, 1.0)
 	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyS}, -1.0)
 	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyDown}, -1.0)
-	dash := ui.InputControl{}
-	dash.AddTrigger(ui.InputEvent{Key: ui.KeySpace}, 1.0)
-	dash.AddTrigger(ui.InputEvent{Key: ui.KeyRightShift}, 1.0)
-	dash.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, 1.0)
 
 	// Entities
 	limitengine.NewEntity(
@@ -90,7 +85,8 @@ func main() {
 			Instance: gfx.NewInstance(),
 		},
 		&ControlComponent{
-			randomTestVar: "kasdfkjsdahflksahndnhslk",
+			XAxis: xAxis,
+			YAxis: yAxis,
 		},
 	)
 
@@ -117,23 +113,6 @@ func main() {
 			Instance: gfx.NewInstance(),
 		},
 	)
-
-	for i := 0; i < 2; i++ {
-		limitengine.NewEntity(
-			&gmath.TransformComponent{
-				Position: gmath.NewVector3(rand.Float32()*2.0-1.0, rand.Float32()*2.0-1.0, -0.1),
-				Rotation: gmath.NewIdentityQuaternion(),
-				Scale:    gmath.NewVector3(0.2, 0.2, 1.0),
-			},
-			&gfx.RenderComponent{
-				Camera:   camera,
-				Shader:   shader,
-				Material: material,
-				Mesh:     &gfx.Mesh{},
-				Instance: gfx.NewInstance(),
-			},
-		)
-	}
 
 	// Left Wall
 	limitengine.NewEntity(
@@ -218,24 +197,47 @@ func main() {
 	interactionWorld.AddInteraction(myInteraction)
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
-	limitengine.AddSystem(gmath.NewMotionSystem(0.99))
+	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
 	limitengine.AddSystem(NewPlatformControlSystem())
 	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
+			control := entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
 			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
 
-			speed := float32(0.5)
-			if xAxis.Amount() > 0.01 {
+			speed := float32(3.0)
+			maxSpeed := float32(1.0)
+			if control.XAxis.Amount() > 0.01 {
 				motion.Acceleration[0] = speed
-			} else if xAxis.Amount() < -0.01 {
+			} else if control.XAxis.Amount() < -0.01 {
 				motion.Acceleration[0] = -speed
 			} else {
 				motion.Acceleration[0] = 0.0
+				if !control.gravityEnabled {
+					motion.Velocity[0] *= 0.75
+				}
 			}
-			if yAxis.Amount() > 0.01 {
-				motion.Acceleration[1] = speed * 30.0
+
+			if gmath.Abs(motion.Velocity[0]) > maxSpeed {
+				motion.Velocity[0] = maxSpeed * gmath.Sign(motion.Velocity[0])
+			}
+
+			if control.YAxis.Amount() > 0.01 && control.canJump {
+				control.gravityEnabled = true
+				control.canJump = false
+				motion.Velocity[1] += 2.0
+			}
+
+			if !control.canJump {
+				control.gravityEnabled = true
+			}
+
+			if control.gravityEnabled {
+				motion.Acceleration[1] = -3.45
+				if motion.Velocity[1] < 0.0 {
+					motion.Acceleration[1] = -4.45
+				}
 			} else {
-				motion.Acceleration[1] = -2.45
+				motion.Acceleration[1] = -0.5
 			}
 		}
 	}, (*ControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
@@ -246,7 +248,9 @@ func main() {
 }
 
 type ControlComponent struct {
-	randomTestVar string
+	XAxis, YAxis   *ui.InputControl
+	canJump        bool
+	gravityEnabled bool
 }
 
 type TestInteraction struct {
@@ -254,13 +258,23 @@ type TestInteraction struct {
 }
 
 func (test TestInteraction) StartInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
+	control := interactor.Entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
+	if !interactee.Collider.IsTrigger {
+		if normal[1] < -0.5 {
+			interactor.Motion.Velocity[1] = 0.0
+			control.canJump = true
+			control.gravityEnabled = false
+		}
+	}
 }
 
 func (test TestInteraction) EndInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3) {
+
 }
 
 func (test TestInteraction) GetInteractorComponents() []reflect.Type {
 	return []reflect.Type{
+		reflect.TypeOf((*ControlComponent)(nil)),
 		reflect.TypeOf((*gmath.MotionComponent)(nil)),
 	}
 }

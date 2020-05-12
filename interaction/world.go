@@ -197,6 +197,13 @@ func (world *World) ProcessInteractions(delta float32) {
 				}
 				// END TEMPORARY CODE
 
+				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
+					// TODO: Replace with proper physics equations.
+					interactEntityA.Transform.Position.SubV(normal.Clone().MulSc(penetration))
+					newVelocity := interactEntityA.Motion.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactEntityA.Motion.Velocity)))
+					interactEntityA.Motion.Velocity.SetV(newVelocity)
+				}
+
 				interactEntityA.collidingEntities[interactEntityB] = normal
 				if _, ok := interactEntityA.previousCollidingEntities[interactEntityB]; !ok {
 					for _, interactor := range interactEntityA.interactors {
@@ -218,13 +225,6 @@ func (world *World) ProcessInteractions(delta float32) {
 							}
 						}
 					}
-				}
-
-				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
-					// TODO: Replace with proper physics equations.
-					interactEntityA.Transform.Position.SubV(normal.Clone().MulSc(penetration))
-					newVelocity := interactEntityA.Motion.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactEntityA.Motion.Velocity)))
-					interactEntityA.Motion.Velocity.SetV(newVelocity)
 				}
 			}
 			for previousEntity, normal := range interactEntityA.previousCollidingEntities {
