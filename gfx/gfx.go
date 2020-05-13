@@ -162,7 +162,8 @@ func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, inst
 			batch1[material] = batch2
 		}
 
-		// TODO: Fix transparency sorting for translucent objects.
+		// TODO: Fix transparency sorting for translucent objects of different materials,
+		// shaders, meshes, etc., unless that doesn't need to be supported.
 		if material.Transparency {
 			instances := batch2[mesh]
 			i := 0
@@ -173,23 +174,6 @@ func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, inst
 			copy(instances[i+1:], instances[i:])
 			instances[i] = instance
 			batch2[mesh] = instances
-
-			// for index0, test0 := range renderBatches {
-			// 	fmt.Println("Renderbatch", index0, ":")
-			// 	for camera0, test1 := range test0 {
-			// 		fmt.Println("\tCamera:", camera0)
-			// 		for shader0, test2 := range test1 {
-			// 			fmt.Println("\t\tShader:", shader0)
-			// 			for material0, test3 := range test2 {
-			// 				fmt.Println("\t\t\tMaterial:", material0)
-			// 				for mesh0, test4 := range test3 {
-			// 					fmt.Println("\t\t\t\tMesh:", mesh0)
-			// 					fmt.Println("\t\t\t\t\tInstances:", test4)
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
 		} else {
 			batch2[mesh] = append(batch2[mesh], instance)
 		}

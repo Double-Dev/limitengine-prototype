@@ -1,8 +1,6 @@
 package gfx
 
 import (
-	"fmt"
-
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gmath"
 )
@@ -28,7 +26,6 @@ func NewRenderSystem() *limitengine.ECSSystem {
 
 			Render(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 		}
-		fmt.Println("Sweeping...")
 		Sweep()
 	}, (*RenderComponent)(nil), (*gmath.TransformComponent)(nil))
 }

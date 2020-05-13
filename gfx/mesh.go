@@ -5,8 +5,14 @@ import (
 )
 
 var (
-	meshIndex = uint32(1)
-	meshes    = make(map[uint32]framework.IMesh)
+	meshIndex  = uint32(1)
+	meshes     = make(map[uint32]framework.IMesh)
+	spriteMesh = &Mesh{
+		id:          0,
+		DepthTest:   true,
+		BackCulling: false,
+		WriteDepth:  true,
+	}
 )
 
 func init() {
@@ -96,6 +102,10 @@ func CreateMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh 
 	meshIndex++
 	actionQueue = append(actionQueue, func() { meshes[mesh.id] = context.CreateMesh(indices, vertices, texCoords, normals) })
 	return mesh
+}
+
+func GetSpriteMesh() *Mesh {
+	return spriteMesh
 }
 
 // DeleteMesh queues a gfx action that deletes the input mesh.

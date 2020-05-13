@@ -28,7 +28,7 @@ func main() {
 	shader := gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
 	material := gfx.CreateTextureMaterial(texture)
-	mesh := &gfx.Mesh{}
+	mesh := gfx.GetSpriteMesh()
 	camera := gfx.CreateCamera2D()
 
 	// Controls
