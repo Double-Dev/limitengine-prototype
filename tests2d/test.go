@@ -14,25 +14,6 @@ import (
 	"github.com/pkg/profile"
 )
 
-type PlatformControlComponent struct {
-	WalkControl                 *ui.InputControl
-	WalkSpeed, WalkAcceleration float32
-	JumpControl                 *ui.InputControl
-	JumpSpeed, JumpAcceleration float32
-	DashControl                 *ui.InputControl
-	DashSpeed, DashAcceleration float32
-}
-
-func NewPlatformControlSystem() *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
-		// for _, entity := range entities {
-		// control := entity.GetComponent((*PlatformControlComponent)(nil)).(*PlatformControlComponent)
-		// motion := entity.GetComponent((*utils.MotionComponent)(nil)).(*utils.MotionComponent)
-		// transform := entity.GetComponent((*utils.TransformComponent)(nil)).(*utils.TransformComponent)
-		// }
-	}, (*PlatformControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil))
-}
-
 func main() {
 	// Profile
 	defer profile.Start().Stop()
@@ -198,7 +179,6 @@ func main() {
 
 	limitengine.AddSystem(gfx.NewRenderSystem())
 	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
-	limitengine.AddSystem(NewPlatformControlSystem())
 	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
 			control := entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
@@ -221,13 +201,24 @@ func main() {
 				motion.Velocity[0] = maxSpeed * gmath.Sign(motion.Velocity[0])
 			}
 
-			if control.YAxis.Amount() > 0.01 && control.canJump {
-				control.gravityEnabled = true
-				control.canJump = false
-				motion.Velocity[1] += 2.0
+			if control.YAxis.Amount() > 0.01 {
+				if control.canJump {
+					control.gravityEnabled = true
+					control.canJump = false
+					motion.Velocity[1] += 2.0
+				} else if control.canWallJump {
+					control.gravityEnabled = true
+					control.canWallJump = false
+					motion.Velocity[1] += 2.0
+					if control.wallJumpLeft {
+						motion.Velocity[0] = -4.0
+					} else {
+						motion.Velocity[0] = 4.0
+					}
+				}
 			}
 
-			if !control.canJump {
+			if !control.canJump && !control.canWallJump {
 				control.gravityEnabled = true
 			}
 
@@ -248,9 +239,10 @@ func main() {
 }
 
 type ControlComponent struct {
-	XAxis, YAxis   *ui.InputControl
-	canJump        bool
-	gravityEnabled bool
+	XAxis, YAxis              *ui.InputControl
+	canJump                   bool
+	canWallJump, wallJumpLeft bool
+	gravityEnabled            bool
 }
 
 type TestInteraction struct {
@@ -264,12 +256,27 @@ func (test TestInteraction) StartInteract(delta float32, interactor, interactee 
 			interactor.Motion.Velocity[1] = 0.0
 			control.canJump = true
 			control.gravityEnabled = false
+		} else if gmath.Abs(normal[0]) > 0.9 {
+			interactor.Motion.Velocity[0] = 0.0
+			interactor.Motion.Velocity[1] = -0.1
+			control.canWallJump = true
+			control.gravityEnabled = false
+			if normal[0] < 0.0 {
+				control.wallJumpLeft = false
+			} else {
+				control.wallJumpLeft = true
+			}
 		}
 	}
 }
 
 func (test TestInteraction) EndInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3) {
-
+	control := interactor.Entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
+	if !interactee.Collider.IsTrigger {
+		if gmath.Abs(normal[0]) > 0.9 {
+			control.canWallJump = false
+		}
+	}
 }
 
 func (test TestInteraction) GetInteractorComponents() []reflect.Type {
