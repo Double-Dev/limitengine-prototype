@@ -15,6 +15,12 @@ var (
 	}
 )
 
+type ColliderComponent struct {
+	IsTrigger bool
+
+	AABB gmath.AABB
+}
+
 type World struct {
 	spacialStructure SpacialStructure
 	entities         map[limitengine.ECSEntity]*InteractEntity

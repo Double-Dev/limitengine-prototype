@@ -31,3 +31,10 @@ func (instance *Instance) SetTransform(transform gmath.Matrix4) {
 	instance.data["verttransformMat3"] = transform[3]
 	instance.dataMutex.Unlock()
 }
+
+func (instance *Instance) GetData(key string) []float32 {
+	instance.dataMutex.RLock()
+	result := instance.data[key]
+	instance.dataMutex.RUnlock()
+	return result
+}

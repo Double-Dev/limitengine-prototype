@@ -53,7 +53,7 @@ func main() {
 			Axis:  []*ui.InputControl{&xAxis, &yAxis, &zAxis, &boost},
 			Speed: 600.0,
 		},
-		&gfx.CameraComponent{
+		&CameraComponent{
 			Camera:      camera,
 			PosOffset:   gmath.NewVector3(0.0, 0.0, 15.0),
 			RotOffset:   gmath.NewIdentityQuaternion(),
@@ -118,8 +118,39 @@ func main() {
 		}
 	}, (*MotionControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
 	limitengine.AddSystem(gmath.NewMotionSystem(0.95))
-	limitengine.AddSystem(gfx.NewCameraMotionSystem())
+	limitengine.AddSystem(NewCameraMotionSystem())
 	limitengine.AddSystem(gfx.NewRenderSystem())
 
 	limitengine.Launch()
+}
+
+type CameraComponent struct {
+	Camera      *gfx.Camera
+	PosOffset   gmath.Vector3
+	RotOffset   gmath.Quaternion
+	ScaleOffset gmath.Vector3
+}
+
+func NewCameraMotionSystem() *limitengine.ECSSystem {
+	return limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
+		for _, entity := range entities {
+			camera := entity.GetComponent((*CameraComponent)(nil)).(*CameraComponent)
+			transform := entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
+
+			transformViewMat := gmath.NewViewMatrix(
+				transform.Position,
+				transform.Rotation,
+				transform.Scale,
+			)
+			offsetViewMat := gmath.NewViewMatrix(
+				camera.PosOffset,
+				camera.RotOffset,
+				camera.ScaleOffset,
+			)
+
+			viewMat := offsetViewMat.MulM(transformViewMat)
+
+			camera.Camera.SetViewMat(viewMat)
+		}
+	}, (*CameraComponent)(nil), (*gmath.TransformComponent)(nil))
 }

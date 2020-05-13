@@ -3,7 +3,6 @@ package gfx
 import (
 	"fmt"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -23,10 +22,9 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
 
-	gfxMutex      = sync.RWMutex{}
-	renderBatches = []map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance{}
-	actionQueue   = []func(){}
-	gfxPipeline   = [](chan func()){}
+	renderBatch = map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance{}
+	actionQueue = []func(){}
+	gfxPipeline = [](chan func()){}
 )
 
 func init() {
@@ -84,7 +82,7 @@ func Sweep() {
 	}
 	actionQueue = append(actionQueue, func() {
 		// Batching System TODO: Improve with instanced rendering.
-		for camera, batch0 := range renderBatches[0] {
+		for camera, batch0 := range renderBatch {
 			// iFrameBuffer := frameBuffers[camera.id]
 			// fmt.Println(iFrameBuffer)
 			// Enable framebuffer
@@ -92,8 +90,6 @@ func Sweep() {
 				iShader := shaders[shader.id]
 				iShader.Start()
 				camera.prefs.loadTo(iShader)
-				// iShader.LoadUniformMatrix4fv("vertprojMat", gmath.NewProjectionMatrix2D(limitengine.GetAspectRatio()).ToArray())
-				// iShader.LoadUniformMatrix4fv("vertviewMat", gmath.NewIdentityMatrix4().ToArray())
 				shader.uniformLoader.loadTo(iShader)
 
 				for material, batch2 := range batch1 {
@@ -126,7 +122,6 @@ func Sweep() {
 			}
 			// Disable framebuffer
 		}
-		renderBatches = renderBatches[1:]
 	})
 	pipeline := make(chan func())
 	gfxPipeline = append(gfxPipeline, pipeline)
@@ -140,12 +135,8 @@ func Sweep() {
 	}()
 }
 
-func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, instance *Instance) {
+func AddRenderable(camera *Camera, shader *Shader, material *Material, mesh *Mesh, instance *Instance) {
 	actionQueue = append(actionQueue, func() {
-		if len(renderBatches) == 0 {
-			renderBatches = append(renderBatches, make(map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance))
-		}
-		renderBatch := renderBatches[len(renderBatches)-1]
 		batch0 := renderBatch[camera]
 		if batch0 == nil {
 			batch0 = make(map[*Shader]map[*Material]map[*Mesh][]*Instance)
@@ -167,7 +158,7 @@ func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, inst
 		if material.Transparency {
 			instances := batch2[mesh]
 			i := 0
-			for i < len(instances) && instances[i].data["verttransformMat3"][2] > instance.data["verttransformMat3"][2] {
+			for i < len(instances) && instances[i].GetData("verttransformMat3")[2] > instance.GetData("verttransformMat3")[2] {
 				i++
 			}
 			instances = append(instances, nil)
@@ -177,5 +168,36 @@ func Render(camera *Camera, shader *Shader, material *Material, mesh *Mesh, inst
 		} else {
 			batch2[mesh] = append(batch2[mesh], instance)
 		}
+	})
+}
+
+func RemoveRenderable(camera *Camera, shader *Shader, material *Material, mesh *Mesh, instance *Instance) {
+	actionQueue = append(actionQueue, func() {
+		batch0 := renderBatch[camera]
+		if batch0 == nil {
+			batch0 = make(map[*Shader]map[*Material]map[*Mesh][]*Instance)
+			renderBatch[camera] = batch0
+		}
+		batch1 := batch0[shader]
+		if batch1 == nil {
+			batch1 = make(map[*Material]map[*Mesh][]*Instance)
+			batch0[shader] = batch1
+		}
+		batch2 := batch1[material]
+		if batch2 == nil {
+			batch2 = make(map[*Mesh][]*Instance)
+			batch1[material] = batch2
+		}
+
+		instances := batch2[mesh]
+		for i, batchInstance := range instances {
+			if batchInstance == instance {
+				copy(instances[i:], instances[i+1:])
+				instances[len(instances)-1] = nil
+				instances = instances[:len(instances)-1]
+				break
+			}
+		}
+		batch2[mesh] = instances
 	})
 }

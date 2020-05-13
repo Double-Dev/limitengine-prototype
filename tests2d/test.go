@@ -193,6 +193,9 @@ func main() {
 
 	interactionWorld.AddInteraction(myInteraction)
 
+	gfxListener := gfx.NewGFXListener()
+	limitengine.AddECSListener(gfxListener)
+
 	limitengine.AddSystem(gfx.NewRenderSystem())
 	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
 	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
