@@ -28,6 +28,7 @@ func main() {
 	shader := gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
 	material := gfx.CreateTextureMaterial(texture)
+	mesh := &gfx.Mesh{}
 	camera := gfx.CreateCamera2D()
 
 	// Controls
@@ -45,7 +46,7 @@ func main() {
 	// Entities
 	limitengine.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(-0.5, 0.0, -0.5),
+			Position: gmath.NewVector3(-0.5, 0.0, -0.3),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
@@ -62,12 +63,27 @@ func main() {
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Mesh:     &gfx.Mesh{},
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 		&ControlComponent{
 			XAxis: xAxis,
 			YAxis: yAxis,
+		},
+	)
+
+	limitengine.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.5, -0.25, -0.4),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.5, 0.5, 1.0),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: material,
+			Mesh:     mesh,
+			Instance: gfx.NewInstance(),
 		},
 	)
 
@@ -90,7 +106,7 @@ func main() {
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Mesh:     &gfx.Mesh{},
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 	)
@@ -109,7 +125,7 @@ func main() {
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Mesh:     &gfx.Mesh{},
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 	)
@@ -127,7 +143,7 @@ func main() {
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Mesh:     &gfx.Mesh{},
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 	)
@@ -145,7 +161,7 @@ func main() {
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Mesh:     &gfx.Mesh{},
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 	)
@@ -163,7 +179,7 @@ func main() {
 			Camera:   camera,
 			Shader:   shader,
 			Material: material,
-			Mesh:     &gfx.Mesh{},
+			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
 	)
