@@ -20,6 +20,11 @@ type RenderComponent struct {
 	Instance *Instance
 }
 
+func (renderComponent *RenderComponent) Delete() {
+	// TODO: Finish cleaning up render component.
+	DeleteMesh(renderComponent.Mesh)
+}
+
 type GFXListener struct {
 	entities map[limitengine.ECSEntity]RenderComponent
 }
@@ -36,13 +41,13 @@ func (gfxListener GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
 	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 }
 
-func (gfxListener GFXListener) OnAddComponent(entity limitengine.ECSEntity, component interface{}) {
+func (gfxListener GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	render := component.(*RenderComponent)
 	gfxListener.entities[entity] = *render
 	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 }
 
-func (gfxListener GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component interface{}) {
+func (gfxListener GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	render := gfxListener.entities[entity]
 	RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 	delete(gfxListener.entities, entity)

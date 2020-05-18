@@ -2,6 +2,7 @@ package limitengine
 
 import (
 	"runtime"
+	"time"
 )
 
 // Version is the current engine version string.
@@ -24,19 +25,22 @@ const (
 )
 
 var (
-	log                   = NewLogger("core")
-	running               bool
-	view                  View
+	log     = NewLogger("core")
+	running bool
+	view    View
+	state   *State
+
 	viewWidth, viewHeight int
-	closeCallbacks        []func()
-	resizeCallbacks       []func(width, height int)
-	joystickCallbacks     []func(joy Joystick, event Action)
-	keyCallbacks          []func(key Key, scancode int, action Action, mods ModKey)
-	mouseButtonCallbacks  []func(button MouseButton, action Action, mod ModKey)
-	mouseMotionCallbacks  []func(x, y float32)
-	mouseScrollCallbacks  []func(x, y float32)
-	touchMotionCallbacks  []func(x, y []float32)
-	typingCallbacks       []func(char rune, mods ModKey)
+
+	closeCallbacks       []func()
+	resizeCallbacks      []func(width, height int)
+	joystickCallbacks    []func(joy Joystick, event Action)
+	keyCallbacks         []func(key Key, scancode int, action Action, mods ModKey)
+	mouseButtonCallbacks []func(button MouseButton, action Action, mod ModKey)
+	mouseMotionCallbacks []func(x, y float32)
+	mouseScrollCallbacks []func(x, y float32)
+	touchMotionCallbacks []func(x, y []float32)
+	typingCallbacks      []func(char rune, mods ModKey)
 )
 
 func init() {
@@ -94,17 +98,34 @@ func init() {
 	// TODO: Handle touch input callbacks.
 
 	running = true
-	initECS()
 	log.Log("Core online...")
 }
 
 // Launch runs the core's Run() func until the engine closes and must be called on the main thread.
-func Launch() {
+func Launch(initState *State) {
+	state = initState
+	// TODO: Clean up update loop.
+	go func() {
+		currentTime := time.Now().UnixNano()
+		for Running() {
+			if time.Now().UnixNano()-currentTime > int64((1.0/TargetUpdatesPerSecond)*1000000000.0) {
+				lastTime := currentTime
+				currentTime = time.Now().UnixNano()
+				delta := float32(currentTime-lastTime) / 1000000000.0
+				state.Update(delta)
+			} else {
+				time.Sleep(time.Millisecond * 10)
+			}
+		}
+	}()
+
 	view.show()
 	for Running() {
 		view.pollEvents()
 	}
 }
+
+func SetState(newState *State) { state = newState }
 
 // AppView returns the engine's view.
 func AppView() View { return view }

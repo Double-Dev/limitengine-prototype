@@ -10,6 +10,8 @@ type TransformComponent struct {
 	Scale    Vector3
 }
 
+func (transformComponent *TransformComponent) Delete() {}
+
 type MotionComponent struct {
 	awake bool
 
@@ -18,6 +20,8 @@ type MotionComponent struct {
 	AngVelocity     Quaternion
 	AngAcceleration Quaternion
 }
+
+func (motionComponent *MotionComponent) Delete() {}
 
 func (motion *MotionComponent) IsAwake() bool {
 	return motion.awake

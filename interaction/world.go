@@ -21,6 +21,8 @@ type ColliderComponent struct {
 	AABB gmath.AABB
 }
 
+func (colliderComponent *ColliderComponent) Delete() {}
+
 type World struct {
 	spacialStructure SpacialStructure
 	entities         map[limitengine.ECSEntity]*InteractEntity
@@ -56,7 +58,7 @@ func (world *World) OnAddEntity(entity limitengine.ECSEntity) {
 	world.spacialStructure.Add(interactEntity)
 }
 
-func (world *World) OnAddComponent(entity limitengine.ECSEntity, component interface{}) {
+func (world *World) OnAddComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	if (reflect.TypeOf(component) == targets[0] && entity.HasComponent(targets[1])) ||
 		(reflect.TypeOf(component) == targets[1] && entity.HasComponent(targets[0])) {
 		interactEntity := world.createInteractEntity(entity)
@@ -118,7 +120,7 @@ func (world *World) updateInteraction(entity *InteractEntity, interaction Intera
 	}
 }
 
-func (world *World) OnRemoveComponent(entity limitengine.ECSEntity, component interface{}) {
+func (world *World) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	if reflect.TypeOf(component) == targets[0] || reflect.TypeOf(component) == targets[1] {
 		world.entitiesToRemove = append(world.entitiesToRemove, entity)
 	} else if entity.HasComponent(targets[0]) && entity.HasComponent(targets[1]) {

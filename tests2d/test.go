@@ -24,6 +24,9 @@ func main() {
 	limitengine.AppView().SetAspectRatio(3, 2)
 	limitengine.AppView().SetIcons([]image.Image{gio.LoadIcon("Test.png")})
 
+	// Creating State
+	state := limitengine.NewState()
+
 	// Assets
 	shader := gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
@@ -44,7 +47,7 @@ func main() {
 	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyDown}, -1.0)
 
 	// Entities
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(-0.5, 0.0, -0.3),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -72,7 +75,7 @@ func main() {
 		},
 	)
 
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.5, -0.25, -0.4),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -87,7 +90,7 @@ func main() {
 		},
 	)
 
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.5, 0.0, -0.5),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -112,7 +115,7 @@ func main() {
 	)
 
 	// Left Wall
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(-1.5, 0.0, -0.45),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -130,7 +133,7 @@ func main() {
 		},
 	)
 	// Right Wall
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(1.5, 0.0, -0.45),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -148,7 +151,7 @@ func main() {
 		},
 	)
 	// Top Wall
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, 1.0, -0.4),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -166,7 +169,7 @@ func main() {
 		},
 	)
 	// Bottom Wall
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, -1.0, -0.4),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -194,11 +197,11 @@ func main() {
 	interactionWorld.AddInteraction(myInteraction)
 
 	gfxListener := gfx.NewGFXListener()
-	limitengine.AddECSListener(gfxListener)
+	state.AddListener(gfxListener)
 
-	limitengine.AddSystem(gfx.NewRenderSystem())
-	limitengine.AddSystem(gmath.NewMotionSystem(1.0))
-	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
+	state.AddSystem(gfx.NewRenderSystem())
+	state.AddSystem(gmath.NewMotionSystem(1.0))
+	state.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
 		for _, entity := range entities {
 			control := entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
 			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
@@ -251,12 +254,13 @@ func main() {
 			}
 		}
 	}, (*ControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
-	limitengine.AddECSListener(interactionWorld)
+	state.AddListener(interactionWorld)
 
 	// Launch!
-	limitengine.Launch()
+	limitengine.Launch(state)
 }
 
+// INPUT TESTS
 type ControlComponent struct {
 	XAxis, YAxis              *ui.InputControl
 	canJump                   bool
@@ -264,6 +268,9 @@ type ControlComponent struct {
 	gravityEnabled            bool
 }
 
+func (controlComponent *ControlComponent) Delete() {}
+
+// INTERACTION TESTS
 type TestInteraction struct {
 	test string
 }

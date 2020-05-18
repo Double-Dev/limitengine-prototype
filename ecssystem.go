@@ -4,10 +4,7 @@ import (
 	"reflect"
 )
 
-var (
-	systems = []*ECSSystem{}
-)
-
+// TODO: Store component sets rather than entities to avoid map queries.
 type ECSSystem struct {
 	targetComponents []reflect.Type
 	entities         []ECSEntity
@@ -26,28 +23,21 @@ func NewSystem(update func(delta float32, entities []ECSEntity), nilTargetCompon
 	return &system
 }
 
-func UpdateSystems(delta float32) {
-	for _, system := range systems {
-		system.update(delta, system.GetEntities())
-	}
-}
-
-func AddSystem(system *ECSSystem) {
-	AddECSListener(system)
-	systems = append(systems, system)
+func (system *ECSSystem) Update(delta float32) {
+	system.update(delta, system.GetEntities())
 }
 
 func (system *ECSSystem) OnAddEntity(entity ECSEntity) {
 	system.entities = append(system.entities, entity)
 }
 
-func (system *ECSSystem) OnAddComponent(entity ECSEntity, component interface{}) {
+func (system *ECSSystem) OnAddComponent(entity ECSEntity, component Component) {
 	if entity.HasComponent(system.GetTargetComponents()...) {
 		system.entities = append(system.entities, entity)
 	}
 }
 
-func (system *ECSSystem) OnRemoveComponent(entity ECSEntity, component interface{}) {
+func (system *ECSSystem) OnRemoveComponent(entity ECSEntity, component Component) {
 	for i, target := range system.entities {
 		if target == entity {
 			system.entities[i] = system.entities[len(system.entities)-1]
