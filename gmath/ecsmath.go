@@ -28,10 +28,10 @@ func (motion *MotionComponent) IsAwake() bool {
 }
 
 func NewMotionSystem(damping float32) *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
-		for _, entity := range entities {
-			transform := entity.GetComponent((*TransformComponent)(nil)).(*TransformComponent)
-			motion := entity.GetComponent((*MotionComponent)(nil)).(*MotionComponent)
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+		for _, components := range entities {
+			transform := components[1].(*TransformComponent)
+			motion := components[0].(*MotionComponent)
 			motion.Velocity.AddV(motion.Acceleration.Clone().MulSc(delta))
 
 			// TODO: Optimize/fix awake system.

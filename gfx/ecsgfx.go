@@ -7,14 +7,14 @@ import (
 
 func NewRenderSystem() *limitengine.ECSSystem {
 	// TODO: Create render listener that only adds/removes entities from the batch when altered.
-	return limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
 		ClearScreen(0.0, 0.1, 0.25, 1.0)
-		for _, entity := range entities {
-			transform := entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
+		for _, components := range entities {
+			transform := components[1].(*gmath.TransformComponent)
 
 			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
 
-			render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
+			render := components[0].(*RenderComponent)
 			render.Instance.SetTransform(transformMat)
 		}
 		Sweep()

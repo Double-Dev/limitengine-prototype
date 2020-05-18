@@ -201,10 +201,10 @@ func main() {
 
 	state.AddSystem(gfx.NewRenderSystem())
 	state.AddSystem(gmath.NewMotionSystem(1.0))
-	state.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
-		for _, entity := range entities {
-			control := entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
-			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
+	state.AddSystem(limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+		for _, components := range entities {
+			control := components[0].(*ControlComponent)
+			motion := components[1].(*gmath.MotionComponent)
 
 			speed := float32(3.0)
 			maxSpeed := float32(1.0)
@@ -253,7 +253,7 @@ func main() {
 				motion.Acceleration[1] = -0.5
 			}
 		}
-	}, (*ControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
+	}, (*ControlComponent)(nil), (*gmath.MotionComponent)(nil)))
 	state.AddListener(interactionWorld)
 
 	// Launch!

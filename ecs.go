@@ -146,13 +146,24 @@ func (ecs *ECS) RemoveEntity(entity ECSEntity) bool {
 	return false
 }
 
-func (entity ECSEntity) GetComponent(nilComponent interface{}) interface{} {
+func (entity ECSEntity) GetComponent(nilComponent interface{}) Component {
 	entity.ecs.mutex.RLock()
 	if entity.ecs.ecs[entity] == nil {
 		entity.ecs.mutex.RUnlock()
 		return nil
 	}
 	component := entity.ecs.ecs[entity][reflect.TypeOf(nilComponent)]
+	entity.ecs.mutex.RUnlock()
+	return component
+}
+
+func (entity ECSEntity) getComponentOfType(componentType reflect.Type) Component {
+	entity.ecs.mutex.RLock()
+	if entity.ecs.ecs[entity] == nil {
+		entity.ecs.mutex.RUnlock()
+		return nil
+	}
+	component := entity.ecs.ecs[entity][componentType]
 	entity.ecs.mutex.RUnlock()
 	return component
 }
