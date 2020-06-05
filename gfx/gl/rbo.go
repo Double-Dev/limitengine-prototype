@@ -22,10 +22,10 @@ func (rbo *rbo) bind() {
 }
 
 // Attachment functions
-func (rbo *rbo) AttachToFramebufferColor(framebuffer framework.IFramebuffer, attachment int) {
+func (rbo *rbo) AttachToFramebufferColor(framebuffer framework.IFramebuffer) {
 	rbo.bind()
 	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.RGB, framebuffer.Width(), framebuffer.Height())
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0+attachment), gl.RENDERBUFFER, rbo.id)
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0), gl.RENDERBUFFER, rbo.id)
 }
 
 func (rbo *rbo) AttachToFramebufferDepth(framebuffer framework.IFramebuffer) {

@@ -8,7 +8,7 @@ import (
 
 type fbo struct {
 	id                     uint32
-	colorAttachments       []uint32
+	colorAttachment        uint32
 	depthStencilAttachment uint32
 
 	width, height, samples uint32
@@ -27,14 +27,14 @@ func (fbo *fbo) bind() {
 }
 
 func (fbo *fbo) BindForRender() {
-	gl.DrawBuffers(int32(len(fbo.colorAttachments)), &fbo.colorAttachments[0])
+	gl.DrawBuffers(1, &fbo.colorAttachment)
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fbo.id)
 }
 
 func (fbo *fbo) AddColorAttachment(attachment framework.IAttachment) {
 	fbo.bind()
-	attachment.AttachToFramebufferColor(fbo, len(fbo.colorAttachments))
-	fbo.colorAttachments = append(fbo.colorAttachments, attachment.ID())
+	attachment.AttachToFramebufferColor(fbo)
+	fbo.colorAttachment = attachment.ID()
 	fbo.unbind()
 }
 

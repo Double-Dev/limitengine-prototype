@@ -117,11 +117,11 @@ func (texture *texture) Delete() {
 }
 
 // Attachment functions:
-func (texture *texture) AttachToFramebufferColor(framebuffer framework.IFramebuffer, attachment int) {
+func (texture *texture) AttachToFramebufferColor(framebuffer framework.IFramebuffer) {
 	if texture.textureType == textureType2D {
 		texture.Bind()
 		gl.TexImage2D(texture.textureType, 0, gl.RGB, framebuffer.Width(), framebuffer.Height(), 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
-		gl.FramebufferTexture2D(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0+attachment), texture.textureType, texture.id, 0)
+		gl.FramebufferTexture2D(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0), texture.textureType, texture.id, 0)
 	}
 }
 
