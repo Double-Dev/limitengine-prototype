@@ -126,6 +126,8 @@ func Sweep() {
 				iFrameBuffer.UnbindForRender()
 			}
 		}
+
+		// TODO: Remove horrible hard-coded framebuffer test blitting.
 		frameBuffers[1].BlitToFramebuffer(frameBuffers[2])
 	})
 	pipeline := make(chan func())
