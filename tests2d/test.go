@@ -31,8 +31,14 @@ func main() {
 	shader := gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
 	material := gfx.CreateTextureMaterial(texture)
-	mesh := gfx.GetSpriteMesh()
+	mesh := gfx.SpriteMesh()
+
+	camTexture := gfx.CreateRenderbuffer()
+	camBuffer := gfx.CreateRenderbuffer()
 	camera := gfx.CreateCamera2D()
+	camera.AddColorAttachment(camTexture)
+	camera.AddDepthStencilAttachment(camBuffer)
+	// gfx.AddRenderable(&gfx.Camera{}, shader, gfx.CreateTextureMaterial(camTexture), mesh, gfx.NewInstance())
 
 	// Controls
 	xAxis := &ui.InputControl{}

@@ -6,9 +6,15 @@ import (
 	"github.com/double-dev/limitengine/gmath"
 )
 
+const (
+	projNone = "None"
+	proj2D   = "2D"
+	proj3D   = "3D"
+)
+
 var (
 	frameBufferIndex = uint32(1)
-	frameBuffers     = make(map[uint32]framework.IFrameBuffer)
+	frameBuffers     = make(map[uint32]framework.IFramebuffer)
 	cameras          = []*Camera{}
 )
 
@@ -16,10 +22,30 @@ func init() { frameBuffers[0] = nil }
 
 // Camera is a gfx framebuffer.
 type Camera struct {
-	id                       uint32
-	perspective3D            bool
+	id                     uint32
+	colorAttachments       []Attachment
+	depthStencilAttachment Attachment
+
+	projectionType           string
 	nearPlane, farPlane, fov float32
 	prefs                    uniformLoader
+}
+
+func CreateCamera() *Camera {
+	camera := &Camera{
+		id:             frameBufferIndex,
+		projectionType: projNone,
+		prefs:          newUniformLoader(),
+	}
+	frameBufferIndex++
+	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
+	camera.prefs.AddMatrix4(
+		"vertprojMat",
+		gmath.NewIdentityMatrix4(),
+	)
+	camera.SetViewMat(gmath.NewIdentityMatrix4())
+	cameras = append(cameras, camera)
+	return camera
 }
 
 // CreateCamera2D creates a camera initialized with a 2D projection matrix.
@@ -27,13 +53,15 @@ type Camera struct {
 // the z-axis.
 func CreateCamera2D() *Camera {
 	camera := &Camera{
-		id:            0,
-		perspective3D: false,
-		prefs:         newUniformLoader(),
+		id:             frameBufferIndex,
+		projectionType: proj2D,
+		prefs:          newUniformLoader(),
 	}
+	frameBufferIndex++
+	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
-		gmath.NewProjectionMatrix2D(limitengine.GetAspectRatio()),
+		gmath.NewProjectionMatrix2D(limitengine.AspectRatio()),
 	)
 	camera.SetViewMat(gmath.NewIdentityMatrix4())
 	cameras = append(cameras, camera)
@@ -42,17 +70,19 @@ func CreateCamera2D() *Camera {
 
 func CreateCamera3D(nearPlane, farPlane, fov float32) *Camera {
 	camera := &Camera{
-		id:            0,
-		perspective3D: true,
-		nearPlane:     nearPlane,
-		farPlane:      farPlane,
-		fov:           fov,
-		prefs:         newUniformLoader(),
+		id:             frameBufferIndex,
+		projectionType: proj3D,
+		nearPlane:      nearPlane,
+		farPlane:       farPlane,
+		fov:            fov,
+		prefs:          newUniformLoader(),
 	}
+	frameBufferIndex++
+	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewProjectionMatrix3D(
-			limitengine.GetAspectRatio(),
+			limitengine.AspectRatio(),
 			nearPlane,
 			farPlane,
 			fov,
@@ -63,27 +93,51 @@ func CreateCamera3D(nearPlane, farPlane, fov float32) *Camera {
 	return camera
 }
 
+func (camera *Camera) AddColorAttachment(attachment Attachment) {
+	if len(camera.colorAttachments) <= 32 {
+		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddColorAttachment(attachment.getFrameworkAttachment()) })
+		camera.colorAttachments = append(camera.colorAttachments, attachment)
+	}
+}
+
+func (camera *Camera) AddDepthAttachment(attachment Attachment) {
+	if camera.depthStencilAttachment != nil {
+		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddDepthAttachment(attachment.getFrameworkAttachment()) })
+		camera.depthStencilAttachment = attachment
+	}
+}
+
+func (camera *Camera) AddStencilAttachment(attachment Attachment) {
+	if camera.depthStencilAttachment != nil {
+		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddStencilAttachment(attachment.getFrameworkAttachment()) })
+		camera.depthStencilAttachment = attachment
+	}
+}
+
+func (camera *Camera) AddDepthStencilAttachment(attachment Attachment) {
+	if camera.depthStencilAttachment != nil {
+		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddDepthStencilAttachment(attachment.getFrameworkAttachment()) })
+		camera.depthStencilAttachment = attachment
+	}
+}
+
 func (camera *Camera) updateProjectionMat(aspectRatio float32) {
-	if camera.perspective3D {
-		camera.prefs.AddMatrix4(
-			"vertprojMat",
-			gmath.NewProjectionMatrix3D(aspectRatio, camera.nearPlane, camera.farPlane, camera.fov),
-		)
-	} else {
+	switch camera.projectionType {
+	case proj2D:
 		camera.prefs.AddMatrix4(
 			"vertprojMat",
 			gmath.NewProjectionMatrix2D(aspectRatio),
 		)
+		break
+	case proj3D:
+		camera.prefs.AddMatrix4(
+			"vertprojMat",
+			gmath.NewProjectionMatrix3D(aspectRatio, camera.nearPlane, camera.farPlane, camera.fov),
+		)
+		break
 	}
 }
 
 func (camera *Camera) SetViewMat(viewMat gmath.Matrix4) {
 	camera.prefs.AddMatrix4("vertviewMat", viewMat)
-}
-
-func CreateFrameBuffer() {
-}
-
-func CreateRenderBuffer() {
-
 }

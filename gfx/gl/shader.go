@@ -19,7 +19,7 @@ type shader struct {
 	uniforms map[uint32]map[string]int32
 }
 
-func newShader(vertSrc, fragSrc string) *shader {
+func createShader(vertSrc, fragSrc string) *shader {
 	id := gl.CreateProgram()
 
 	vertID, vertErr := compileShader(vertSrc, vertexShaderType)

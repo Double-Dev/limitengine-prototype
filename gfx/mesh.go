@@ -104,7 +104,7 @@ func CreateMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh 
 	return mesh
 }
 
-func GetSpriteMesh() *Mesh {
+func SpriteMesh() *Mesh {
 	return spriteMesh
 }
 

@@ -9,11 +9,11 @@ import (
 
 // Variables used for default initialization.
 const (
-	InitWidth       = 600
-	InitHeight      = 600
-	WindowTitle     = "Hello Limitengine!"
-	WindowResizable = true
-	BufferSamples   = 8
+	initWidth       = 600
+	initHeight      = 600
+	windowTitle     = "Hello Limitengine!"
+	windowResizable = true
+	bufferSamples   = 8
 )
 
 // Variables used for default initialization.

@@ -16,9 +16,11 @@ type View interface {
 	SetAspectRatio(numer, denom int)
 	SetTitle(title string)
 	SetIcons(icons []image.Image)
+	SetSamples(samples int)
 
 	setCloseCallback(func())
 	setResizeCallback(func(width, height int))
+	setSampleCallback(func(samples int))
 
 	setJoystickCallback(func(joy Joystick, event Action))
 	setKeyCallback(func(key Key, scancode int, action Action, mods ModKey))

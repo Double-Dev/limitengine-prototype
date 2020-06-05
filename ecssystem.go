@@ -4,7 +4,6 @@ import (
 	"reflect"
 )
 
-// TODO: Store component sets rather than entities to avoid map queries.
 type ECSSystem struct {
 	targetComponents []reflect.Type
 	entities         []ECSEntity

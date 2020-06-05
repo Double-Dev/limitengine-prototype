@@ -37,7 +37,6 @@ func NewECS() *ECS {
 
 	// 	}
 	// }()
-	// TODO: Sort out ECS threading.
 }
 
 type ECSEntity struct {

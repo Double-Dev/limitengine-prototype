@@ -16,7 +16,8 @@ var (
 	context framework.Context
 
 	// TargetFPS is the amount of frames gfx will attempt to output per second.
-	TargetFPS     = float32(100.0)
+	TargetFPS = float32(100.0)
+	// AdvanceFrames is the number of frames for which the GFX pipeline will accept commands for in advance.
 	AdvanceFrames = 2
 
 	fps        = float32(0.0)
@@ -81,11 +82,13 @@ func Sweep() {
 		time.Sleep(time.Millisecond * 10)
 	}
 	actionQueue = append(actionQueue, func() {
-		// Batching System TODO: Improve with instanced rendering.
 		for camera, batch0 := range renderBatch {
-			// iFrameBuffer := frameBuffers[camera.id]
-			// fmt.Println(iFrameBuffer)
-			// Enable framebuffer
+			iFrameBuffer := frameBuffers[camera.id]
+			if iFrameBuffer != nil {
+				iFrameBuffer.Bind()
+			}
+			// TODO: Remove temporary clear screen code.
+			ClearScreen(0.0, 0.1, 0.1, 1.0)
 			for shader, batch1 := range batch0 {
 				iShader := shaders[shader.id]
 				iShader.Start()
@@ -120,7 +123,13 @@ func Sweep() {
 				}
 				iShader.Stop()
 			}
-			// Disable framebuffer
+			if iFrameBuffer != nil {
+				iFrameBuffer.Unbind()
+			}
+
+			// TODO: Remove awful temporary framebuffer display code.
+			ClearScreen(0.1, 0.0, 0.1, 1.0)
+			iFrameBuffer.BlitToScreen()
 		}
 	})
 	pipeline := make(chan func())

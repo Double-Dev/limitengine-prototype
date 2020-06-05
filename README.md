@@ -1,8 +1,9 @@
 # limitengine
-A custom GoLang cross-platform game engine.
+A custom GoLang cross-platform *application* engine. This engine has been designed with a wide variety of uses in mind (not just game development) to provide both the interface and tools necessary for developers to write any kind of program.
+Please note that Limitengine is still in alpha development and some features are subject to change. 
 
 # Dependencies
-This engine uses the GLFW, OpenGL, OpenAL, and Vorbis C libraries.
+This engine utilizes the GLFW, OpenGL, OpenAL Soft, and Vorbis libraries internally for low-level graphical and audio.
 
 External Packages:
 - golang.org/x/mobile

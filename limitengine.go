@@ -30,10 +30,11 @@ var (
 	view    View
 	state   *State
 
-	viewWidth, viewHeight int
+	viewWidth, viewHeight, viewSamples int
 
 	closeCallbacks       []func()
 	resizeCallbacks      []func(width, height int)
+	sampleCallbacks      []func(samples int)
 	joystickCallbacks    []func(joy Joystick, event Action)
 	keyCallbacks         []func(key Key, scancode int, action Action, mods ModKey)
 	mouseButtonCallbacks []func(button MouseButton, action Action, mod ModKey)
@@ -69,6 +70,12 @@ func init() {
 			resizeCallback(width, height)
 		}
 	})
+	view.setSampleCallback(func(samples int) {
+		viewSamples = samples
+		for _, sampleCallback := range sampleCallbacks {
+			sampleCallback(samples)
+		}
+	})
 	// TODO: Handle joystick callbacks.
 	view.setKeyCallback(func(key Key, scancode int, action Action, mods ModKey) {
 		for _, keyCallback := range keyCallbacks {
@@ -101,10 +108,10 @@ func init() {
 	log.Log("Core online...")
 }
 
-// Launch runs the core's Run() func until the engine closes and must be called on the main thread.
+// Launch begins the thread which runs the engine's update logic until the engine closes.
+// This must be called on the main thread.
 func Launch(initState *State) {
 	state = initState
-	// TODO: Clean up update loop.
 	go func() {
 		currentTime := time.Now().UnixNano()
 		for Running() {
@@ -125,6 +132,7 @@ func Launch(initState *State) {
 	}
 }
 
+// SetState sets a new application state for the engine to process.
 func SetState(newState *State) { state = newState }
 
 // AppView returns the engine's view.
@@ -133,14 +141,17 @@ func AppView() View { return view }
 // Running returns whether the engine is running.
 func Running() bool { return running }
 
-// GetWidth returns the current width (in pixels) of the view.
-func GetWidth() int { return viewWidth }
+// Width returns the current width (in pixels) of the view.
+func Width() int { return viewWidth }
 
-// GetHeight returns the current height (in pixels) of the view.
-func GetHeight() int { return viewHeight }
+// Height returns the current height (in pixels) of the view.
+func Height() int { return viewHeight }
 
-// GetAspectRatio returns the current aspect ratio of the view.
-func GetAspectRatio() float32 { return float32(viewHeight) / float32(viewWidth) }
+// AspectRatio returns the current aspect ratio of the view.
+func AspectRatio() float32 { return float32(viewHeight) / float32(viewWidth) }
+
+// Samples returns the current sample value of the view.
+func Samples() int { return viewSamples }
 
 // AddCloseCallback adds a close callback function to the application.
 func AddCloseCallback(callback func()) {

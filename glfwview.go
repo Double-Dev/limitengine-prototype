@@ -8,7 +8,9 @@ import (
 )
 
 type glfwView struct {
-	window *glfw.Window
+	window          *glfw.Window
+	samples         int
+	samplesCallback func(samples int)
 }
 
 func newGLFWView() *glfwView {
@@ -16,24 +18,24 @@ func newGLFWView() *glfwView {
 		log.Err("Error initializing GLFW:", err)
 	}
 	glfw.WindowHint(glfw.Visible, glfw.False)
-	if WindowResizable {
+	if windowResizable {
 		glfw.WindowHint(glfw.Resizable, glfw.True)
 	} else {
 		glfw.WindowHint(glfw.Resizable, glfw.False)
 	}
-	glfw.WindowHint(glfw.Samples, BufferSamples)
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 3)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	if runtime.GOOS == DARWIN {
 		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	}
-	window, err := glfw.CreateWindow(InitWidth, InitHeight, WindowTitle, nil, nil)
+	window, err := glfw.CreateWindow(initWidth, initHeight, windowTitle, nil, nil)
 	if err != nil {
 		log.Err("Error creating window.", err)
 	}
 	glfwView := &glfwView{
-		window: window,
+		window:  window,
+		samples: 4,
 	}
 	if WindowIcons != nil {
 		glfwView.SetIcons(WindowIcons)
@@ -82,6 +84,11 @@ func (glfwView *glfwView) SetIcons(icons []image.Image) {
 	glfwView.window.SetIcon(icons)
 }
 
+func (glfwView *glfwView) SetSamples(samples int) {
+	glfwView.samples = samples
+	glfwView.samplesCallback(samples)
+}
+
 func (glfwView *glfwView) setCloseCallback(callback func()) {
 	glfwView.window.SetCloseCallback(func(w *glfw.Window) {
 		callback()
@@ -92,6 +99,10 @@ func (glfwView *glfwView) setResizeCallback(callback func(width, height int)) {
 	glfwView.window.SetSizeCallback(func(w *glfw.Window, width, height int) {
 		callback(width, height)
 	})
+}
+
+func (glfwView *glfwView) setSampleCallback(callback func(samples int)) {
+	glfwView.samplesCallback = callback
 }
 
 func (glfwView *glfwView) setJoystickCallback(callback func(joy Joystick, event Action)) {

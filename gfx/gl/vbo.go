@@ -14,7 +14,7 @@ type vbo struct {
 	vboType uint32
 }
 
-func newVBO(vboType uint32) vbo {
+func createVBO(vboType uint32) vbo {
 	var id uint32
 	gl.GenBuffers(1, &id)
 	return vbo{
