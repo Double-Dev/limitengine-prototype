@@ -85,10 +85,9 @@ func Sweep() {
 		for camera, batch0 := range renderBatch {
 			iFrameBuffer := frameBuffers[camera.id]
 			if iFrameBuffer != nil {
-				iFrameBuffer.Bind()
+				iFrameBuffer.BindForRender()
 			}
-			// TODO: Remove temporary clear screen code.
-			ClearScreen(0.0, 0.1, 0.1, 1.0)
+			context.ClearScreen(camera.clearColor[0], camera.clearColor[1], camera.clearColor[2], camera.clearColor[3])
 			for shader, batch1 := range batch0 {
 				iShader := shaders[shader.id]
 				iShader.Start()
@@ -124,13 +123,10 @@ func Sweep() {
 				iShader.Stop()
 			}
 			if iFrameBuffer != nil {
-				iFrameBuffer.Unbind()
+				iFrameBuffer.UnbindForRender()
 			}
-
-			// TODO: Remove awful temporary framebuffer display code.
-			ClearScreen(0.1, 0.0, 0.1, 1.0)
-			iFrameBuffer.BlitToScreen()
 		}
+		frameBuffers[1].BlitToFramebuffer(frameBuffers[2])
 	})
 	pipeline := make(chan func())
 	gfxPipeline = append(gfxPipeline, pipeline)

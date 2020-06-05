@@ -8,8 +8,8 @@ import (
 
 type fbo struct {
 	id                     uint32
-	colorAttachments       []framework.IAttachment
-	depthStencilAttachment framework.IAttachment
+	colorAttachments       []uint32
+	depthStencilAttachment uint32
 
 	width, height, samples uint32
 }
@@ -22,40 +22,50 @@ func createFBO() *fbo {
 	}
 }
 
-func (fbo *fbo) Bind() {
+func (fbo *fbo) bind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.id)
 }
 
+func (fbo *fbo) BindForRender() {
+	gl.DrawBuffers(int32(len(fbo.colorAttachments)), &fbo.colorAttachments[0])
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fbo.id)
+}
+
 func (fbo *fbo) AddColorAttachment(attachment framework.IAttachment) {
-	fbo.Bind()
+	fbo.bind()
 	attachment.AttachToFramebufferColor(fbo, len(fbo.colorAttachments))
-	fbo.colorAttachments = append(fbo.colorAttachments, attachment)
-	fbo.Unbind()
+	fbo.colorAttachments = append(fbo.colorAttachments, attachment.ID())
+	fbo.unbind()
 }
 
 func (fbo *fbo) AddDepthAttachment(attachment framework.IAttachment) {
-	fbo.Bind()
+	fbo.bind()
 	attachment.AttachToFramebufferDepth(fbo)
-	fbo.depthStencilAttachment = attachment
-	fbo.Unbind()
+	fbo.depthStencilAttachment = attachment.ID()
+	fbo.unbind()
 }
 
 func (fbo *fbo) AddStencilAttachment(attachment framework.IAttachment) {
-	fbo.Bind()
+	fbo.bind()
 	attachment.AttachToFramebufferStencil(fbo)
-	fbo.depthStencilAttachment = attachment
-	fbo.Unbind()
+	fbo.depthStencilAttachment = attachment.ID()
+	fbo.unbind()
 }
 
 func (fbo *fbo) AddDepthStencilAttachment(attachment framework.IAttachment) {
-	fbo.Bind()
+	fbo.bind()
 	attachment.AttachToFramebufferDepthStencil(fbo)
-	fbo.depthStencilAttachment = attachment
-	fbo.Unbind()
+	fbo.depthStencilAttachment = attachment.ID()
+	fbo.unbind()
 }
 
-func (fbo *fbo) Unbind() {
+func (fbo *fbo) unbind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+func (fbo *fbo) UnbindForRender() {
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+	gl.DrawBuffer(gl.BACK)
 }
 
 func (fbo *fbo) Delete() {
@@ -68,6 +78,16 @@ func (fbo *fbo) BlitToScreen() {
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, fbo.id)
 	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
 	gl.BlitFramebuffer(0, 0, fbo.Width(), fbo.Height(), 0, 0, fbo.Width(), fbo.Height(), gl.COLOR_BUFFER_BIT, gl.NEAREST)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
+	targetFBO := framebuffer.(*fbo)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, targetFBO.id)
+	gl.DrawBuffer(gl.BACK)
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
+	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
+	gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, srcFBO.Width(), srcFBO.Height(), gl.COLOR_BUFFER_BIT, gl.NEAREST)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 

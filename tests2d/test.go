@@ -33,12 +33,24 @@ func main() {
 	material := gfx.CreateTextureMaterial(texture)
 	mesh := gfx.SpriteMesh()
 
-	camTexture := gfx.CreateRenderbuffer()
-	camBuffer := gfx.CreateRenderbuffer()
+	cam1Color := gfx.CreateRenderbuffer()
+	cam1Depth := gfx.CreateRenderbuffer()
 	camera := gfx.CreateCamera2D()
-	camera.AddColorAttachment(camTexture)
-	camera.AddDepthStencilAttachment(camBuffer)
-	// gfx.AddRenderable(&gfx.Camera{}, shader, gfx.CreateTextureMaterial(camTexture), mesh, gfx.NewInstance())
+	camera.AddColorAttachment(cam1Color)
+	camera.AddDepthStencilAttachment(cam1Depth)
+	camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
+
+	cam2Color := gfx.CreateEmptyTexture()
+	cam2Depth := gfx.CreateRenderbuffer()
+	camera2 := gfx.CreateCamera2D()
+	camera2.AddColorAttachment(cam2Color)
+	camera2.AddDepthStencilAttachment(cam2Depth)
+
+	fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
+	cam2Mat := gfx.CreateTextureMaterial(cam2Color)
+	defaultCamera := gfx.CreateDefaultCamera()
+
+	gfx.AddRenderable(defaultCamera, fboShader, cam2Mat, mesh, gfx.NewInstance())
 
 	// Controls
 	xAxis := &ui.InputControl{}

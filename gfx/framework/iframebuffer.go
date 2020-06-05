@@ -1,15 +1,16 @@
 package framework
 
 type IFramebuffer interface {
-	Bind()
+	BindForRender()
 	AddColorAttachment(attachment IAttachment)
 	AddDepthAttachment(attachment IAttachment)
 	AddStencilAttachment(attachment IAttachment)
 	AddDepthStencilAttachment(attachment IAttachment)
-	Unbind()
+	UnbindForRender()
 	Delete()
 
 	BlitToScreen()
+	BlitToFramebuffer(framebuffer IFramebuffer)
 
 	Width() int32
 	Height() int32

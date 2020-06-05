@@ -13,4 +13,5 @@ type ITexture interface {
 	AttachToFramebufferDepth(framebuffer IFramebuffer)
 	AttachToFramebufferStencil(framebuffer IFramebuffer)
 	AttachToFramebufferDepthStencil(framebuffer IFramebuffer)
+	ID() uint32
 }

@@ -148,3 +148,7 @@ func (texture *texture) AttachToFramebufferDepthStencil(framebuffer framework.IF
 		gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, texture.textureType, texture.id, 0)
 	}
 }
+
+func (texture *texture) ID() uint32 {
+	return texture.id
+}

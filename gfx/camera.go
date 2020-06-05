@@ -26,19 +26,21 @@ type Camera struct {
 	colorAttachments       []Attachment
 	depthStencilAttachment Attachment
 
+	clearColor gmath.Vector4
+
 	projectionType           string
 	nearPlane, farPlane, fov float32
 	prefs                    uniformLoader
 }
 
-func CreateCamera() *Camera {
+func CreateDefaultCamera() *Camera {
 	camera := &Camera{
-		id:             frameBufferIndex,
+		id:             0,
+		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType: projNone,
 		prefs:          newUniformLoader(),
 	}
 	frameBufferIndex++
-	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewIdentityMatrix4(),
@@ -54,6 +56,7 @@ func CreateCamera() *Camera {
 func CreateCamera2D() *Camera {
 	camera := &Camera{
 		id:             frameBufferIndex,
+		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType: proj2D,
 		prefs:          newUniformLoader(),
 	}
@@ -71,6 +74,7 @@ func CreateCamera2D() *Camera {
 func CreateCamera3D(nearPlane, farPlane, fov float32) *Camera {
 	camera := &Camera{
 		id:             frameBufferIndex,
+		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType: proj3D,
 		nearPlane:      nearPlane,
 		farPlane:       farPlane,
@@ -91,6 +95,10 @@ func CreateCamera3D(nearPlane, farPlane, fov float32) *Camera {
 	camera.SetViewMat(gmath.NewIdentityMatrix4())
 	cameras = append(cameras, camera)
 	return camera
+}
+
+func (camera *Camera) SetClearColor(r, g, b, a float32) {
+	camera.clearColor.Set(r, g, b, a)
 }
 
 func (camera *Camera) AddColorAttachment(attachment Attachment) {

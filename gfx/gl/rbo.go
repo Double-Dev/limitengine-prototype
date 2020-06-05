@@ -45,3 +45,7 @@ func (rbo *rbo) AttachToFramebufferDepthStencil(framebuffer framework.IFramebuff
 	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_STENCIL, framebuffer.Width(), framebuffer.Height())
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, rbo.id)
 }
+
+func (rbo *rbo) ID() uint32 {
+	return rbo.id
+}

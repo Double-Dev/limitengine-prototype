@@ -17,6 +17,7 @@ func NewRenderSystem() *limitengine.ECSSystem {
 			render := components[0].(*RenderComponent)
 			render.Instance.SetTransform(transformMat)
 		}
+
 		Sweep()
 	}, (*RenderComponent)(nil), (*gmath.TransformComponent)(nil))
 }
