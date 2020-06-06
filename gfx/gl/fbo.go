@@ -8,8 +8,8 @@ import (
 
 type fbo struct {
 	id                     uint32
-	colorAttachment        uint32
-	depthStencilAttachment uint32
+	colorAttachment        framework.IAttachment
+	depthStencilAttachment framework.IAttachment
 
 	width, height, samples uint32
 }
@@ -27,35 +27,35 @@ func (fbo *fbo) bind() {
 }
 
 func (fbo *fbo) BindForRender() {
-	gl.DrawBuffers(1, &fbo.colorAttachment)
+	gl.DrawBuffers(1, fbo.colorAttachment.ID())
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fbo.id)
 }
 
 func (fbo *fbo) AddColorAttachment(attachment framework.IAttachment) {
 	fbo.bind()
 	attachment.AttachToFramebufferColor(fbo)
-	fbo.colorAttachment = attachment.ID()
+	fbo.colorAttachment = attachment
 	fbo.unbind()
 }
 
 func (fbo *fbo) AddDepthAttachment(attachment framework.IAttachment) {
 	fbo.bind()
 	attachment.AttachToFramebufferDepth(fbo)
-	fbo.depthStencilAttachment = attachment.ID()
+	fbo.depthStencilAttachment = attachment
 	fbo.unbind()
 }
 
 func (fbo *fbo) AddStencilAttachment(attachment framework.IAttachment) {
 	fbo.bind()
 	attachment.AttachToFramebufferStencil(fbo)
-	fbo.depthStencilAttachment = attachment.ID()
+	fbo.depthStencilAttachment = attachment
 	fbo.unbind()
 }
 
 func (fbo *fbo) AddDepthStencilAttachment(attachment framework.IAttachment) {
 	fbo.bind()
 	attachment.AttachToFramebufferDepthStencil(fbo)
-	fbo.depthStencilAttachment = attachment.ID()
+	fbo.depthStencilAttachment = attachment
 	fbo.unbind()
 }
 
@@ -89,6 +89,18 @@ func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
 	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
 	gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, srcFBO.Width(), srcFBO.Height(), gl.COLOR_BUFFER_BIT, gl.NEAREST)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+func (fbo *fbo) Resize(width, height int32) {
+	fbo.BindForRender()
+	if fbo.colorAttachment != nil {
+		fbo.colorAttachment.AttachToFramebufferColor(fbo)
+	}
+	if fbo.depthStencilAttachment != nil {
+		fbo.depthStencilAttachment.AttachToFramebufferDepthStencil(fbo)
+	}
+	gl.Viewport(0, 0, width, height)
+	fbo.UnbindForRender()
 }
 
 func (fbo *fbo) Width() int32 {

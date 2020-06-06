@@ -20,7 +20,7 @@ func main() {
 
 	// Setup Window
 	limitengine.AppView().SetTitle("2D Tests!")
-	limitengine.AppView().SetPosition(0, 50)
+	limitengine.AppView().SetPosition(100, 100)
 	limitengine.AppView().SetAspectRatio(3, 2)
 	limitengine.AppView().SetIcons([]image.Image{gio.LoadIcon("Test.png")})
 
@@ -42,15 +42,14 @@ func main() {
 
 	cam2Color := gfx.CreateEmptyTexture()
 	cam2Depth := gfx.CreateRenderbuffer()
-	camera2 := gfx.CreateCamera2D()
+	camera2 := gfx.CreateCamera()
 	camera2.AddColorAttachment(cam2Color)
 	camera2.AddDepthStencilAttachment(cam2Depth)
 
 	fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
 	cam2Mat := gfx.CreateTextureMaterial(cam2Color)
-	defaultCamera := gfx.CreateDefaultCamera()
 
-	gfx.AddRenderable(defaultCamera, fboShader, cam2Mat, mesh, gfx.NewInstance())
+	gfx.AddRenderable(gfx.DefaultCamera(), fboShader, cam2Mat, mesh, gfx.NewInstance())
 
 	// Controls
 	xAxis := &ui.InputControl{}

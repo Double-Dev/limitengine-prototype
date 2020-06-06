@@ -6,5 +6,5 @@ type IRenderbuffer interface {
 	AttachToFramebufferDepth(framebuffer IFramebuffer)
 	AttachToFramebufferStencil(framebuffer IFramebuffer)
 	AttachToFramebufferDepthStencil(framebuffer IFramebuffer)
-	ID() uint32
+	ID() *uint32
 }

@@ -42,10 +42,10 @@ func init() {
 
 			limitengine.AddResizeCallback(func(width, height int) {
 				fmt.Println(width, height)
-				for _, camera := range cameras {
-					camera.updateProjectionMat(float32(height) / float32(width))
-				}
 				actionQueue = append(actionQueue, func() { context.Resize(width, height) })
+				for _, camera := range cameras {
+					camera.resize(width, height)
+				}
 			})
 
 			currentTime := time.Now().UnixNano()
@@ -129,6 +129,7 @@ func Sweep() {
 
 		// TODO: Remove horrible hard-coded framebuffer test blitting.
 		frameBuffers[1].BlitToFramebuffer(frameBuffers[2])
+		// frameBuffers[1].BlitToScreen()
 	})
 	pipeline := make(chan func())
 	gfxPipeline = append(gfxPipeline, pipeline)

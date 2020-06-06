@@ -16,9 +16,25 @@ var (
 	frameBufferIndex = uint32(1)
 	frameBuffers     = make(map[uint32]framework.IFramebuffer)
 	cameras          = []*Camera{}
+
+	defaultCamera = &Camera{
+		id:             0,
+		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
+		projectionType: projNone,
+		prefs:          newUniformLoader(),
+	}
 )
 
-func init() { frameBuffers[0] = nil }
+func init() {
+	frameBuffers[0] = nil
+
+	defaultCamera.prefs.AddMatrix4(
+		"vertprojMat",
+		gmath.NewIdentityMatrix4(),
+	)
+	defaultCamera.SetViewMat(gmath.NewIdentityMatrix4())
+	cameras = append(cameras, defaultCamera)
+}
 
 // Camera is a gfx framebuffer.
 type Camera struct {
@@ -33,14 +49,19 @@ type Camera struct {
 	prefs                    uniformLoader
 }
 
-func CreateDefaultCamera() *Camera {
+func DefaultCamera() *Camera {
+	return defaultCamera
+}
+
+func CreateCamera() *Camera {
 	camera := &Camera{
-		id:             0,
+		id:             frameBufferIndex,
 		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType: projNone,
 		prefs:          newUniformLoader(),
 	}
 	frameBufferIndex++
+	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewIdentityMatrix4(),
@@ -129,7 +150,11 @@ func (camera *Camera) AddDepthStencilAttachment(attachment Attachment) {
 	}
 }
 
-func (camera *Camera) updateProjectionMat(aspectRatio float32) {
+func (camera *Camera) resize(width, height int) {
+	if frameBuffers[camera.id] != nil {
+		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].Resize(int32(width), int32(height)) })
+	}
+	aspectRatio := float32(height) / float32(width)
 	switch camera.projectionType {
 	case proj2D:
 		camera.prefs.AddMatrix4(

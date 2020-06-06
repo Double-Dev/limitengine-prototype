@@ -149,6 +149,6 @@ func (texture *texture) AttachToFramebufferDepthStencil(framebuffer framework.IF
 	}
 }
 
-func (texture *texture) ID() uint32 {
-	return texture.id
+func (texture *texture) ID() *uint32 {
+	return &texture.id
 }
