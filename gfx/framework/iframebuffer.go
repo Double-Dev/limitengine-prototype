@@ -2,10 +2,8 @@ package framework
 
 type IFramebuffer interface {
 	BindForRender()
-	AddColorAttachment(attachment IAttachment)
-	AddDepthAttachment(attachment IAttachment)
-	AddStencilAttachment(attachment IAttachment)
-	AddDepthStencilAttachment(attachment IAttachment)
+	SetColorAttachment(attachment IAttachment)
+	SetDepthAttachment(attachment IAttachment)
 	UnbindForRender()
 	Delete()
 

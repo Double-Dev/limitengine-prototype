@@ -10,8 +10,10 @@ void vert() {
 texture0 tex;
 
 void frag() {
-	vec4 temp = texture(tex, vec2(lesl.textureCoord.x, 1.0 - lesl.textureCoord.y));
-    // lesl.outColor = temp;
-    lesl.outColor = vec4(1.0 - temp.r, 1.0 - temp.g, 1.0 - temp.b, temp.a);
+	lesl.outColor = texture(tex, vec2(lesl.textureCoord.x, 1.0 - lesl.textureCoord.y));
+    // lesl.outColor = vec4(1.0 - lesl.outColor.r, 1.0 - lesl.outColor.g, 1.0 - lesl.outColor.b, lesl.outColor.a);
+
+    // float average = (lesl.outColor.r + lesl.outColor.g + lesl.outColor.b) / 3.0;
+    // lesl.outColor = vec4(average, average, average, 1.0);
 }
 #end

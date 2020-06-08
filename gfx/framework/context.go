@@ -4,7 +4,7 @@ type Context interface {
 	Resize(width, height int)
 
 	ClearScreen(r, g, b, a float32)
-	CreateFramebuffer() IFramebuffer
+	CreateFramebuffer(colorAttachment, depthAttachment IAttachment) IFramebuffer
 	CreateRenderbuffer() IRenderbuffer
 	CreateShader(vertSrc, fragSrc string) IShader
 

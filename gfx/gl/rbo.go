@@ -28,22 +28,20 @@ func (rbo *rbo) AttachToFramebufferColor(framebuffer framework.IFramebuffer) {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0), gl.RENDERBUFFER, rbo.id)
 }
 
+func (rbo *rbo) ResizeFramebufferColor(framebuffer framework.IFramebuffer) {
+	rbo.bind()
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.RGB, framebuffer.Width(), framebuffer.Height())
+}
+
 func (rbo *rbo) AttachToFramebufferDepth(framebuffer framework.IFramebuffer) {
 	rbo.bind()
 	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo.id)
 }
 
-func (rbo *rbo) AttachToFramebufferStencil(framebuffer framework.IFramebuffer) {
+func (rbo *rbo) ResizeFramebufferDepth(framebuffer framework.IFramebuffer) {
 	rbo.bind()
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.STENCIL_INDEX, framebuffer.Width(), framebuffer.Height())
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, rbo.id)
-}
-
-func (rbo *rbo) AttachToFramebufferDepthStencil(framebuffer framework.IFramebuffer) {
-	rbo.bind()
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_STENCIL, framebuffer.Width(), framebuffer.Height())
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, rbo.id)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
 }
 
 func (rbo *rbo) ID() *uint32 {

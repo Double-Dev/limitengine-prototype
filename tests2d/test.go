@@ -33,23 +33,22 @@ func main() {
 	material := gfx.CreateTextureMaterial(texture)
 	mesh := gfx.SpriteMesh()
 
+	// TODO: Fix issue where having a texture as a framebuffer depth attachment doesn't work.
 	cam1Color := gfx.CreateRenderbuffer()
 	cam1Depth := gfx.CreateRenderbuffer()
-	camera := gfx.CreateCamera2D()
-	camera.AddColorAttachment(cam1Color)
-	camera.AddDepthStencilAttachment(cam1Depth)
+	camera := gfx.CreateCamera2D(cam1Color, cam1Depth)
 	camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
 
 	cam2Color := gfx.CreateEmptyTexture()
 	cam2Depth := gfx.CreateRenderbuffer()
-	camera2 := gfx.CreateCamera()
-	camera2.AddColorAttachment(cam2Color)
-	camera2.AddDepthStencilAttachment(cam2Depth)
+	gfx.CreateCamera(cam2Color, cam2Depth)
 
 	fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
 	cam2Mat := gfx.CreateTextureMaterial(cam2Color)
 
-	gfx.AddRenderable(gfx.DefaultCamera(), fboShader, cam2Mat, mesh, gfx.NewInstance())
+	pos := gfx.NewInstance()
+	pos.SetTransform(gmath.NewTransformMatrix(gmath.NewVector3(0.0, 0.0, 0.5), gmath.NewIdentityQuaternion(), gmath.NewVector3(1.0, 1.0, 1.0)))
+	gfx.AddRenderable(gfx.DefaultCamera(), fboShader, cam2Mat, mesh, pos)
 
 	// Controls
 	xAxis := &ui.InputControl{}
@@ -244,11 +243,11 @@ func main() {
 				if control.canJump {
 					control.gravityEnabled = true
 					control.canJump = false
-					motion.Velocity[1] += 2.0
+					motion.Velocity[1] = 2.0
 				} else if control.canWallJump {
 					control.gravityEnabled = true
 					control.canWallJump = false
-					motion.Velocity[1] += 2.0
+					motion.Velocity[1] = 2.0
 					if control.wallJumpLeft {
 						motion.Velocity[0] = -4.0
 					} else {

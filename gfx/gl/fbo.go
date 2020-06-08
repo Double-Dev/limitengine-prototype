@@ -7,9 +7,9 @@ import (
 )
 
 type fbo struct {
-	id                     uint32
-	colorAttachment        framework.IAttachment
-	depthStencilAttachment framework.IAttachment
+	id              uint32
+	colorAttachment framework.IAttachment
+	depthAttachment framework.IAttachment
 
 	width, height, samples uint32
 }
@@ -27,35 +27,21 @@ func (fbo *fbo) bind() {
 }
 
 func (fbo *fbo) BindForRender() {
-	gl.DrawBuffers(1, fbo.colorAttachment.ID())
+	// gl.DrawBuffers(1, fbo.colorAttachment.ID())
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fbo.id)
 }
 
-func (fbo *fbo) AddColorAttachment(attachment framework.IAttachment) {
+func (fbo *fbo) SetColorAttachment(attachment framework.IAttachment) {
 	fbo.bind()
 	attachment.AttachToFramebufferColor(fbo)
 	fbo.colorAttachment = attachment
 	fbo.unbind()
 }
 
-func (fbo *fbo) AddDepthAttachment(attachment framework.IAttachment) {
+func (fbo *fbo) SetDepthAttachment(attachment framework.IAttachment) {
 	fbo.bind()
 	attachment.AttachToFramebufferDepth(fbo)
-	fbo.depthStencilAttachment = attachment
-	fbo.unbind()
-}
-
-func (fbo *fbo) AddStencilAttachment(attachment framework.IAttachment) {
-	fbo.bind()
-	attachment.AttachToFramebufferStencil(fbo)
-	fbo.depthStencilAttachment = attachment
-	fbo.unbind()
-}
-
-func (fbo *fbo) AddDepthStencilAttachment(attachment framework.IAttachment) {
-	fbo.bind()
-	attachment.AttachToFramebufferDepthStencil(fbo)
-	fbo.depthStencilAttachment = attachment
+	fbo.depthAttachment = attachment
 	fbo.unbind()
 }
 
@@ -65,7 +51,7 @@ func (fbo *fbo) unbind() {
 
 func (fbo *fbo) UnbindForRender() {
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
-	gl.DrawBuffer(gl.BACK)
+	// gl.DrawBuffer(gl.BACK)
 }
 
 func (fbo *fbo) Delete() {
@@ -94,10 +80,10 @@ func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
 func (fbo *fbo) Resize(width, height int32) {
 	fbo.BindForRender()
 	if fbo.colorAttachment != nil {
-		fbo.colorAttachment.AttachToFramebufferColor(fbo)
+		fbo.colorAttachment.ResizeFramebufferColor(fbo)
 	}
-	if fbo.depthStencilAttachment != nil {
-		fbo.depthStencilAttachment.AttachToFramebufferDepthStencil(fbo)
+	if fbo.depthAttachment != nil {
+		fbo.depthAttachment.ResizeFramebufferDepth(fbo)
 	}
 	gl.Viewport(0, 0, width, height)
 	fbo.UnbindForRender()

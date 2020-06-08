@@ -39,7 +39,7 @@ func init() {
 // Camera is a gfx framebuffer.
 type Camera struct {
 	id                     uint32
-	colorAttachments       []Attachment
+	colorAttachment        Attachment
 	depthStencilAttachment Attachment
 
 	clearColor gmath.Vector4
@@ -53,15 +53,19 @@ func DefaultCamera() *Camera {
 	return defaultCamera
 }
 
-func CreateCamera() *Camera {
+func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
-		id:             frameBufferIndex,
-		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
-		projectionType: projNone,
-		prefs:          newUniformLoader(),
+		id:                     frameBufferIndex,
+		colorAttachment:        colorAttachment,
+		depthStencilAttachment: depthAttachment,
+		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
+		projectionType:         projNone,
+		prefs:                  newUniformLoader(),
 	}
 	frameBufferIndex++
-	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
+	actionQueue = append(actionQueue, func() {
+		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment())
+	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewIdentityMatrix4(),
@@ -74,15 +78,19 @@ func CreateCamera() *Camera {
 // CreateCamera2D creates a camera initialized with a 2D projection matrix.
 // Note: A 2D camera cannot 'see' anything more than 1.0 units away on
 // the z-axis.
-func CreateCamera2D() *Camera {
+func CreateCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
-		id:             frameBufferIndex,
-		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
-		projectionType: proj2D,
-		prefs:          newUniformLoader(),
+		id:                     frameBufferIndex,
+		colorAttachment:        colorAttachment,
+		depthStencilAttachment: depthAttachment,
+		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
+		projectionType:         proj2D,
+		prefs:                  newUniformLoader(),
 	}
 	frameBufferIndex++
-	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
+	actionQueue = append(actionQueue, func() {
+		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment())
+	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewProjectionMatrix2D(limitengine.AspectRatio()),
@@ -92,18 +100,22 @@ func CreateCamera2D() *Camera {
 	return camera
 }
 
-func CreateCamera3D(nearPlane, farPlane, fov float32) *Camera {
+func CreateCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farPlane, fov float32) *Camera {
 	camera := &Camera{
-		id:             frameBufferIndex,
-		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
-		projectionType: proj3D,
-		nearPlane:      nearPlane,
-		farPlane:       farPlane,
-		fov:            fov,
-		prefs:          newUniformLoader(),
+		id:                     frameBufferIndex,
+		colorAttachment:        colorAttachment,
+		depthStencilAttachment: depthAttachment,
+		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
+		projectionType:         proj3D,
+		nearPlane:              nearPlane,
+		farPlane:               farPlane,
+		fov:                    fov,
+		prefs:                  newUniformLoader(),
 	}
 	frameBufferIndex++
-	actionQueue = append(actionQueue, func() { frameBuffers[camera.id] = context.CreateFramebuffer() })
+	actionQueue = append(actionQueue, func() {
+		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment())
+	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewProjectionMatrix3D(
@@ -120,34 +132,6 @@ func CreateCamera3D(nearPlane, farPlane, fov float32) *Camera {
 
 func (camera *Camera) SetClearColor(r, g, b, a float32) {
 	camera.clearColor.Set(r, g, b, a)
-}
-
-func (camera *Camera) AddColorAttachment(attachment Attachment) {
-	if len(camera.colorAttachments) <= 32 {
-		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddColorAttachment(attachment.getFrameworkAttachment()) })
-		camera.colorAttachments = append(camera.colorAttachments, attachment)
-	}
-}
-
-func (camera *Camera) AddDepthAttachment(attachment Attachment) {
-	if camera.depthStencilAttachment != nil {
-		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddDepthAttachment(attachment.getFrameworkAttachment()) })
-		camera.depthStencilAttachment = attachment
-	}
-}
-
-func (camera *Camera) AddStencilAttachment(attachment Attachment) {
-	if camera.depthStencilAttachment != nil {
-		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddStencilAttachment(attachment.getFrameworkAttachment()) })
-		camera.depthStencilAttachment = attachment
-	}
-}
-
-func (camera *Camera) AddDepthStencilAttachment(attachment Attachment) {
-	if camera.depthStencilAttachment != nil {
-		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].AddDepthStencilAttachment(attachment.getFrameworkAttachment()) })
-		camera.depthStencilAttachment = attachment
-	}
 }
 
 func (camera *Camera) resize(width, height int) {

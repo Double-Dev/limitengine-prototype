@@ -67,42 +67,6 @@ func (texture *texture) TextureData(image []uint8, width, height int32) {
 	}
 }
 
-// func createTexture(image []uint8, width, height int32) *texture {
-// 	var id uint32
-// 	gl.GenTextures(1, &id)
-// 	texture := &texture{
-// 		id:      id,
-// 		texType: textureType2D,
-// 	}
-// 	texture.Bind()
-
-// 	gl.TexParameterf(texture.texType, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-// 	gl.TexParameterf(texture.texType, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-
-// 	gl.TexImage2D(texture.texType, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(image))
-
-// 	// gl.GenerateMipmap(texture.texType)
-// 	// gl.TexParameteri(texture.texType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-// 	// gl.TexParameterf(texture.texType, gl.MAX_TEXTURE_LOD_BIAS, 0.0)
-
-// 	// var data float32
-// 	// gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &data)
-// 	// amount := gmath.Min(4.0, data)
-// 	// gl.TexParameterf(texture.texType, gl.TEXTURE_MAX_ANISOTROPY, amount)
-
-// 	texture.Unbind()
-// 	return texture
-// }
-
-// func newTextureEmpty(texType uint32) *texture {
-// 	var id uint32
-// 	gl.GenTextures(1, &id)
-// 	return &texture{
-// 		id:      id,
-// 		texType: textureType2D,
-// 	}
-// }
-
 func (texture *texture) Bind() {
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, texture.id)
@@ -125,6 +89,13 @@ func (texture *texture) AttachToFramebufferColor(framebuffer framework.IFramebuf
 	}
 }
 
+func (texture *texture) ResizeFramebufferColor(framebuffer framework.IFramebuffer) {
+	if texture.textureType == textureType2D {
+		texture.Bind()
+		gl.TexImage2D(texture.textureType, 0, gl.RGB, framebuffer.Width(), framebuffer.Height(), 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
+	}
+}
+
 func (texture *texture) AttachToFramebufferDepth(framebuffer framework.IFramebuffer) {
 	if texture.textureType == textureType2D {
 		texture.Bind()
@@ -133,19 +104,10 @@ func (texture *texture) AttachToFramebufferDepth(framebuffer framework.IFramebuf
 	}
 }
 
-func (texture *texture) AttachToFramebufferStencil(framebuffer framework.IFramebuffer) {
+func (texture *texture) ResizeFramebufferDepth(framebuffer framework.IFramebuffer) {
 	if texture.textureType == textureType2D {
 		texture.Bind()
-		gl.TexImage2D(texture.textureType, 0, gl.STENCIL_INDEX, framebuffer.Width(), framebuffer.Height(), 0, gl.STENCIL_INDEX, gl.UNSIGNED_BYTE, nil)
-		gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, texture.textureType, texture.id, 0)
-	}
-}
-
-func (texture *texture) AttachToFramebufferDepthStencil(framebuffer framework.IFramebuffer) {
-	if texture.textureType == textureType2D {
-		texture.Bind()
-		gl.TexImage2D(texture.textureType, 0, gl.DEPTH_STENCIL, framebuffer.Width(), framebuffer.Height(), 0, gl.DEPTH_STENCIL, gl.UNSIGNED_BYTE, nil)
-		gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, texture.textureType, texture.id, 0)
+		gl.TexImage2D(texture.textureType, 0, gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height(), 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_BYTE, nil)
 	}
 }
 

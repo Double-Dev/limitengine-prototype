@@ -10,8 +10,8 @@ type ITexture interface {
 
 	// Attachment functions:
 	AttachToFramebufferColor(framebuffer IFramebuffer)
+	ResizeFramebufferColor(framebuffer IFramebuffer)
 	AttachToFramebufferDepth(framebuffer IFramebuffer)
-	AttachToFramebufferStencil(framebuffer IFramebuffer)
-	AttachToFramebufferDepthStencil(framebuffer IFramebuffer)
+	ResizeFramebufferDepth(framebuffer IFramebuffer)
 	ID() *uint32
 }

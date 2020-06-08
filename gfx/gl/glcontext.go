@@ -30,12 +30,15 @@ func (glContext glContext) Resize(width, height int) {
 
 func (glContext glContext) ClearScreen(r, g, b, a float32) {
 	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthMask(true)
 	gl.ClearColor(r, g, b, a)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-func (glContext glContext) CreateFramebuffer() framework.IFramebuffer {
+func (glContext glContext) CreateFramebuffer(colorAttachment, depthAttachment framework.IAttachment) framework.IFramebuffer {
 	framebuffer := createFBO()
+	framebuffer.SetColorAttachment(colorAttachment)
+	framebuffer.SetDepthAttachment(depthAttachment)
 	return framebuffer
 }
 
