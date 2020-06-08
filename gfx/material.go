@@ -1,5 +1,6 @@
 package gfx
 
+// TODO: Think about turning Material into interface to allow easy creation of variations.
 type Material struct {
 	texture      *Texture
 	prefs        uniformLoader
