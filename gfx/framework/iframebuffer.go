@@ -7,7 +7,6 @@ type IFramebuffer interface {
 	UnbindForRender()
 	Delete()
 
-	BlitToScreen()
 	BlitToFramebuffer(framebuffer IFramebuffer)
 
 	Resize(width, height int32)

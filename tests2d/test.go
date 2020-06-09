@@ -41,7 +41,9 @@ func main() {
 
 	cam2Color := gfx.CreateEmptyTexture()
 	cam2Depth := gfx.CreateRenderbuffer()
-	gfx.CreateCamera(cam2Color, cam2Depth)
+	camera2 := gfx.CreateCamera(cam2Color, cam2Depth)
+
+	camera.AddBlitCamera(camera2)
 
 	fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
 	cam2Mat := gfx.CreateTextureMaterial(cam2Color)

@@ -125,11 +125,11 @@ func Sweep() {
 			if iFrameBuffer != nil {
 				iFrameBuffer.UnbindForRender()
 			}
-		}
 
-		// TODO: Remove horrible hard-coded framebuffer test blitting.
-		frameBuffers[1].BlitToFramebuffer(frameBuffers[2])
-		// frameBuffers[1].BlitToScreen()
+			for _, blitCamera := range camera.blitCameras {
+				iFrameBuffer.BlitToFramebuffer(frameBuffers[blitCamera.id])
+			}
+		}
 	})
 	pipeline := make(chan func())
 	gfxPipeline = append(gfxPipeline, pipeline)

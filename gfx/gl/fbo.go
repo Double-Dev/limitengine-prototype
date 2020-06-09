@@ -58,18 +58,13 @@ func (fbo *fbo) Delete() {
 	gl.DeleteFramebuffers(1, &fbo.id)
 }
 
-func (fbo *fbo) BlitToScreen() {
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
-	gl.DrawBuffer(gl.BACK)
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, fbo.id)
-	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
-	gl.BlitFramebuffer(0, 0, fbo.Width(), fbo.Height(), 0, 0, fbo.Width(), fbo.Height(), gl.COLOR_BUFFER_BIT, gl.NEAREST)
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-}
-
 func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
-	targetFBO := framebuffer.(*fbo)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, targetFBO.id)
+	if framebuffer != nil {
+		targetFBO := framebuffer.(*fbo)
+		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, targetFBO.id)
+	} else {
+		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+	}
 	gl.DrawBuffer(gl.BACK)
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
 	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)

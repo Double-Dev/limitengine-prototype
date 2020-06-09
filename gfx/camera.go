@@ -41,6 +41,7 @@ type Camera struct {
 	id                     uint32
 	colorAttachment        Attachment
 	depthStencilAttachment Attachment
+	blitCameras            []*Camera
 
 	clearColor gmath.Vector4
 
@@ -130,8 +131,36 @@ func CreateCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farP
 	return camera
 }
 
+func (camera *Camera) HasBlitCamera(targetBlitCamera *Camera) bool {
+	for _, blitCamera := range camera.blitCameras {
+		if blitCamera == targetBlitCamera || blitCamera.HasBlitCamera(targetBlitCamera) {
+			return true
+		}
+	}
+	return false
+}
+
+func (camera *Camera) AddBlitCamera(blitCamera *Camera) {
+	if !camera.HasBlitCamera(blitCamera) {
+		camera.blitCameras = append(camera.blitCameras, blitCamera)
+	}
+}
+
+func (camera *Camera) RemoveBlitCamera(targetBlitCamera *Camera) {
+	for i, blitCamera := range camera.blitCameras {
+		if blitCamera == targetBlitCamera {
+			camera.blitCameras[i] = camera.blitCameras[len(camera.blitCameras)-1]
+			camera.blitCameras = camera.blitCameras[:len(camera.blitCameras)-1]
+		}
+	}
+}
+
 func (camera *Camera) SetClearColor(r, g, b, a float32) {
 	camera.clearColor.Set(r, g, b, a)
+}
+
+func (camera *Camera) SetViewMat(viewMat gmath.Matrix4) {
+	camera.prefs.AddMatrix4("vertviewMat", viewMat)
 }
 
 func (camera *Camera) resize(width, height int) {
@@ -153,8 +182,4 @@ func (camera *Camera) resize(width, height int) {
 		)
 		break
 	}
-}
-
-func (camera *Camera) SetViewMat(viewMat gmath.Matrix4) {
-	camera.prefs.AddMatrix4("vertviewMat", viewMat)
 }
