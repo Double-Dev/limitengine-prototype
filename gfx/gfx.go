@@ -101,8 +101,8 @@ func Sweep() {
 
 				for material, batch2 := range batch1 {
 					material.prefs.loadTo(iShader)
-					if material.texture != nil {
-						iTexture := textures[material.texture.id]
+					iTexture := textures[material.texture.id]
+					if iTexture != nil {
 						iTexture.Bind()
 					}
 					for mesh, instances := range batch2 {
@@ -123,6 +123,9 @@ func Sweep() {
 						iMesh.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
 
 						iMesh.Disable()
+					}
+					if iTexture != nil {
+						iTexture.Unbind()
 					}
 				}
 				iShader.Stop()

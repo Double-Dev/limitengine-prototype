@@ -7,10 +7,17 @@ void vert() {
 
 #frag
 
-texture0 tex;
+texture0 sprite;
+
+uniform vec4 spriteBounds;
+uniform vec4 tintColor;
+uniform float tintAmount;
 
 void frag() {
-	// lesl.outColor = texture(tex, lesl.textureCoord);
-	lesl.outColor = vec4(lesl.textureCoord.x, lesl.textureCoord.y, cos(lesl.textureCoord.x), 0.9);
+	lesl.outColor = texture(sprite, vec2(lesl.textureCoord.x * spriteBounds.z + spriteBounds.x, lesl.textureCoord.y * spriteBounds.w + spriteBounds.y));
+	if (lesl.outColor.a >= 0.01) {
+		lesl.outColor = mix(lesl.outColor, tintColor, tintAmount);
+	}
+	// lesl.outColor = vec4(lesl.textureCoord.x, lesl.textureCoord.y, cos(lesl.textureCoord.x), 0.9);
 }
 #end

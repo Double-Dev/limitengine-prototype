@@ -36,8 +36,14 @@ func main() {
 
 	// Assets
 	shader = gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
-	texture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
-	material = gfx.CreateTextureMaterial(texture)
+
+	// Player
+	playerTexture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
+	playerMaterial := gfx.CreateTextureMaterial(playerTexture)
+
+	// Walls
+	material = gfx.CreateMaterial(gmath.NewVector4(0.4, 0.4, 0.45, 1.0))
+
 	mesh = gfx.SpriteMesh()
 
 	// TODO: Fix issue where having a texture as a framebuffer depth attachment doesn't work.
@@ -90,7 +96,7 @@ func main() {
 		&gfx.RenderComponent{
 			Camera:   camera,
 			Shader:   shader,
-			Material: material,
+			Material: playerMaterial,
 			Mesh:     mesh,
 			Instance: gfx.NewInstance(),
 		},
@@ -100,20 +106,20 @@ func main() {
 		},
 	)
 
-	state.NewEntity(
-		&gmath.TransformComponent{
-			Position: gmath.NewVector3(-1.05, -0.25, -0.6),
-			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.35, 0.65, 1.0),
-		},
-		&gfx.RenderComponent{
-			Camera:   camera,
-			Shader:   shader,
-			Material: material,
-			Mesh:     mesh,
-			Instance: gfx.NewInstance(),
-		},
-	)
+	// state.NewEntity(
+	// 	&gmath.TransformComponent{
+	// 		Position: gmath.NewVector3(-1.05, -0.25, -0.6),
+	// 		Rotation: gmath.NewIdentityQuaternion(),
+	// 		Scale:    gmath.NewVector3(0.35, 0.65, 1.0),
+	// 	},
+	// 	&gfx.RenderComponent{
+	// 		Camera:   camera,
+	// 		Shader:   shader,
+	// 		Material: material,
+	// 		Mesh:     mesh,
+	// 		Instance: gfx.NewInstance(),
+	// 	},
+	// )
 
 	state.NewEntity(
 		&gmath.TransformComponent{
