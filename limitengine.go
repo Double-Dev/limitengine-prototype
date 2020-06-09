@@ -121,7 +121,7 @@ func Launch(initState *State) {
 				delta := float32(currentTime-lastTime) / 1000000000.0
 				state.Update(delta)
 			} else {
-				time.Sleep(time.Millisecond * 10)
+				time.Sleep(time.Millisecond)
 			}
 		}
 	}()

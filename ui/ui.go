@@ -65,7 +65,7 @@ func (inputControl *InputControl) Amount() float32 {
 	return gmath.Clamp(inputControl.amt, -1.0, 1.0)
 }
 
-func ClearKeyControls() {
+func ClearControls() {
 	inputControls = make(map[InputEvent]struct {
 		float32
 		*InputControl

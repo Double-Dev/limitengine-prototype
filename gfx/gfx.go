@@ -20,6 +20,8 @@ var (
 	// AdvanceFrames is the number of frames for which the GFX pipeline will accept commands for in advance.
 	AdvanceFrames = 2
 
+	queuedFrames = 0
+
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
 
@@ -55,6 +57,7 @@ func init() {
 					currentTime = time.Now().UnixNano()
 					delta := float32(currentTime-lastTime) / 1000000000.0
 					fps = 1.0 / delta
+					// log.Log(fps)
 
 					pipeline := gfxPipeline[0]
 					for action := range pipeline {
@@ -63,7 +66,7 @@ func init() {
 					gfxPipeline = gfxPipeline[1:]
 					view.SwapBuffers()
 				} else {
-					time.Sleep(time.Millisecond * 10)
+					time.Sleep(time.Millisecond)
 				}
 			}
 		}()
@@ -78,10 +81,12 @@ func ClearScreen(r, g, b, a float32) {
 
 // Sweep sweeps queued gfx actions onto the render pipeline and renders all gfx objects added to the batch.
 func Sweep() {
-	for len(gfxPipeline)-1 > AdvanceFrames {
-		time.Sleep(time.Millisecond * 10)
+	for queuedFrames > AdvanceFrames {
+		time.Sleep(time.Millisecond)
 	}
+	queuedFrames++
 	actionQueue = append(actionQueue, func() {
+		queuedFrames--
 		for camera, batch0 := range renderBatch {
 			iFrameBuffer := frameBuffers[camera.id]
 			if iFrameBuffer != nil {
@@ -130,6 +135,7 @@ func Sweep() {
 				iFrameBuffer.BlitToFramebuffer(frameBuffers[blitCamera.id])
 			}
 		}
+
 	})
 	pipeline := make(chan func())
 	gfxPipeline = append(gfxPipeline, pipeline)

@@ -8,15 +8,34 @@ import (
 	"github.com/double-dev/limitengine/gio"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/ui"
+	"github.com/pkg/profile"
 )
 
 func main() {
-	mesh := gfx.CreateMesh(gio.LoadOBJ("monkey.obj"))
-	// mesh := &gfx.Mesh{}
+	// Profile
+	defer profile.Start().Stop()
+
+	// Setup Window
+	limitengine.AppView().SetTitle("3D Tests!")
+	limitengine.AppView().SetPosition(100, 100)
+	limitengine.AppView().SetAspectRatio(3, 2)
+
+	// Creating State
+	state := limitengine.NewState()
+
+	// Assets
 	shader := gfx.CreateShader(gio.LoadAsString("testShader.lesl"))
 	texture := gfx.CreateTexture(gio.LoadPNG("lamp.png"))
 	material := gfx.CreateTextureMaterial(texture)
+	mesh := gfx.CreateMesh(gio.LoadOBJ("monkey.obj"))
 
+	camColor := gfx.CreateRenderbuffer()
+	camDepth := gfx.CreateRenderbuffer()
+	camera := gfx.CreateCamera3D(camColor, camDepth, 0.001, 1000.0, 60.0)
+	camera.SetClearColor(0.0, 0.1, 0.25, 1.0)
+	camera.AddBlitCamera(gfx.DefaultCamera())
+
+	// Controls
 	xAxis := ui.InputControl{}
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyA}, -1.0)
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyLeft}, -1.0)
@@ -30,17 +49,15 @@ func main() {
 	zAxis.AddTrigger(ui.InputEvent{Key: ui.KeyUp}, -1.0)
 	zAxis.AddTrigger(ui.InputEvent{Key: ui.KeyS}, 1.0)
 	zAxis.AddTrigger(ui.InputEvent{Key: ui.KeyDown}, 1.0)
-
 	boost := ui.InputControl{}
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeySpace}, 1.0)
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeyRightShift}, 0.05)
 	boost.AddTrigger(ui.InputEvent{Key: ui.KeyLeftShift}, 0.05)
 
-	camera := gfx.CreateCamera3D(0.001, 1000.0, 60.0)
-	limitengine.NewEntity(
+	state.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 1.0, -10.0),
-			Rotation: gmath.NewQuaternion(0.0, 0.0, 0.0, 1.0),
+			Position: gmath.NewVector3(0.0, 0.0, -10.0),
+			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
 		&gmath.MotionComponent{
@@ -69,19 +86,12 @@ func main() {
 	)
 
 	for i := 0; i < 2000; i++ {
-		// randAxis := gmath.NewVector3(rand.Float32()-0.5, rand.Float32()-0.5, rand.Float32()-0.5).Normalize()
-		limitengine.NewEntity(
+		state.NewEntity(
 			&gmath.TransformComponent{
 				Position: gmath.NewVector3(rand.Float32()*1000.0-500.0, rand.Float32()*1000.0-500.0, rand.Float32()*1000.0-750.0),
 				Rotation: gmath.NewQuaternion(rand.Float32()*gmath.Pi, rand.Float32(), rand.Float32(), rand.Float32()),
 				Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 			},
-			// &gmath.MotionComponent{
-			// 	Velocity:        gmath.NewZeroVector3(),
-			// 	Acceleration:    gmath.NewZeroVector3(),
-			// 	AngVelocity:     gmath.NewIdentityQuaternion(),
-			// 	AngAcceleration: gmath.NewQuaternionV(rand.Float32(), randAxis),
-			// },
 			&gfx.RenderComponent{
 				Camera:   camera,
 				Shader:   shader,
@@ -92,12 +102,15 @@ func main() {
 		)
 	}
 
-	// limitengine.AddSystem(utils.NewMotionControlSystem())
-	limitengine.AddSystem(limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
-		for _, entity := range entities {
-			control := entity.GetComponent((*MotionControlComponent)(nil)).(*MotionControlComponent)
-			motion := entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)
-			transform := entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
+	// System & Listeners
+	gfxListener := gfx.NewGFXListener()
+	state.AddListener(gfxListener)
+
+	state.AddSystem(limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+		for _, components := range entities {
+			control := components[0].(*MotionControlComponent)
+			motion := components[1].(*gmath.MotionComponent)
+			transform := components[2].(*gmath.TransformComponent)
 
 			direction := gmath.NewVector3(control.Axis[2].Amount(), control.Axis[0].Amount(), control.Axis[1].Amount())
 
@@ -117,11 +130,11 @@ func main() {
 			motion.Acceleration = transform.Rotation.RotateV(gmath.NewVector3(0.0, 0.0, speed))
 		}
 	}, (*MotionControlComponent)(nil), (*gmath.MotionComponent)(nil), (*gmath.TransformComponent)(nil)))
-	limitengine.AddSystem(gmath.NewMotionSystem(0.95))
-	limitengine.AddSystem(NewCameraMotionSystem())
-	limitengine.AddSystem(gfx.NewRenderSystem())
+	state.AddSystem(gmath.NewMotionSystem(0.95))
+	state.AddSystem(gfx.NewRenderSystem())
+	state.AddSystem(NewCameraMotionSystem())
 
-	limitengine.Launch()
+	limitengine.Launch(state)
 }
 
 type CameraComponent struct {
@@ -131,11 +144,13 @@ type CameraComponent struct {
 	ScaleOffset gmath.Vector3
 }
 
+func (cameraComponent *CameraComponent) Delete() {}
+
 func NewCameraMotionSystem() *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities []limitengine.ECSEntity) {
-		for _, entity := range entities {
-			camera := entity.GetComponent((*CameraComponent)(nil)).(*CameraComponent)
-			transform := entity.GetComponent((*gmath.TransformComponent)(nil)).(*gmath.TransformComponent)
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+		for _, components := range entities {
+			camera := components[0].(*CameraComponent)
+			transform := components[1].(*gmath.TransformComponent)
 
 			transformViewMat := gmath.NewViewMatrix(
 				transform.Position,
@@ -154,3 +169,10 @@ func NewCameraMotionSystem() *limitengine.ECSSystem {
 		}
 	}, (*CameraComponent)(nil), (*gmath.TransformComponent)(nil))
 }
+
+type MotionControlComponent struct {
+	Axis  []*ui.InputControl
+	Speed float32
+}
+
+func (motionControlComponent *MotionControlComponent) Delete() {}

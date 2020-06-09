@@ -36,11 +36,11 @@ func (aabb AABB) ContainsV2D(vector Vector3) bool {
 }
 
 func (aabb AABB) Intersects(min, max Vector3) bool {
-	return aabb.Min.IsLess(max) && aabb.Max.IsGreater(min)
+	return aabb.Min.IsLessOrEqual(max) && aabb.Max.IsGreaterOrEqual(min)
 }
 
 func (aabb AABB) Intersects2D(min, max Vector3) bool {
-	return Vector2(aabb.Min).IsLess(Vector2(max)) && Vector2(aabb.Max).IsGreater(Vector2(min))
+	return Vector2(aabb.Min).IsLessOrEqual(Vector2(max)) && Vector2(aabb.Max).IsGreaterOrEqual(Vector2(min))
 }
 
 func (aabb AABB) IntersectsAABB(other AABB) bool {
