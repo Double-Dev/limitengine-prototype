@@ -21,7 +21,7 @@ var (
 		id:             0,
 		clearColor:     gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType: projNone,
-		prefs:          newUniformLoader(),
+		prefs:          NewUniformLoader(),
 	}
 )
 
@@ -47,13 +47,14 @@ type Camera struct {
 
 	projectionType           string
 	nearPlane, farPlane, fov float32
-	prefs                    uniformLoader
+	prefs                    UniformLoader
 }
 
 func DefaultCamera() *Camera {
 	return defaultCamera
 }
 
+// TODO: Think about turning Camera into interface to allow easy creation of variations.
 func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
 		id:                     frameBufferIndex,
@@ -61,7 +62,7 @@ func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
 		depthStencilAttachment: depthAttachment,
 		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType:         projNone,
-		prefs:                  newUniformLoader(),
+		prefs:                  NewUniformLoader(),
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
@@ -86,7 +87,7 @@ func CreateCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 		depthStencilAttachment: depthAttachment,
 		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType:         proj2D,
-		prefs:                  newUniformLoader(),
+		prefs:                  NewUniformLoader(),
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
@@ -111,7 +112,7 @@ func CreateCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farP
 		nearPlane:              nearPlane,
 		farPlane:               farPlane,
 		fov:                    fov,
-		prefs:                  newUniformLoader(),
+		prefs:                  NewUniformLoader(),
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {

@@ -10,6 +10,7 @@ import (
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/interaction"
 	"github.com/double-dev/limitengine/ui"
+	"github.com/double-dev/limitengine/utils2d"
 
 	"github.com/pkg/profile"
 )
@@ -17,7 +18,7 @@ import (
 var (
 	camera   *gfx.Camera
 	shader   *gfx.Shader
-	material *gfx.Material
+	material gfx.Material
 	mesh     *gfx.Mesh
 )
 
@@ -39,10 +40,11 @@ func main() {
 
 	// Player
 	playerTexture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
-	playerMaterial := gfx.CreateTextureMaterial(playerTexture)
+	playerMaterial := utils2d.CreateSpriteSheet(playerTexture, 0.5, 0.5)
+	playerMaterial.SetIndex(1)
 
 	// Walls
-	material = gfx.CreateMaterial(gmath.NewVector4(0.4, 0.4, 0.45, 1.0))
+	material = gfx.CreateColorMaterial(gmath.NewVector4(0.4, 0.4, 0.45, 1.0))
 
 	mesh = gfx.SpriteMesh()
 
@@ -91,7 +93,7 @@ func main() {
 			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
 		&interaction.ColliderComponent{
-			AABB: gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,

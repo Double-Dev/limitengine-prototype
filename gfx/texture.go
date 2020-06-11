@@ -5,6 +5,8 @@ import "github.com/double-dev/limitengine/gfx/framework"
 var (
 	textureIndex = uint32(1)
 	textures     = make(map[uint32]framework.ITexture)
+
+	nilTexture = &Texture{}
 )
 
 func init() { textures[0] = nil }

@@ -15,7 +15,7 @@ var (
 type RenderComponent struct {
 	Camera   *Camera
 	Shader   *Shader
-	Material *Material
+	Material Material
 	Mesh     *Mesh
 	Instance *Instance
 }

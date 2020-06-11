@@ -29,8 +29,8 @@ func main() {
 	material := gfx.CreateTextureMaterial(texture)
 	mesh := gfx.CreateMesh(gio.LoadOBJ("monkey.obj"))
 
-	camColor := gfx.CreateRenderbuffer()
-	camDepth := gfx.CreateRenderbuffer()
+	camColor := gfx.CreateRenderbuffer(true)
+	camDepth := gfx.CreateRenderbuffer(true)
 	camera := gfx.CreateCamera3D(camColor, camDepth, 0.001, 1000.0, 60.0)
 	camera.SetClearColor(0.0, 0.1, 0.25, 1.0)
 	camera.AddBlitCamera(gfx.DefaultCamera())

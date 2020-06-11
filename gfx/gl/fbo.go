@@ -66,15 +66,11 @@ func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
 	if framebuffer != nil {
 		targetFBO := framebuffer.(*fbo)
 		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, targetFBO.id)
-		// gl.DrawBuffer(gl.BACK)
 		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
-		// gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
 		gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, framebuffer.Width(), framebuffer.Height(), gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
 	} else {
 		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
-		// gl.DrawBuffer(gl.BACK)
 		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
-		// gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
 		gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, int32(limitengine.Width()), int32(limitengine.Height()), gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

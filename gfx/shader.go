@@ -14,7 +14,7 @@ func init() { shaders[0] = nil }
 
 type Shader struct {
 	id             uint32
-	uniformLoader  uniformLoader
+	uniformLoader  UniformLoader
 	instanceBuffer framework.IInstanceBuffer
 }
 
@@ -31,7 +31,7 @@ func CreateShader(leslSrc string) *Shader {
 		for _, instanceDef := range instanceDefs {
 			totalInstanceSize += instanceDef.Size
 		}
-		shader.uniformLoader = newUniformLoader()
+		shader.uniformLoader = NewUniformLoader()
 		for key, value := range textureVars {
 			shader.uniformLoader.AddInt(key, value)
 		}
@@ -57,20 +57,20 @@ func (shader *Shader) GetInstanceDefs() []struct {
 	}
 }
 
-func (shader *Shader) GetUniformLoader() uniformLoader {
+func (shader *Shader) GetUniformLoader() UniformLoader {
 	return shader.uniformLoader
 }
 
 // TODO: Add support for more variables + array uniforms.
-type uniformLoader struct {
+type UniformLoader struct {
 	uniformInts     map[string]int32
 	uniformFloats   map[string]float32
 	uniformVector4s map[string]gmath.Vector4
 	uniformMatrix4s map[string]gmath.Matrix4
 }
 
-func newUniformLoader() uniformLoader {
-	return uniformLoader{
+func NewUniformLoader() UniformLoader {
+	return UniformLoader{
 		uniformInts:     make(map[string]int32),
 		uniformFloats:   make(map[string]float32),
 		uniformVector4s: make(map[string]gmath.Vector4),
@@ -78,7 +78,7 @@ func newUniformLoader() uniformLoader {
 	}
 }
 
-func (uniformLoader uniformLoader) loadTo(iShader framework.IShader) {
+func (uniformLoader UniformLoader) loadTo(iShader framework.IShader) {
 	for varName, value := range uniformLoader.uniformInts {
 		iShader.LoadUniform1I(varName, value)
 	}
@@ -93,18 +93,18 @@ func (uniformLoader uniformLoader) loadTo(iShader framework.IShader) {
 	}
 }
 
-func (uniformLoader uniformLoader) AddInt(varName string, val int32) {
+func (uniformLoader UniformLoader) AddInt(varName string, val int32) {
 	uniformLoader.uniformInts[varName] = val
 }
 
-func (uniformLoader uniformLoader) AddFloat(varName string, val float32) {
+func (uniformLoader UniformLoader) AddFloat(varName string, val float32) {
 	uniformLoader.uniformFloats[varName] = val
 }
 
-func (uniformLoader uniformLoader) AddVector4(varName string, val gmath.Vector4) {
+func (uniformLoader UniformLoader) AddVector4(varName string, val gmath.Vector4) {
 	uniformLoader.uniformVector4s[varName] = val
 }
 
-func (uniformLoader uniformLoader) AddMatrix4(varName string, val gmath.Matrix4) {
+func (uniformLoader UniformLoader) AddMatrix4(varName string, val gmath.Matrix4) {
 	uniformLoader.uniformMatrix4s[varName] = val
 }

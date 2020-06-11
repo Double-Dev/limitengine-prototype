@@ -27,7 +27,7 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
 
-	renderBatch = map[*Camera]map[*Shader]map[*Material]map[*Mesh][]*Instance{}
+	renderBatch = map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance{}
 	actionQueue = []func(){}
 	gfxPipeline = [](chan func()){}
 )
@@ -94,7 +94,7 @@ func Sweep() {
 			if iFrameBuffer != nil {
 				iFrameBuffer.BindForRender()
 			} else {
-				testgl.BindFramebuffer(testgl.DRAW_FRAMEBUFFER, 0)
+				testgl.BindFramebuffer(testgl.DRAW_FRAMEBUFFER, 0) // TODO: Remove testgl.
 			}
 			context.ClearScreen(camera.clearColor[0], camera.clearColor[1], camera.clearColor[2], camera.clearColor[3])
 			for shader, batch1 := range batch0 {
@@ -104,10 +104,12 @@ func Sweep() {
 				shader.uniformLoader.loadTo(iShader)
 
 				for material, batch2 := range batch1 {
-					material.prefs.loadTo(iShader)
-					iTexture := textures[material.texture.id]
+					material.Prefs().loadTo(iShader)
+					iTexture := textures[material.Texture().id]
 					if iTexture != nil {
 						iTexture.Bind()
+					} else {
+						testgl.BindTexture(testgl.TEXTURE_2D, 0) // TODO: Remove testgl.
 					}
 					for mesh, instances := range batch2 {
 						mesh.prefs.loadTo(iShader)
@@ -127,9 +129,6 @@ func Sweep() {
 						iMesh.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
 
 						iMesh.Disable()
-					}
-					if iTexture != nil {
-						iTexture.Unbind()
 					}
 				}
 				iShader.Stop()
@@ -156,16 +155,16 @@ func Sweep() {
 	}()
 }
 
-func AddRenderable(camera *Camera, shader *Shader, material *Material, mesh *Mesh, instance *Instance) {
+func AddRenderable(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) {
 	actionQueue = append(actionQueue, func() {
 		batch0 := renderBatch[camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[*Material]map[*Mesh][]*Instance)
+			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
 			renderBatch[camera] = batch0
 		}
 		batch1 := batch0[shader]
 		if batch1 == nil {
-			batch1 = make(map[*Material]map[*Mesh][]*Instance)
+			batch1 = make(map[Material]map[*Mesh][]*Instance)
 			batch0[shader] = batch1
 		}
 		batch2 := batch1[material]
@@ -176,7 +175,7 @@ func AddRenderable(camera *Camera, shader *Shader, material *Material, mesh *Mes
 
 		// TODO: Fix transparency sorting for translucent objects of different materials,
 		// shaders, meshes, etc., unless that doesn't need to be supported.
-		if material.Transparency {
+		if material.Transparency() {
 			instances := batch2[mesh]
 			i := 0
 			for i < len(instances) && instances[i].GetData("verttransformMat3")[2] > instance.GetData("verttransformMat3")[2] {
@@ -192,16 +191,16 @@ func AddRenderable(camera *Camera, shader *Shader, material *Material, mesh *Mes
 	})
 }
 
-func RemoveRenderable(camera *Camera, shader *Shader, material *Material, mesh *Mesh, instance *Instance) {
+func RemoveRenderable(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) {
 	actionQueue = append(actionQueue, func() {
 		batch0 := renderBatch[camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[*Material]map[*Mesh][]*Instance)
+			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
 			renderBatch[camera] = batch0
 		}
 		batch1 := batch0[shader]
 		if batch1 == nil {
-			batch1 = make(map[*Material]map[*Mesh][]*Instance)
+			batch1 = make(map[Material]map[*Mesh][]*Instance)
 			batch0[shader] = batch1
 		}
 		batch2 := batch1[material]

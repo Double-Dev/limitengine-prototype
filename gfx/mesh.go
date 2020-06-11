@@ -82,10 +82,11 @@ func init() {
 	// })
 }
 
+// TODO: Think about turning Mesh into interface to allow easy creation of variations.
 // Mesh is a gfx mesh.
 type Mesh struct {
 	id          uint32
-	prefs       uniformLoader
+	prefs       UniformLoader
 	DepthTest   bool
 	BackCulling bool
 	WriteDepth  bool
