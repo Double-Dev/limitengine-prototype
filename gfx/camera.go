@@ -65,7 +65,7 @@ func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment())
+		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 1)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -90,7 +90,7 @@ func CreateCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment())
+		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -115,7 +115,7 @@ func CreateCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farP
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment())
+		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -143,7 +143,7 @@ func (camera *Camera) HasBlitCamera(targetBlitCamera *Camera) bool {
 func (camera *Camera) AddBlitCamera(blitCamera *Camera) {
 	if !camera.HasBlitCamera(blitCamera) {
 		camera.blitCameras = append(camera.blitCameras, blitCamera)
-	}
+	} // TODO: Print error otherwise.
 }
 
 func (camera *Camera) RemoveBlitCamera(targetBlitCamera *Camera) {

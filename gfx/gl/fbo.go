@@ -11,14 +11,18 @@ type fbo struct {
 	colorAttachment framework.IAttachment
 	depthAttachment framework.IAttachment
 
-	width, height, samples uint32
+	width, height float32
+	samples       int32
 }
 
-func createFBO() *fbo {
+func createFBO(width, height float32, samples int32) *fbo {
 	var id uint32
 	gl.GenFramebuffers(1, &id)
 	return &fbo{
-		id: id,
+		id:      id,
+		width:   width,
+		height:  height,
+		samples: samples,
 	}
 }
 
@@ -27,7 +31,7 @@ func (fbo *fbo) bind() {
 }
 
 func (fbo *fbo) BindForRender() {
-	// gl.DrawBuffers(1, fbo.colorAttachment.ID())
+	// gl.DrawBuffer(gl.COLOR_ATTACHMENT0)
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fbo.id)
 }
 
@@ -62,14 +66,18 @@ func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
 	if framebuffer != nil {
 		targetFBO := framebuffer.(*fbo)
 		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, targetFBO.id)
+		// gl.DrawBuffer(gl.BACK)
+		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
+		// gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
+		gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, framebuffer.Width(), framebuffer.Height(), gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
 	} else {
 		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+		// gl.DrawBuffer(gl.BACK)
+		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
+		// gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
+		gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, int32(limitengine.Width()), int32(limitengine.Height()), gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
 	}
-	gl.DrawBuffer(gl.BACK)
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
-	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
-	gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, srcFBO.Width(), srcFBO.Height(), gl.COLOR_BUFFER_BIT, gl.NEAREST)
-	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
 func (fbo *fbo) Resize(width, height int32) {
@@ -85,13 +93,13 @@ func (fbo *fbo) Resize(width, height int32) {
 }
 
 func (fbo *fbo) Width() int32 {
-	return int32(limitengine.Width())
+	return int32(float32(limitengine.Width()) * fbo.width)
 }
 
 func (fbo *fbo) Height() int32 {
-	return int32(limitengine.Height())
+	return int32(float32(limitengine.Height()) * fbo.height)
 }
 
 func (fbo *fbo) Samples() int32 {
-	return int32(limitengine.Samples())
+	return fbo.samples // TODO: Provide options for fbo width, height, and samples.
 }

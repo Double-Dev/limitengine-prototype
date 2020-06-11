@@ -8,9 +8,7 @@ import (
 )
 
 type glfwView struct {
-	window          *glfw.Window
-	samples         int
-	samplesCallback func(samples int)
+	window *glfw.Window
 }
 
 func newGLFWView() *glfwView {
@@ -34,8 +32,7 @@ func newGLFWView() *glfwView {
 		log.Err("Error creating window.", err)
 	}
 	glfwView := &glfwView{
-		window:  window,
-		samples: 4,
+		window: window,
 	}
 	if WindowIcons != nil {
 		glfwView.SetIcons(WindowIcons)
@@ -84,11 +81,6 @@ func (glfwView *glfwView) SetIcons(icons []image.Image) {
 	glfwView.window.SetIcon(icons)
 }
 
-func (glfwView *glfwView) SetSamples(samples int) {
-	glfwView.samples = samples
-	glfwView.samplesCallback(samples)
-}
-
 func (glfwView *glfwView) setCloseCallback(callback func()) {
 	glfwView.window.SetCloseCallback(func(w *glfw.Window) {
 		callback()
@@ -99,10 +91,6 @@ func (glfwView *glfwView) setResizeCallback(callback func(width, height int)) {
 	glfwView.window.SetSizeCallback(func(w *glfw.Window, width, height int) {
 		callback(width, height)
 	})
-}
-
-func (glfwView *glfwView) setSampleCallback(callback func(samples int)) {
-	glfwView.samplesCallback = callback
 }
 
 func (glfwView *glfwView) setJoystickCallback(callback func(joy Joystick, event Action)) {

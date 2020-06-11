@@ -85,7 +85,7 @@ func (texture *texture) Delete() {
 func (texture *texture) AttachToFramebufferColor(framebuffer framework.IFramebuffer) {
 	if texture.textureType == textureType2D {
 		texture.Bind()
-		gl.TexImage2D(texture.textureType, 0, gl.RGB, framebuffer.Width(), framebuffer.Height(), 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
+		gl.TexImage2D(texture.textureType, 0, gl.RGBA, framebuffer.Width(), framebuffer.Height(), 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
 		gl.FramebufferTexture2D(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0), texture.textureType, texture.id, 0)
 	}
 }
@@ -93,7 +93,7 @@ func (texture *texture) AttachToFramebufferColor(framebuffer framework.IFramebuf
 func (texture *texture) ResizeFramebufferColor(framebuffer framework.IFramebuffer) {
 	if texture.textureType == textureType2D {
 		texture.Bind()
-		gl.TexImage2D(texture.textureType, 0, gl.RGB, framebuffer.Width(), framebuffer.Height(), 0, gl.RGB, gl.UNSIGNED_BYTE, nil)
+		gl.TexImage2D(texture.textureType, 0, gl.RGBA, framebuffer.Width(), framebuffer.Height(), 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
 	}
 }
 

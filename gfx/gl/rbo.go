@@ -6,14 +6,16 @@ import (
 )
 
 type rbo struct {
-	id uint32
+	id          uint32
+	multisample bool
 }
 
-func createRBO() *rbo {
+func createRBO(multisample bool) *rbo {
 	var id uint32
 	gl.GenRenderbuffers(1, &id)
 	return &rbo{
-		id: id,
+		id:          id,
+		multisample: multisample,
 	}
 }
 
@@ -28,24 +30,40 @@ func (rbo *rbo) Delete() {
 // Attachment functions
 func (rbo *rbo) AttachToFramebufferColor(framebuffer framework.IFramebuffer) {
 	rbo.bind()
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.RGB, framebuffer.Width(), framebuffer.Height())
+	if rbo.multisample {
+		gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.RGBA, framebuffer.Width(), framebuffer.Height())
+	} else {
+		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.RGBA, framebuffer.Width(), framebuffer.Height())
+	}
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, uint32(gl.COLOR_ATTACHMENT0), gl.RENDERBUFFER, rbo.id)
 }
 
 func (rbo *rbo) ResizeFramebufferColor(framebuffer framework.IFramebuffer) {
 	rbo.bind()
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.RGB, framebuffer.Width(), framebuffer.Height())
+	if rbo.multisample {
+		gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.RGBA, framebuffer.Width(), framebuffer.Height())
+	} else {
+		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.RGBA, framebuffer.Width(), framebuffer.Height())
+	}
 }
 
 func (rbo *rbo) AttachToFramebufferDepth(framebuffer framework.IFramebuffer) {
 	rbo.bind()
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
+	if rbo.multisample {
+		gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
+	} else {
+		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
+	}
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo.id)
 }
 
 func (rbo *rbo) ResizeFramebufferDepth(framebuffer framework.IFramebuffer) {
 	rbo.bind()
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
+	if rbo.multisample {
+		gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, framebuffer.Samples(), gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
+	} else {
+		gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT, framebuffer.Width(), framebuffer.Height())
+	}
 }
 
 func (rbo *rbo) ID() *uint32 {

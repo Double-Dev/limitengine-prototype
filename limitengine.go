@@ -30,7 +30,7 @@ var (
 	view    View
 	state   *State
 
-	viewWidth, viewHeight, viewSamples int
+	viewWidth, viewHeight int
 
 	closeCallbacks       []func()
 	resizeCallbacks      []func(width, height int)
@@ -68,12 +68,6 @@ func init() {
 		viewHeight = height
 		for _, resizeCallback := range resizeCallbacks {
 			resizeCallback(width, height)
-		}
-	})
-	view.setSampleCallback(func(samples int) {
-		viewSamples = samples
-		for _, sampleCallback := range sampleCallbacks {
-			sampleCallback(samples)
 		}
 	})
 	// TODO: Handle joystick callbacks.
@@ -149,9 +143,6 @@ func Height() int { return viewHeight }
 
 // AspectRatio returns the current aspect ratio of the view.
 func AspectRatio() float32 { return float32(viewHeight) / float32(viewWidth) }
-
-// Samples returns the current sample value of the view.
-func Samples() int { return viewSamples }
 
 // AddCloseCallback adds a close callback function to the application.
 func AddCloseCallback(callback func()) {

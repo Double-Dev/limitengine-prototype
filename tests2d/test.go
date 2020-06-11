@@ -47,13 +47,13 @@ func main() {
 	mesh = gfx.SpriteMesh()
 
 	// TODO: Fix issue where having a texture as a framebuffer depth attachment doesn't work.
-	cam1Color := gfx.CreateRenderbuffer()
-	cam1Depth := gfx.CreateRenderbuffer()
+	cam1Color := gfx.CreateRenderbuffer(true)
+	cam1Depth := gfx.CreateRenderbuffer(true)
 	camera = gfx.CreateCamera2D(cam1Color, cam1Depth)
 	camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
 
 	cam2Color := gfx.CreateEmptyTexture()
-	cam2Depth := gfx.CreateRenderbuffer()
+	cam2Depth := gfx.CreateEmptyTexture()
 	camera2 := gfx.CreateCamera(cam2Color, cam2Depth)
 
 	camera.AddBlitCamera(camera2)
@@ -81,7 +81,7 @@ func main() {
 	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(-0.5, 0.0, -0.3),
-			Rotation: gmath.NewQuaternion(gmath.Pi/4.0, 0.0, 0.0, 1.0),
+			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
 		&gmath.MotionComponent{

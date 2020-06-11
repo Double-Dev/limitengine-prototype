@@ -34,15 +34,15 @@ func (glContext glContext) ClearScreen(r, g, b, a float32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-func (glContext glContext) CreateFramebuffer(colorAttachment, depthAttachment framework.IAttachment) framework.IFramebuffer {
-	framebuffer := createFBO()
+func (glContext glContext) CreateFramebuffer(colorAttachment, depthAttachment framework.IAttachment, width, height float32, samples int32) framework.IFramebuffer {
+	framebuffer := createFBO(width, height, samples)
 	framebuffer.SetColorAttachment(colorAttachment)
 	framebuffer.SetDepthAttachment(depthAttachment)
 	return framebuffer
 }
 
-func (glContext glContext) CreateRenderbuffer() framework.IRenderbuffer {
-	renderbuffer := createRBO()
+func (glContext glContext) CreateRenderbuffer(multisample bool) framework.IRenderbuffer {
+	renderbuffer := createRBO(multisample)
 	return renderbuffer
 }
 
