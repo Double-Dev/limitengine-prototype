@@ -52,18 +52,18 @@ func main() {
 	camera = gfx.CreateCamera2D(cam1Color, cam1Depth)
 	camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
 
-	// cam2Color := gfx.CreateEmptyTexture()
-	// cam2Depth := gfx.CreateRenderbuffer()
-	// camera2 := gfx.CreateCamera(cam2Color, cam2Depth)
+	cam2Color := gfx.CreateEmptyTexture()
+	cam2Depth := gfx.CreateRenderbuffer()
+	camera2 := gfx.CreateCamera(cam2Color, cam2Depth)
 
-	camera.AddBlitCamera(gfx.DefaultCamera())
+	camera.AddBlitCamera(camera2)
 
-	// fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
-	// cam2Mat := gfx.CreateTextureMaterial(cam2Color)
+	fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
+	cam2Mat := gfx.CreateTextureMaterial(cam2Color)
 
-	// pos := gfx.NewInstance()
-	// pos.SetTransform(gmath.NewTransformMatrix(gmath.NewVector3(0.0, 0.0, 0.5), gmath.NewIdentityQuaternion(), gmath.NewVector3(1.0, 1.0, 1.0)))
-	// gfx.AddRenderable(gfx.DefaultCamera(), fboShader, cam2Mat, mesh, pos)
+	pos := gfx.NewInstance()
+	pos.SetTransform(gmath.NewTransformMatrix(gmath.NewVector3(0.0, 0.0, 0.5), gmath.NewIdentityQuaternion(), gmath.NewVector3(1.0, 1.0, 1.0)))
+	gfx.AddRenderable(gfx.DefaultCamera(), fboShader, cam2Mat, mesh, pos)
 
 	// Controls
 	xAxis := &ui.InputControl{}
@@ -81,8 +81,8 @@ func main() {
 	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(-0.5, 0.0, -0.3),
-			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.05, 0.05, 1.0),
+			Rotation: gmath.NewQuaternion(gmath.Pi/4.0, 0.0, 0.0, 1.0),
+			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
 		},
 		&gmath.MotionComponent{
 			Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
@@ -91,7 +91,7 @@ func main() {
 			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
 		&interaction.ColliderComponent{
-			AABB: gmath.NewAABB(gmath.NewVector3(-0.05, -0.05, 0.0), gmath.NewVector3(0.05, 0.05, 0.0)),
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,
@@ -124,7 +124,7 @@ func main() {
 	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.5, 0.0, -0.5),
-			Rotation: gmath.NewIdentityQuaternion(),
+			Rotation: gmath.NewQuaternion(gmath.Pi/8.0, 0.0, 0.0, 1.0),
 			Scale:    gmath.NewVector3(0.25, 0.05, 1.0),
 		},
 		&gmath.MotionComponent{

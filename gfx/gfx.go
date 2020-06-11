@@ -9,6 +9,8 @@ import (
 	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/double-dev/limitengine/gfx/gl"
 	"github.com/double-dev/limitengine/gmath"
+
+	testgl "github.com/go-gl/gl/v3.3-core/gl"
 )
 
 var (
@@ -91,6 +93,8 @@ func Sweep() {
 			iFrameBuffer := frameBuffers[camera.id]
 			if iFrameBuffer != nil {
 				iFrameBuffer.BindForRender()
+			} else {
+				testgl.BindFramebuffer(testgl.DRAW_FRAMEBUFFER, 0)
 			}
 			context.ClearScreen(camera.clearColor[0], camera.clearColor[1], camera.clearColor[2], camera.clearColor[3])
 			for shader, batch1 := range batch0 {
@@ -130,9 +134,9 @@ func Sweep() {
 				}
 				iShader.Stop()
 			}
-			if iFrameBuffer != nil {
-				iFrameBuffer.UnbindForRender()
-			}
+			// if iFrameBuffer != nil {
+			// 	iFrameBuffer.UnbindForRender()
+			// }
 
 			for _, blitCamera := range camera.blitCameras {
 				iFrameBuffer.BlitToFramebuffer(frameBuffers[blitCamera.id])

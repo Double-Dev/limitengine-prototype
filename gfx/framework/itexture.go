@@ -6,12 +6,12 @@ type ITexture interface {
 	LinearFilter(mipmap, antisotrophic bool)
 	TextureData(image []uint8, width, height int32)
 	Unbind()
-	Delete()
 
 	// Attachment functions:
 	AttachToFramebufferColor(framebuffer IFramebuffer)
 	ResizeFramebufferColor(framebuffer IFramebuffer)
 	AttachToFramebufferDepth(framebuffer IFramebuffer)
 	ResizeFramebufferDepth(framebuffer IFramebuffer)
+	Delete()
 	ID() *uint32
 }

@@ -46,18 +46,19 @@ func (texture *texture) NearestFilter(mipmap, antisotrophic bool) {
 func (texture *texture) LinearFilter(mipmap, antisotrophic bool) {
 	if mipmap {
 		gl.GenerateMipmap(texture.textureType)
+		gl.TexParameteri(texture.textureType, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 		gl.TexParameteri(texture.textureType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-		gl.TexParameterf(texture.textureType, gl.MAX_TEXTURE_LOD_BIAS, 0.0)
 
 		if antisotrophic {
+			gl.TexParameterf(texture.textureType, gl.TEXTURE_LOD_BIAS, 0.0)
 			var data float32
 			gl.GetFloatv(gl.MAX_TEXTURE_MAX_ANISOTROPY, &data)
 			amount := gmath.Min(4.0, data)
 			gl.TexParameterf(texture.textureType, gl.TEXTURE_MAX_ANISOTROPY, amount)
 		}
 	} else {
-		gl.TexParameterf(texture.textureType, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-		gl.TexParameterf(texture.textureType, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+		gl.TexParameteri(texture.textureType, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+		gl.TexParameteri(texture.textureType, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	}
 }
 
@@ -77,7 +78,7 @@ func (texture *texture) Unbind() {
 }
 
 func (texture *texture) Delete() {
-
+	gl.DeleteTextures(1, &texture.id)
 }
 
 // Attachment functions:

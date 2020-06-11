@@ -17,6 +17,7 @@ func NewGLContext() (glContext, error) {
 	// TODO: Add options for opengl features.
 	gl.Enable(gl.MULTISAMPLE)
 	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthMask(true)
 	gl.Enable(gl.CULL_FACE)
 	gl.CullFace(gl.BACK)
 	gl.Enable(gl.BLEND)
@@ -29,8 +30,6 @@ func (glContext glContext) Resize(width, height int) {
 }
 
 func (glContext glContext) ClearScreen(r, g, b, a float32) {
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthMask(true)
 	gl.ClearColor(r, g, b, a)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
@@ -61,9 +60,10 @@ func (glContext glContext) CreateEmptyTexture() framework.ITexture {
 }
 
 func (glContext glContext) CreateTexture(image []uint8, width, height int32) framework.ITexture {
-	texture := glContext.CreateEmptyTexture()
+	texture := createTexture(textureType2D)
 	texture.Bind()
 	texture.TextureData(image, width, height)
+	texture.LinearFilter(true, false)
 	texture.Unbind()
 	return texture
 }

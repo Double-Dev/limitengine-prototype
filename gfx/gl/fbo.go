@@ -69,7 +69,7 @@ func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, srcFBO.id)
 	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
 	gl.BlitFramebuffer(0, 0, srcFBO.Width(), srcFBO.Height(), 0, 0, srcFBO.Width(), srcFBO.Height(), gl.COLOR_BUFFER_BIT, gl.NEAREST)
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
 func (fbo *fbo) Resize(width, height int32) {

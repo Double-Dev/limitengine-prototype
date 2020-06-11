@@ -41,13 +41,21 @@ in vec3 fragposition;
 in vec2 fragtextureCoord;
 in vec3 fragnormal;
 out vec4 fragoutColor;
+
+uniform sampler2D fragtexture0;
+uniform vec4 fragtexture0Bounds;
+uniform vec4 fragtintColor;
+uniform float fragtintAmount;
 `
 	fragFooter = `
 void main()
 {
+	fragoutColor = texture(fragtexture0, vec2(fragtextureCoord.x * fragtexture0Bounds.z + fragtexture0Bounds.x, fragtextureCoord.y * fragtexture0Bounds.w + fragtexture0Bounds.y));
 	frag();
-	if (fragoutColor.a < 0.01) {
+	if (fragoutColor.a < 0.001) {
 		discard;
+	} else {
+		fragoutColor = mix(fragoutColor, fragtintColor, fragtintAmount);
 	}
 }`
 )
@@ -55,17 +63,20 @@ void main()
 var (
 	vertReservedVars = []string{
 		"vertposition", "verttextureCoord", "vertnormal",
-		"vertprojMat", "vertviewMat", "verttransformMat", "fragPosition",
-		"fragTextureCoord", "fragNormal", "vertworldPos",
+		"vertprojMat", "vertviewMat", "verttransformMat",
+		"fragPosition", "fragTextureCoord", "fragNormal",
+		"vertworldPos",
 	}
 	fragReservedVars = []string{
 		"fragposition", "fragtextureCoord", "fragnormal", "fragoutColor",
+		"fragtexture0", "fragtexture0Bounds",
+		"fragtintColor", "fragtintAmount",
 	}
 )
 
 func processLESL(src string) (string, string, map[string]int32) { // TODO: Parse custom shader
 	textureVars := make(map[string]int32)
-	for i := int32(0); i < 10; i++ {
+	for i := int32(1); i < 10; i++ {
 		if strings.Contains(src, fmt.Sprintf("texture%d", i)) {
 			varNameStart := strings.Index(src, fmt.Sprintf("texture%d", i)) + 9
 			varNameEnd := strings.Index(src[varNameStart:], ";")

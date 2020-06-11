@@ -21,6 +21,10 @@ func (rbo *rbo) bind() {
 	gl.BindRenderbuffer(gl.RENDERBUFFER, rbo.id)
 }
 
+func (rbo *rbo) Delete() {
+	gl.DeleteRenderbuffers(1, &rbo.id)
+}
+
 // Attachment functions
 func (rbo *rbo) AttachToFramebufferColor(framebuffer framework.IFramebuffer) {
 	rbo.bind()

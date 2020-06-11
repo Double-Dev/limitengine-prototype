@@ -19,8 +19,9 @@ func NewIdentityMatrix4() Matrix4 {
 
 func NewTransformMatrix(translation Vector3, rotation Quaternion, scale Vector3) Matrix4 {
 	rMat := NewIdentityMatrix4().SetRotate(rotation)
-	tsMat := NewIdentityMatrix4().SetTranslate(translation).SetScale(scale)
-	return tsMat.MulM(rMat)
+	tMat := NewIdentityMatrix4().SetTranslate(translation)
+	sMat := NewIdentityMatrix4().SetScale(scale)
+	return tMat.MulM(rMat).MulM(sMat)
 }
 
 func NewViewMatrix(translation Vector3, rotation Quaternion, scale Vector3) Matrix4 {
