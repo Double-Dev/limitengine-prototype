@@ -5,7 +5,6 @@ type ITexture interface {
 	NearestFilter(mipmap, antisotrophic bool)
 	LinearFilter(mipmap, antisotrophic bool)
 	TextureData(image []uint8, width, height int32)
-	Unbind()
 
 	// Attachment functions:
 	AttachToFramebufferColor(framebuffer IFramebuffer)

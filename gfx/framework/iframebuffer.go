@@ -1,10 +1,9 @@
 package framework
 
 type IFramebuffer interface {
-	BindForRender()
+	Bind()
 	SetColorAttachment(attachment IAttachment)
 	SetDepthAttachment(attachment IAttachment)
-	UnbindForRender()
 	Delete()
 
 	BlitToFramebuffer(framebuffer IFramebuffer)

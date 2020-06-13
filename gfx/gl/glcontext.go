@@ -41,6 +41,10 @@ func (glContext glContext) CreateFramebuffer(colorAttachment, depthAttachment fr
 	return framebuffer
 }
 
+func (glContext glContext) UnbindFramebuffers() {
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+}
+
 func (glContext glContext) CreateRenderbuffer(multisample bool) framework.IRenderbuffer {
 	renderbuffer := createRBO(multisample)
 	return renderbuffer
@@ -55,7 +59,7 @@ func (glContext glContext) CreateEmptyTexture() framework.ITexture {
 	texture := createTexture(textureType2D)
 	texture.Bind()
 	texture.LinearFilter(false, false)
-	texture.Unbind()
+	glContext.UnbindTextures()
 	return texture
 }
 
@@ -64,8 +68,12 @@ func (glContext glContext) CreateTexture(image []uint8, width, height int32) fra
 	texture.Bind()
 	texture.TextureData(image, width, height)
 	texture.LinearFilter(true, false)
-	texture.Unbind()
+	glContext.UnbindTextures()
 	return texture
+}
+
+func (glContext glContext) UnbindTextures() {
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
 func (glContext glContext) CreateMesh(indices []uint32, vertices, texCoords, normals []float32) framework.IMesh {

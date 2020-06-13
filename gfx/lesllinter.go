@@ -19,9 +19,12 @@ layout(location = 5) in vec4 verttransformMat2;
 layout(location = 6) in vec4 verttransformMat3;
 mat4 verttransformMat;
 
+layout(location = 7) in vec4 verttextureBounds;
+
 out vec3 fragposition;
 out vec2 fragtextureCoord;
 out vec3 fragnormal;
+out vec4 fragtextureBounds;
 vec4 vertworldPos;
 `
 	vertFooter = `
@@ -33,6 +36,7 @@ void main()
 	fragposition = vertposition;
 	fragtextureCoord = verttextureCoord;
 	fragnormal = vertnormal;
+	fragtextureBounds = verttextureBounds;
 	vert();
 }`
 
@@ -40,22 +44,22 @@ void main()
 in vec3 fragposition;
 in vec2 fragtextureCoord;
 in vec3 fragnormal;
+in vec4 fragtextureBounds;
 out vec4 fragoutColor;
 
-uniform sampler2D fragtexture0;
-uniform vec4 fragtexture0Bounds;
-uniform vec4 fragtintColor;
+uniform sampler2D fragtexture;
+uniform vec3 fragtintColor;
 uniform float fragtintAmount;
 `
 	fragFooter = `
 void main()
 {
-	fragoutColor = texture(fragtexture0, vec2(fragtextureCoord.x * fragtexture0Bounds.z + fragtexture0Bounds.x, fragtextureCoord.y * fragtexture0Bounds.w + fragtexture0Bounds.y));
+	fragoutColor = texture(fragtexture, vec2(fragtextureCoord.x * fragtextureBounds.z + fragtextureBounds.x, fragtextureCoord.y * fragtextureBounds.w + fragtextureBounds.y));
 	frag();
 	if (fragoutColor.a < 0.001) {
 		discard;
 	} else {
-		fragoutColor = mix(fragoutColor, fragtintColor, fragtintAmount);
+		fragoutColor = mix(fragoutColor, vec4(fragtintColor, fragoutColor.a), fragtintAmount);
 	}
 }`
 )
@@ -63,13 +67,14 @@ void main()
 var (
 	vertReservedVars = []string{
 		"vertposition", "verttextureCoord", "vertnormal",
+		"verttransformMat0", "verttransformMat1", "verttransformMat2", "verttransformMat3", "verttextureBounds",
 		"vertprojMat", "vertviewMat", "verttransformMat",
 		"fragPosition", "fragTextureCoord", "fragNormal",
 		"vertworldPos",
 	}
 	fragReservedVars = []string{
 		"fragposition", "fragtextureCoord", "fragnormal", "fragoutColor",
-		"fragtexture0", "fragtexture0Bounds",
+		"fragtexture", "fragtextureBounds",
 		"fragtintColor", "fragtintAmount",
 	}
 )

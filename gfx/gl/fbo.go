@@ -26,24 +26,19 @@ func createFBO(width, height float32, samples int32) *fbo {
 	}
 }
 
-func (fbo *fbo) bind() {
-	gl.BindFramebuffer(gl.FRAMEBUFFER, fbo.id)
-}
-
-func (fbo *fbo) BindForRender() {
-	// gl.DrawBuffer(gl.COLOR_ATTACHMENT0)
+func (fbo *fbo) Bind() {
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fbo.id)
 }
 
 func (fbo *fbo) SetColorAttachment(attachment framework.IAttachment) {
-	fbo.bind()
+	fbo.Bind()
 	attachment.AttachToFramebufferColor(fbo)
 	fbo.colorAttachment = attachment
 	fbo.unbind()
 }
 
 func (fbo *fbo) SetDepthAttachment(attachment framework.IAttachment) {
-	fbo.bind()
+	fbo.Bind()
 	attachment.AttachToFramebufferDepth(fbo)
 	fbo.depthAttachment = attachment
 	fbo.unbind()
@@ -51,11 +46,6 @@ func (fbo *fbo) SetDepthAttachment(attachment framework.IAttachment) {
 
 func (fbo *fbo) unbind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-}
-
-func (fbo *fbo) UnbindForRender() {
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
-	// gl.DrawBuffer(gl.BACK)
 }
 
 func (fbo *fbo) Delete() {
@@ -77,7 +67,7 @@ func (srcFBO *fbo) BlitToFramebuffer(framebuffer framework.IFramebuffer) {
 }
 
 func (fbo *fbo) Resize(width, height int32) {
-	fbo.BindForRender()
+	fbo.Bind()
 	if fbo.colorAttachment != nil {
 		fbo.colorAttachment.ResizeFramebufferColor(fbo)
 	}
@@ -85,7 +75,7 @@ func (fbo *fbo) Resize(width, height int32) {
 		fbo.depthAttachment.ResizeFramebufferDepth(fbo)
 	}
 	gl.Viewport(0, 0, width, height)
-	fbo.UnbindForRender()
+	fbo.unbind()
 }
 
 func (fbo *fbo) Width() int32 {

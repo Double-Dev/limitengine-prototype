@@ -9,45 +9,41 @@ type SpriteSheet struct {
 	texture                   *gfx.Texture
 	prefs                     gfx.UniformLoader
 	spriteWidth, spriteHeight float32
+	padding                   float32
 	columns, rows             uint32
-	index                     uint32
 }
 
-func CreateSpriteSheet(texture *gfx.Texture, spriteWidth, spriteHeight float32) *SpriteSheet {
+func CreateSpriteSheet(texture *gfx.Texture, spriteWidth, spriteHeight, padding float32) *SpriteSheet {
 	spriteSheet := &SpriteSheet{
 		texture:      texture,
 		prefs:        gfx.NewUniformLoader(),
 		spriteWidth:  spriteWidth,
 		spriteHeight: spriteHeight,
+		padding:      padding,
 		columns:      uint32(1.0 / spriteWidth),
 		rows:         uint32(1.0 / spriteHeight),
-		index:        0,
 	}
-	spriteSheet.prefs.AddVector4("fragtexture0Bounds", gmath.NewVector4(spriteSheet.SpriteX(), spriteSheet.SpriteY(), spriteSheet.SpriteWidth(), spriteSheet.SpriteHeight()))
-	spriteSheet.prefs.AddVector4("fragtintColor", gmath.NewZeroVector4())
-	spriteSheet.prefs.AddFloat("fragtintAmount", 0.0)
+	spriteSheet.prefs.AddVector3("fragtintColor", gmath.NewVector3(0.0, 0.0, 1.0))
+	spriteSheet.prefs.AddFloat("fragtintAmount", 0.5)
 	return spriteSheet
 }
 
-func (spriteSheet *SpriteSheet) SetIndex(index uint32) {
-	spriteSheet.index = index
-	spriteSheet.prefs.AddVector4("fragtexture0Bounds", gmath.NewVector4(spriteSheet.SpriteX(), spriteSheet.SpriteY(), spriteSheet.SpriteWidth(), spriteSheet.SpriteHeight()))
+func (spriteSheet *SpriteSheet) ApplyToInstance(instance *gfx.Instance, index uint32) {
+	instance.SetTextureBounds(
+		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
+		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,
+		spriteSheet.spriteWidth-(2.0*spriteSheet.padding),
+		spriteSheet.spriteHeight-(2.0*spriteSheet.padding),
+	)
 }
 
-func (spriteSheet *SpriteSheet) SpriteX() float32 {
-	return spriteSheet.spriteWidth * float32(spriteSheet.index%spriteSheet.rows)
-}
-
-func (spriteSheet *SpriteSheet) SpriteY() float32 {
-	return spriteSheet.spriteHeight * float32(spriteSheet.index/spriteSheet.rows)
-}
-
-func (spriteSheet *SpriteSheet) SpriteWidth() float32 {
-	return spriteSheet.spriteWidth
-}
-
-func (spriteSheet *SpriteSheet) SpriteHeight() float32 {
-	return spriteSheet.spriteHeight
+func (spriteSheet *SpriteSheet) GetBounds(index uint32) gmath.Vector4 {
+	return gmath.NewVector4(
+		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
+		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,
+		spriteSheet.spriteWidth-(2.0*spriteSheet.padding),
+		spriteSheet.spriteHeight-(2.0*spriteSheet.padding),
+	)
 }
 
 func (spriteSheet *SpriteSheet) Texture() *gfx.Texture    { return spriteSheet.texture }

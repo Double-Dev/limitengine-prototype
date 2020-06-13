@@ -54,6 +54,7 @@ func (shader *Shader) GetInstanceDefs() []struct {
 		{"verttransformMat1", 4, 4},
 		{"verttransformMat2", 4, 8},
 		{"verttransformMat3", 4, 12},
+		{"verttextureBounds", 4, 16},
 	}
 }
 
@@ -65,6 +66,7 @@ func (shader *Shader) GetUniformLoader() UniformLoader {
 type UniformLoader struct {
 	uniformInts     map[string]int32
 	uniformFloats   map[string]float32
+	uniformVector3s map[string]gmath.Vector3
 	uniformVector4s map[string]gmath.Vector4
 	uniformMatrix4s map[string]gmath.Matrix4
 }
@@ -73,6 +75,7 @@ func NewUniformLoader() UniformLoader {
 	return UniformLoader{
 		uniformInts:     make(map[string]int32),
 		uniformFloats:   make(map[string]float32),
+		uniformVector3s: make(map[string]gmath.Vector3),
 		uniformVector4s: make(map[string]gmath.Vector4),
 		uniformMatrix4s: make(map[string]gmath.Matrix4),
 	}
@@ -84,6 +87,9 @@ func (uniformLoader UniformLoader) loadTo(iShader framework.IShader) {
 	}
 	for varName, value := range uniformLoader.uniformFloats {
 		iShader.LoadUniform1F(varName, value)
+	}
+	for varName, value := range uniformLoader.uniformVector3s {
+		iShader.LoadUniform3F(varName, value[0], value[1], value[2])
 	}
 	for varName, value := range uniformLoader.uniformVector4s {
 		iShader.LoadUniform4F(varName, value[0], value[1], value[2], value[3])
@@ -99,6 +105,10 @@ func (uniformLoader UniformLoader) AddInt(varName string, val int32) {
 
 func (uniformLoader UniformLoader) AddFloat(varName string, val float32) {
 	uniformLoader.uniformFloats[varName] = val
+}
+
+func (uniformLoader UniformLoader) AddVector3(varName string, val gmath.Vector3) {
+	uniformLoader.uniformVector3s[varName] = val
 }
 
 func (uniformLoader UniformLoader) AddVector4(varName string, val gmath.Vector4) {

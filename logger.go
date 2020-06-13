@@ -5,19 +5,24 @@ import (
 	"time"
 )
 
-var messageQueue = []string{}
+var (
+	loggingEnabled = false
+	messageQueue   = []string{}
+)
 
 func init() {
-	go func() {
-		for Running() {
-			if len(messageQueue) > 0 {
-				fmt.Println(messageQueue[0])
-				messageQueue = messageQueue[1:]
-			} else {
-				time.Sleep(time.Millisecond * 100)
+	if loggingEnabled {
+		go func() {
+			for Running() {
+				if len(messageQueue) > 0 {
+					fmt.Println(messageQueue[0])
+					messageQueue = messageQueue[1:]
+				} else {
+					time.Sleep(time.Millisecond * 100)
+				}
 			}
-		}
-	}()
+		}()
+	}
 }
 
 // TODO: Add cross-platform support.
@@ -32,7 +37,9 @@ func NewLogger(pkg string) logger {
 }
 
 func (logger *logger) Log(msg interface{}) {
-	messageQueue = append(messageQueue, fmt.Sprint(logger.pkg+":", msg))
+	if loggingEnabled {
+		messageQueue = append(messageQueue, fmt.Sprint(logger.pkg+":", msg))
+	}
 }
 
 func (logger *logger) ForceErr(msg interface{}) {

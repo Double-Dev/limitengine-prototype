@@ -4,13 +4,14 @@ import (
 	"image"
 	"reflect"
 
+	"github.com/double-dev/limitengine/utils2d"
+
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gio"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/interaction"
 	"github.com/double-dev/limitengine/ui"
-	"github.com/double-dev/limitengine/utils2d"
 
 	"github.com/pkg/profile"
 )
@@ -39,12 +40,15 @@ func main() {
 	shader = gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
 
 	// Player
-	playerTexture := gfx.CreateTexture(gio.LoadPNG("testsprite.png"))
-	playerMaterial := utils2d.CreateSpriteSheet(playerTexture, 0.5, 0.5)
-	playerMaterial.SetIndex(1)
+	playerTexture := gfx.CreateTexture(gio.LoadPNG("slime.png"))
+	playerTexture.SetPointFilter(true, false)
+	playerMaterial := utils2d.CreateSpriteSheet(playerTexture, 0.25, 0.25, 0.002)
+
+	playerInstance := gfx.NewInstance()
+	playerMaterial.ApplyToInstance(playerInstance, 0)
 
 	// Walls
-	material = gfx.CreateColorMaterial(gmath.NewVector4(0.4, 0.4, 0.45, 1.0))
+	material = gfx.CreateColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
 
 	mesh = gfx.SpriteMesh()
 
@@ -52,7 +56,8 @@ func main() {
 	cam1Color := gfx.CreateRenderbuffer(true)
 	cam1Depth := gfx.CreateRenderbuffer(true)
 	camera = gfx.CreateCamera2D(cam1Color, cam1Depth)
-	camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
+	// camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
+	camera.SetClearColor(0.9, 0.9, 0.9, 1.0)
 
 	cam2Color := gfx.CreateEmptyTexture()
 	cam2Depth := gfx.CreateEmptyTexture()
@@ -82,9 +87,9 @@ func main() {
 	// Entities
 	state.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(-0.5, 0.0, -0.3),
+			Position: gmath.NewVector3(0.0, 0.0, -0.3),
 			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
+			Scale:    gmath.NewVector3(0.075, 0.075, 1.0),
 		},
 		&gmath.MotionComponent{
 			Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
@@ -93,14 +98,14 @@ func main() {
 			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
 		&interaction.ColliderComponent{
-			AABB: gmath.NewAABB(gmath.NewVector3(-0.1, -0.1, 0.0), gmath.NewVector3(0.1, 0.1, 0.0)),
+			AABB: gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,
 			Shader:   shader,
 			Material: playerMaterial,
 			Mesh:     mesh,
-			Instance: gfx.NewInstance(),
+			Instance: playerInstance,
 		},
 		&ControlComponent{
 			XAxis: xAxis,
@@ -117,7 +122,7 @@ func main() {
 	// 	&gfx.RenderComponent{
 	// 		Camera:   camera,
 	// 		Shader:   shader,
-	// 		Material: material,
+	// 		Material: playerMaterial,
 	// 		Mesh:     mesh,
 	// 		Instance: gfx.NewInstance(),
 	// 	},

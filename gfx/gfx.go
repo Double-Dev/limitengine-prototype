@@ -9,8 +9,6 @@ import (
 	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/double-dev/limitengine/gfx/gl"
 	"github.com/double-dev/limitengine/gmath"
-
-	testgl "github.com/go-gl/gl/v3.3-core/gl"
 )
 
 var (
@@ -92,9 +90,9 @@ func Sweep() {
 		for camera, batch0 := range renderBatch {
 			iFrameBuffer := frameBuffers[camera.id]
 			if iFrameBuffer != nil {
-				iFrameBuffer.BindForRender()
+				iFrameBuffer.Bind()
 			} else {
-				testgl.BindFramebuffer(testgl.DRAW_FRAMEBUFFER, 0) // TODO: Remove testgl.
+				context.UnbindFramebuffers()
 			}
 			context.ClearScreen(camera.clearColor[0], camera.clearColor[1], camera.clearColor[2], camera.clearColor[3])
 			for shader, batch1 := range batch0 {
@@ -109,14 +107,14 @@ func Sweep() {
 					if iTexture != nil {
 						iTexture.Bind()
 					} else {
-						testgl.BindTexture(testgl.TEXTURE_2D, 0) // TODO: Remove testgl.
+						context.UnbindTextures()
 					}
 					for mesh, instances := range batch2 {
 						mesh.prefs.loadTo(iShader)
 						iMesh := meshes[mesh.id]
 						iMesh.Enable()
 
-						data := []float32{}
+						data := []float32{} // TODO: Don't create a new slice every frame.
 
 						for _, instance := range instances {
 							instanceDefs := shader.GetInstanceDefs()
@@ -133,10 +131,6 @@ func Sweep() {
 				}
 				iShader.Stop()
 			}
-			// if iFrameBuffer != nil {
-			// 	iFrameBuffer.UnbindForRender()
-			// }
-
 			for _, blitCamera := range camera.blitCameras {
 				iFrameBuffer.BlitToFramebuffer(frameBuffers[blitCamera.id])
 			}

@@ -16,20 +16,18 @@ type ColorMaterial struct {
 	transparency bool
 }
 
-func CreateColorMaterial(color gmath.Vector4) *ColorMaterial {
+func CreateColorMaterial(color gmath.Vector3) *ColorMaterial {
 	colorMaterial := &ColorMaterial{
-		prefs:        NewUniformLoader(),
-		transparency: color[3] < 1.0,
+		prefs: NewUniformLoader(),
 	}
-	colorMaterial.prefs.AddVector4("fragtexture0Bounds", gmath.NewVector4(0.0, 0.0, 1.0, 1.0))
-	colorMaterial.prefs.AddVector4("fragtintColor", color)
+	colorMaterial.prefs.AddVector3("fragtintColor", color)
 	colorMaterial.prefs.AddFloat("fragtintAmount", 1.0)
 	return colorMaterial
 }
 
 func (colorMaterial *ColorMaterial) Texture() *Texture    { return nilTexture }
 func (colorMaterial *ColorMaterial) Prefs() UniformLoader { return colorMaterial.prefs }
-func (colorMaterial *ColorMaterial) Transparency() bool   { return colorMaterial.transparency }
+func (colorMaterial *ColorMaterial) Transparency() bool   { return false }
 
 type TextureMaterial struct {
 	texture *Texture
@@ -41,8 +39,7 @@ func CreateTextureMaterial(texture *Texture) *TextureMaterial {
 		texture: texture,
 		prefs:   NewUniformLoader(),
 	}
-	textureMaterial.prefs.AddVector4("fragtexture0Bounds", gmath.NewVector4(0.0, 0.0, 1.0, 1.0))
-	textureMaterial.prefs.AddVector4("fragtintColor", gmath.NewZeroVector4())
+	textureMaterial.prefs.AddVector3("fragtintColor", gmath.NewZeroVector3())
 	textureMaterial.prefs.AddFloat("fragtintAmount", 0.0)
 	// textureMaterial.prefs.AddVector4("fragtintColor", gmath.NewVector4(0.0, 0.25, 0.75, 1.0))
 	// textureMaterial.prefs.AddFloat("fragtintAmount", 0.5)
