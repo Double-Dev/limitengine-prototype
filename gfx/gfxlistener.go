@@ -21,8 +21,6 @@ type RenderComponent struct {
 	Instance *Instance
 }
 
-func (renderComponent *RenderComponent) Delete() {}
-
 func NewRenderSystem() *limitengine.ECSSystem {
 	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
 		for _, components := range entities {

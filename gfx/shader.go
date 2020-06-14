@@ -1,6 +1,8 @@
 package gfx
 
 import (
+	"sync"
+
 	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/double-dev/limitengine/gmath"
 )
@@ -69,6 +71,7 @@ type UniformLoader struct {
 	uniformVector3s map[string]gmath.Vector3
 	uniformVector4s map[string]gmath.Vector4
 	uniformMatrix4s map[string]gmath.Matrix4
+	mutex           sync.RWMutex
 }
 
 func NewUniformLoader() UniformLoader {
@@ -82,6 +85,7 @@ func NewUniformLoader() UniformLoader {
 }
 
 func (uniformLoader UniformLoader) loadTo(iShader framework.IShader) {
+	uniformLoader.mutex.RLock()
 	for varName, value := range uniformLoader.uniformInts {
 		iShader.LoadUniform1I(varName, value)
 	}
@@ -97,24 +101,35 @@ func (uniformLoader UniformLoader) loadTo(iShader framework.IShader) {
 	for varName, value := range uniformLoader.uniformMatrix4s {
 		iShader.LoadUniformMatrix4fv(varName, value.ToArray())
 	}
+	uniformLoader.mutex.RUnlock()
 }
 
 func (uniformLoader UniformLoader) AddInt(varName string, val int32) {
+	uniformLoader.mutex.Lock()
 	uniformLoader.uniformInts[varName] = val
+	uniformLoader.mutex.Unlock()
 }
 
 func (uniformLoader UniformLoader) AddFloat(varName string, val float32) {
+	uniformLoader.mutex.Lock()
 	uniformLoader.uniformFloats[varName] = val
+	uniformLoader.mutex.Unlock()
 }
 
 func (uniformLoader UniformLoader) AddVector3(varName string, val gmath.Vector3) {
+	uniformLoader.mutex.Lock()
 	uniformLoader.uniformVector3s[varName] = val
+	uniformLoader.mutex.Unlock()
 }
 
 func (uniformLoader UniformLoader) AddVector4(varName string, val gmath.Vector4) {
+	uniformLoader.mutex.Lock()
 	uniformLoader.uniformVector4s[varName] = val
+	uniformLoader.mutex.Unlock()
 }
 
 func (uniformLoader UniformLoader) AddMatrix4(varName string, val gmath.Matrix4) {
+	uniformLoader.mutex.Lock()
 	uniformLoader.uniformMatrix4s[varName] = val
+	uniformLoader.mutex.Unlock()
 }

@@ -20,7 +20,6 @@ func NewInstance() *Instance {
 			"verttransformMat3": []float32{0.0, 0.0, 0.0, 1.0},
 			"verttextureBounds": []float32{0.0, 0.0, 1.0, 1.0},
 		},
-		dataMutex: sync.RWMutex{},
 	}
 }
 
@@ -39,6 +38,12 @@ func (instance *Instance) SetTextureBounds(x, y, width, height float32) {
 	instance.data["verttextureBounds"][1] = y
 	instance.data["verttextureBounds"][2] = width
 	instance.data["verttextureBounds"][3] = height
+	instance.dataMutex.Unlock()
+}
+
+func (instance *Instance) SetTextureBoundsV(bounds gmath.Vector4) {
+	instance.dataMutex.Lock()
+	instance.data["verttextureBounds"] = bounds
 	instance.dataMutex.Unlock()
 }
 

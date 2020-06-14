@@ -19,8 +19,7 @@ type ECS struct {
 
 func NewECS() *ECS {
 	return &ECS{
-		ecs:   make(map[ECSEntity]map[reflect.Type]Component),
-		mutex: sync.RWMutex{},
+		ecs: make(map[ECSEntity]map[reflect.Type]Component),
 	}
 
 	// go func() {
@@ -44,9 +43,7 @@ type ECSEntity struct {
 	ecs *ECS
 }
 
-type Component interface {
-	Delete()
-}
+type Component interface{}
 
 type ECSListener interface {
 	OnAddEntity(entity ECSEntity)

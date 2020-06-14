@@ -21,8 +21,6 @@ type ColliderComponent struct {
 	AABB gmath.AABB
 }
 
-func (colliderComponent *ColliderComponent) Delete() {}
-
 type World struct {
 	spacialStructure SpacialStructure
 	entities         map[limitengine.ECSEntity]*InteractEntity
