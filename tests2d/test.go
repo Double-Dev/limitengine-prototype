@@ -49,13 +49,6 @@ func main() {
 	playerInstance := gfx.NewInstance()
 	playerSpriteSheet.Apply(playerInstance, 0)
 
-	idleLeft := utils2d.CreateFrameAnimation(utils2d.CreateFrame(playerSpriteSheet.GetBounds(0), 1.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(3), 1.25))
-	walkLeft := utils2d.CreateFrameAnimation(utils2d.CreateFrame(playerSpriteSheet.GetBounds(0), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(1), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(2), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(3), 0.25))
-	jumpLeft := utils2d.CreateFrameAnimation(utils2d.CreateFrame(playerSpriteSheet.GetBounds(8), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(9), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(10), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(11), 0.25))
-	idleRight := utils2d.CreateFrameAnimation(utils2d.CreateFrame(playerSpriteSheet.GetBounds(4), 1.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(7), 1.25))
-	walkRight := utils2d.CreateFrameAnimation(utils2d.CreateFrame(playerSpriteSheet.GetBounds(4), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(5), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(6), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(7), 0.25))
-	jumpRight := utils2d.CreateFrameAnimation(utils2d.CreateFrame(playerSpriteSheet.GetBounds(12), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(13), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(14), 0.25), utils2d.CreateFrame(playerSpriteSheet.GetBounds(15), 0.25))
-
 	// Walls
 	material = gfx.CreateColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
 
@@ -94,6 +87,12 @@ func main() {
 	yAxis.AddTrigger(ui.InputEvent{Key: ui.KeyDown}, -1.0)
 
 	// Entities
+	playerMotion := &gmath.MotionComponent{
+		Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
+		Acceleration:    gmath.NewZeroVector3(),
+		AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
+		AngAcceleration: gmath.NewIdentityQuaternion(),
+	}
 
 	state.NewEntity(
 		&gmath.TransformComponent{
@@ -101,12 +100,7 @@ func main() {
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.075, 0.075, 1.0),
 		},
-		&gmath.MotionComponent{
-			Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
-			Acceleration:    gmath.NewZeroVector3(),
-			AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
-			AngAcceleration: gmath.NewIdentityQuaternion(),
-		},
+		playerMotion,
 		&interaction.ColliderComponent{
 			AABB: gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
 		},
@@ -118,13 +112,39 @@ func main() {
 			Instance: playerInstance,
 		},
 		&PlayerAnimationComponent{
-			Player:        utils2d.CreateFrameAnimationPlayer(),
-			LeftIdleAnim:  idleLeft,
-			LeftWalkAnim:  walkLeft,
-			LeftJumpAnim:  jumpLeft,
-			RightIdleAnim: idleRight,
-			RightWalkAnim: walkRight,
-			RightJumpAnim: jumpRight,
+			Player:       utils2d.CreateFrameAnimationPlayer(),
+			LeftIdleAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
+			LeftWalkAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
+			LeftJumpAnim: utils2d.CreateFrameAnimation(
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(8), func() bool {
+					return !(playerMotion.Velocity[1] >= 1.9)
+				}),
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(9), func() bool {
+					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
+				}),
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(10), func() bool {
+					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
+				}),
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(11), func() bool {
+					return !(playerMotion.Velocity[1] <= -1.0)
+				}),
+			),
+			RightIdleAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
+			RightWalkAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
+			RightJumpAnim: utils2d.CreateFrameAnimation(
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(12), func() bool {
+					return !(playerMotion.Velocity[1] >= 1.9)
+				}),
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(13), func() bool {
+					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
+				}),
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(14), func() bool {
+					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
+				}),
+				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(15), func() bool {
+					return !(playerMotion.Velocity[1] <= -1.0)
+				}),
+			),
 		},
 		&ControlComponent{
 			XAxis: xAxis,
@@ -262,32 +282,11 @@ func main() {
 				playerAnim.direction = false
 			}
 
-			if gmath.Abs(motion.Velocity[1]) > 0.02 && !control.canJump && !control.canWallJump {
-				playerAnim.Player.Stop()
-				if motion.Velocity[1] >= 1.9 {
-					if playerAnim.direction {
-						playerAnim.LeftJumpAnim.Apply(0, render.Instance)
-					} else {
-						playerAnim.RightJumpAnim.Apply(0, render.Instance)
-					}
-				} else if motion.Velocity[1] < 1.9 && motion.Velocity[1] > 0.0 {
-					if playerAnim.direction {
-						playerAnim.LeftJumpAnim.Apply(1, render.Instance)
-					} else {
-						playerAnim.RightJumpAnim.Apply(1, render.Instance)
-					}
-				} else if motion.Velocity[1] <= 0.0 && motion.Velocity[1] > -1.0 {
-					if playerAnim.direction {
-						playerAnim.LeftJumpAnim.Apply(2, render.Instance)
-					} else {
-						playerAnim.RightJumpAnim.Apply(2, render.Instance)
-					}
+			if gmath.Abs(motion.Velocity[1]) > 0.05 || !control.canJump {
+				if playerAnim.direction {
+					playerAnim.Player.PlayInterrupt(playerAnim.LeftJumpAnim, 1, render.Instance)
 				} else {
-					if playerAnim.direction {
-						playerAnim.LeftJumpAnim.Apply(3, render.Instance)
-					} else {
-						playerAnim.RightJumpAnim.Apply(3, render.Instance)
-					}
+					playerAnim.Player.PlayInterrupt(playerAnim.RightJumpAnim, 1, render.Instance)
 				}
 			} else if gmath.Abs(control.XAxis.Amount()) > 0.0 {
 				if playerAnim.direction {
@@ -295,16 +294,14 @@ func main() {
 				} else {
 					playerAnim.Player.PlayInterrupt(playerAnim.RightWalkAnim, 1, render.Instance)
 				}
-				playerAnim.Player.Update(delta, render.Instance)
 			} else {
 				if playerAnim.direction {
 					playerAnim.Player.PlayInterrupt(playerAnim.LeftIdleAnim, 1, render.Instance)
 				} else {
 					playerAnim.Player.PlayInterrupt(playerAnim.RightIdleAnim, 1, render.Instance)
 				}
-				playerAnim.Player.Update(delta, render.Instance)
 			}
-
+			playerAnim.Player.Update(delta, render.Instance)
 		}
 	}, (*PlayerAnimationComponent)(nil), (*gfx.RenderComponent)(nil), (*ControlComponent)(nil), (*gmath.MotionComponent)(nil)))
 	state.AddListener(interactionWorld)

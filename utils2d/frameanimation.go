@@ -6,30 +6,55 @@ import (
 	"github.com/double-dev/limitengine/gfx"
 )
 
-type Frame struct {
+type Frame interface {
+	Bounds() gmath.Vector4
+	endTrigger(time float32) bool
+}
+
+type DurationFrame struct {
 	bounds   gmath.Vector4
 	duration float32
 }
 
-func CreateFrame(bounds gmath.Vector4, duration float32) *Frame {
-	return &Frame{
+func CreateDurationFrame(bounds gmath.Vector4, duration float32) *DurationFrame {
+	return &DurationFrame{
 		bounds:   bounds,
 		duration: duration,
 	}
 }
 
-type FrameAnimation struct {
-	frames []*Frame
+func (durationFrame *DurationFrame) Bounds() gmath.Vector4 { return durationFrame.bounds }
+func (durationFrame *DurationFrame) endTrigger(time float32) bool {
+	return time >= durationFrame.duration
 }
 
-func CreateFrameAnimation(frames ...*Frame) *FrameAnimation {
+type TriggerFrame struct {
+	bounds      gmath.Vector4
+	triggerFunc func() bool
+}
+
+func CreateTriggerFrame(bounds gmath.Vector4, endTrigger func() bool) *TriggerFrame {
+	return &TriggerFrame{
+		bounds:      bounds,
+		triggerFunc: endTrigger,
+	}
+}
+
+func (triggerFrame *TriggerFrame) Bounds() gmath.Vector4        { return triggerFrame.bounds }
+func (triggerFrame *TriggerFrame) endTrigger(time float32) bool { return triggerFrame.triggerFunc() }
+
+type FrameAnimation struct {
+	frames []Frame
+}
+
+func CreateFrameAnimation(frames ...Frame) *FrameAnimation {
 	return &FrameAnimation{
 		frames: frames,
 	}
 }
 
 func (frameAnimation *FrameAnimation) Apply(index int, instance *gfx.Instance) {
-	instance.SetTextureBoundsV(frameAnimation.frames[index].bounds)
+	instance.SetTextureBoundsV(frameAnimation.frames[index].Bounds())
 }
 
 type FrameAnimationPlayer struct {
@@ -74,18 +99,20 @@ func (player *FrameAnimationPlayer) Stop() {
 func (player *FrameAnimationPlayer) Update(delta float32, instance *gfx.Instance) {
 	if player.playing {
 		player.time += delta
-		if player.time >= player.currentAnimation.frames[player.index].duration {
-			player.index++
-			player.time = 0.0
+		if player.currentAnimation.frames[player.index].endTrigger(player.time) {
+			for player.currentAnimation.frames[player.index].endTrigger(player.time) {
+				player.index++
+				player.time = 0.0
 
-			if player.index >= len(player.currentAnimation.frames) {
-				if player.loopNum > 0 {
-					player.index = 0
-					player.loopNum--
-				} else {
-					player.playing = false
-					player.currentAnimation = nil
-					return
+				if player.index >= len(player.currentAnimation.frames) {
+					if player.loopNum > 0 {
+						player.index = 0
+						player.loopNum--
+					} else {
+						player.playing = false
+						player.currentAnimation = nil
+						return
+					}
 				}
 			}
 			player.currentAnimation.Apply(player.index, instance)
