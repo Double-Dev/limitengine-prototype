@@ -230,7 +230,7 @@ func main() {
 			} else {
 				motion.Acceleration[0] = 0.0
 				if !control.gravityEnabled {
-					motion.Velocity[0] *= 0.75
+					motion.Velocity[0] *= 0.95
 				}
 			}
 
@@ -288,18 +288,20 @@ func main() {
 				} else {
 					playerAnim.Player.PlayInterrupt(playerAnim.RightJumpAnim, 1, render.Instance)
 				}
-			} else if gmath.Abs(control.XAxis.Amount()) > 0.0 {
+			} else if gmath.Abs(motion.Velocity[0]) > 0.05 {
 				if playerAnim.direction {
 					playerAnim.Player.PlayInterrupt(playerAnim.LeftWalkAnim, 1, render.Instance)
 				} else {
 					playerAnim.Player.PlayInterrupt(playerAnim.RightWalkAnim, 1, render.Instance)
 				}
+				playerAnim.Player.SetSpeed(gmath.Abs(motion.Velocity[0]) * 3.0)
 			} else {
 				if playerAnim.direction {
 					playerAnim.Player.PlayInterrupt(playerAnim.LeftIdleAnim, 1, render.Instance)
 				} else {
 					playerAnim.Player.PlayInterrupt(playerAnim.RightIdleAnim, 1, render.Instance)
 				}
+				playerAnim.Player.SetSpeed(1.0)
 			}
 			playerAnim.Player.Update(delta, render.Instance)
 		}

@@ -60,7 +60,7 @@ func (frameAnimation *FrameAnimation) Apply(index int, instance *gfx.Instance) {
 type FrameAnimationPlayer struct {
 	currentAnimation *FrameAnimation
 	index            int
-	time             float32
+	time, speed      float32
 	playing          bool
 	loopNum          int
 }
@@ -86,19 +86,9 @@ func (player *FrameAnimationPlayer) PlayInterrupt(animation *FrameAnimation, tim
 	}
 }
 
-func (player *FrameAnimationPlayer) Stop() {
-	if player.playing {
-		player.currentAnimation = nil
-		player.playing = false
-		player.loopNum = 0
-		player.time = 0.0
-		player.index = 0
-	}
-}
-
 func (player *FrameAnimationPlayer) Update(delta float32, instance *gfx.Instance) {
 	if player.playing {
-		player.time += delta
+		player.time += delta * player.speed
 		if player.currentAnimation.frames[player.index].endTrigger(player.time) {
 			for player.currentAnimation.frames[player.index].endTrigger(player.time) {
 				player.index++
@@ -118,6 +108,20 @@ func (player *FrameAnimationPlayer) Update(delta float32, instance *gfx.Instance
 			player.currentAnimation.Apply(player.index, instance)
 		}
 	}
+}
+
+func (player *FrameAnimationPlayer) Stop() {
+	if player.playing {
+		player.currentAnimation = nil
+		player.playing = false
+		player.loopNum = 0
+		player.time = 0.0
+		player.index = 0
+	}
+}
+
+func (player *FrameAnimationPlayer) SetSpeed(speed float32) {
+	player.speed = speed
 }
 
 func (player *FrameAnimationPlayer) CurrentAnimation() *FrameAnimation {
