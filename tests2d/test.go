@@ -113,10 +113,10 @@ func main() {
 			Instance: playerInstance,
 		},
 		&PlayerAnimationComponent{
-			Player:       utils2d.CreateFrameAnimationPlayer(),
-			LeftIdleAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
-			LeftWalkAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
-			LeftJumpAnim: utils2d.CreateFrameAnimation(
+			Player:        utils2d.CreateFrameAnimationPlayer(),
+			RightIdleAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
+			RightWalkAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
+			RightJumpAnim: utils2d.CreateFrameAnimation(
 				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(8), func() bool {
 					return !(playerMotion.Velocity[1] >= 1.9)
 				}),
@@ -130,9 +130,10 @@ func main() {
 					return !(playerMotion.Velocity[1] <= -1.0)
 				}),
 			),
-			RightIdleAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
-			RightWalkAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
-			RightJumpAnim: utils2d.CreateFrameAnimation(
+			RightWallAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(8), 0.5), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(10), 0.5)),
+			LeftIdleAnim:  utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
+			LeftWalkAnim:  utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
+			LeftJumpAnim: utils2d.CreateFrameAnimation(
 				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(12), func() bool {
 					return !(playerMotion.Velocity[1] >= 1.9)
 				}),
@@ -146,6 +147,7 @@ func main() {
 					return !(playerMotion.Velocity[1] <= -1.0)
 				}),
 			),
+			LeftWallAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(12), 0.5), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(14), 0.5)),
 		},
 		&ControlComponent{
 			XAxis: xAxis,
@@ -278,12 +280,18 @@ func main() {
 			motion := components[3].(*gmath.MotionComponent)
 
 			if motion.Velocity[0] > 0.0 {
-				playerAnim.direction = true
-			} else if motion.Velocity[0] < 0.0 {
 				playerAnim.direction = false
+			} else if motion.Velocity[0] < 0.0 {
+				playerAnim.direction = true
 			}
 
-			if gmath.Abs(motion.Velocity[1]) > 0.05 || !control.canJump {
+			if control.canWallJump {
+				if playerAnim.direction {
+					playerAnim.Player.PlayInterrupt(playerAnim.RightWallAnim, 1, render.Instance)
+				} else {
+					playerAnim.Player.PlayInterrupt(playerAnim.LeftWallAnim, 1, render.Instance)
+				}
+			} else if gmath.Abs(motion.Velocity[1]) > 0.05 || !control.canJump {
 				if playerAnim.direction {
 					playerAnim.Player.PlayInterrupt(playerAnim.LeftJumpAnim, 1, render.Instance)
 				} else {
@@ -348,8 +356,8 @@ type PlayerAnimationComponent struct {
 
 	Player *utils2d.FrameAnimationPlayer
 
-	LeftIdleAnim, LeftWalkAnim, LeftJumpAnim    *utils2d.FrameAnimation
-	RightIdleAnim, RightWalkAnim, RightJumpAnim *utils2d.FrameAnimation
+	RightIdleAnim, RightWalkAnim, RightJumpAnim, RightWallAnim *utils2d.FrameAnimation
+	LeftIdleAnim, LeftWalkAnim, LeftJumpAnim, LeftWallAnim     *utils2d.FrameAnimation
 }
 
 // INTERACTION TESTS
