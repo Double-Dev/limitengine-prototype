@@ -43,6 +43,7 @@ func main() {
 	playerTexture := gfx.CreateTexture(gio.LoadPNG("slime.png"))
 	playerTexture.SetPointFilter(true, false)
 	playerMaterial := gfx.CreateTextureMaterial(playerTexture)
+	playerMaterial.SetTint(gmath.NewVector3(0.0, 0.0, 1.0), 0.5)
 
 	playerSpriteSheet := utils2d.CreateSpriteSheet(0.25, 0.25, 0.003)
 

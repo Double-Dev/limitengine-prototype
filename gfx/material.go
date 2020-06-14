@@ -25,6 +25,10 @@ func CreateColorMaterial(color gmath.Vector3) *ColorMaterial {
 	return colorMaterial
 }
 
+func (colorMaterial *ColorMaterial) SetColor(color gmath.Vector3) {
+	colorMaterial.prefs.AddVector3("fragtintColor", color)
+}
+
 func (colorMaterial *ColorMaterial) Texture() *Texture    { return nilTexture }
 func (colorMaterial *ColorMaterial) Prefs() UniformLoader { return colorMaterial.prefs }
 func (colorMaterial *ColorMaterial) Transparency() bool   { return false }
@@ -44,6 +48,11 @@ func CreateTextureMaterial(texture *Texture) *TextureMaterial {
 	// textureMaterial.prefs.AddVector4("fragtintColor", gmath.NewVector4(0.0, 0.25, 0.75, 1.0))
 	// textureMaterial.prefs.AddFloat("fragtintAmount", 0.5)
 	return textureMaterial
+}
+
+func (textureMaterial *TextureMaterial) SetTint(color gmath.Vector3, amount float32) {
+	textureMaterial.prefs.AddVector3("fragtintColor", color)
+	textureMaterial.prefs.AddFloat("fragtintAmount", amount)
 }
 
 func (textureMaterial *TextureMaterial) Texture() *Texture    { return textureMaterial.texture }
