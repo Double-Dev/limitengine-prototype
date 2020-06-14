@@ -276,9 +276,9 @@ func main() {
 			control := components[2].(*ControlComponent)
 			motion := components[3].(*gmath.MotionComponent)
 
-			if control.XAxis.Amount() > 0.0 {
+			if motion.Velocity[0] > 0.0 {
 				playerAnim.direction = true
-			} else if control.XAxis.Amount() < 0.0 {
+			} else if motion.Velocity[0] < 0.0 {
 				playerAnim.direction = false
 			}
 
