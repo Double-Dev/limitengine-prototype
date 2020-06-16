@@ -10,4 +10,6 @@ func LoadFNT(path string) map[string]gmath.Vector4 {
 	// fileStrs := strings.Split(fileStr, "\n")
 
 	// lineIndex := 0
+
+	return nil
 }
