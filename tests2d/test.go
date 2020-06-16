@@ -31,7 +31,7 @@ func main() {
 	limitengine.AppView().SetTitle("2D Tests!")
 	limitengine.AppView().SetPosition(100, 100)
 	limitengine.AppView().SetAspectRatio(3, 2)
-	limitengine.AppView().SetIcons([]image.Image{gio.LoadIcon("Test.png")})
+	limitengine.AppView().SetIcons([]image.Image{image.Image(gio.LoadPNG("Test.png"))})
 
 	// Creating State
 	state := limitengine.NewState()
@@ -43,12 +43,23 @@ func main() {
 	playerTexture := gfx.CreateTexture(gio.LoadPNG("slime.png"))
 	playerTexture.SetPointFilter(true, false)
 	playerMaterial := gfx.CreateTextureMaterial(playerTexture)
-	playerMaterial.SetTint(gmath.NewVector3(0.0, 0.0, 1.0), 0.5)
+	playerMaterial.SetTint(gmath.NewVector3(0.5, 0.5, 0.0), 0.5)
 
 	playerSpriteSheet := utils2d.CreateSpriteSheet(0.25, 0.25, 0.003)
 
 	playerInstance := gfx.NewInstance()
 	playerSpriteSheet.Apply(playerInstance, 0)
+
+	// Text
+	fontTexture := gfx.CreateTexture(gio.LoadPNG("calibri.png"))
+	fontTexture.SetLinearFilter(true, false)
+	fontMaterial := gfx.CreateTextureMaterial(fontTexture)
+
+	fontAtlas := utils2d.CreateTextureAtlas()
+	fontAtlas.Add("A", gmath.NewVector4(0.0, 0.0, 0.25, 0.25))
+
+	textInstance := gfx.NewInstance()
+	textInstance.SetTextureBoundsV(fontAtlas.Query("A"))
 
 	// Walls
 	material = gfx.CreateColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
@@ -152,6 +163,21 @@ func main() {
 		&ControlComponent{
 			XAxis: xAxis,
 			YAxis: yAxis,
+		},
+	)
+
+	state.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.0, 0.0, -0.6),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.2, 0.2, 1.0),
+		},
+		&gfx.RenderComponent{
+			Camera:   camera,
+			Shader:   shader,
+			Material: fontMaterial,
+			Mesh:     mesh,
+			Instance: textInstance,
 		},
 	)
 
@@ -279,18 +305,19 @@ func main() {
 			control := components[2].(*ControlComponent)
 			motion := components[3].(*gmath.MotionComponent)
 
-			if motion.Velocity[0] > 0.0 {
+			if motion.Velocity[0] > 0.1 {
 				playerAnim.direction = false
-			} else if motion.Velocity[0] < 0.0 {
+			} else if motion.Velocity[0] < -0.1 {
 				playerAnim.direction = true
 			}
 
-			if control.canWallJump {
+			if control.canWallJump && !control.canJump {
 				if playerAnim.direction {
 					playerAnim.Player.PlayInterrupt(playerAnim.RightWallAnim, 1, render.Instance)
 				} else {
 					playerAnim.Player.PlayInterrupt(playerAnim.LeftWallAnim, 1, render.Instance)
 				}
+				playerAnim.Player.SetSpeed(3.0)
 			} else if gmath.Abs(motion.Velocity[1]) > 0.05 || !control.canJump {
 				if playerAnim.direction {
 					playerAnim.Player.PlayInterrupt(playerAnim.LeftJumpAnim, 1, render.Instance)

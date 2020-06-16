@@ -3,6 +3,7 @@ package utils2d
 import (
 	"sync"
 
+	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gmath"
 )
 
@@ -12,6 +13,12 @@ type TextureAtlas struct {
 }
 
 func CreateTextureAtlas() *TextureAtlas {
+	return &TextureAtlas{
+		atlas: make(map[string]gmath.Vector4),
+	}
+}
+
+func CreateTextureAtlasExisting(atlas map[string]gmath.Vector4) *TextureAtlas {
 	return &TextureAtlas{
 		atlas: make(map[string]gmath.Vector4),
 	}
@@ -28,4 +35,8 @@ func (textureAtlas *TextureAtlas) Query(key string) gmath.Vector4 {
 	bounds := textureAtlas.atlas[key]
 	textureAtlas.mutex.RUnlock()
 	return bounds
+}
+
+func (textureAtlas *TextureAtlas) Apply(instance *gfx.Instance, key string) {
+	instance.SetTextureBoundsV(textureAtlas.Query(key))
 }

@@ -82,13 +82,14 @@ var (
 func processLESL(src string) (string, string, map[string]int32) { // TODO: Parse custom shader
 	textureVars := make(map[string]int32)
 	for i := int32(1); i < 10; i++ {
-		if strings.Contains(src, fmt.Sprintf("texture%d", i)) {
-			varNameStart := strings.Index(src, fmt.Sprintf("texture%d", i)) + 9
+		keyword := fmt.Sprintf("texture%d", i)
+		if strings.Contains(src, keyword) {
+			varNameStart := strings.Index(src, keyword) + 9
 			varNameEnd := strings.Index(src[varNameStart:], ";")
 			textureVars[src[varNameStart:varNameStart+varNameEnd]] = i
-			src = strings.Replace(src, fmt.Sprintf("texture%d", i), "uniform sampler2D", 1)
-			if strings.Contains(src, fmt.Sprintf("texture%d", i)) {
-				log.ForceErr(fmt.Sprintf("LESL: Multiple uses of type 'texture%d' not allowed.", i))
+			src = strings.Replace(src, keyword, "uniform sampler2D", 1)
+			if strings.Contains(src, keyword) {
+				log.ForceErr("LESL: Multiple uses of type '" + keyword + "' not allowed.")
 			}
 		}
 	}

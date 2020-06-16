@@ -60,7 +60,7 @@ func init() {
 					// log.Log(fps)
 
 					pipeline := gfxPipeline[0]
-					for action := range pipeline {
+					for action := range pipeline { // TODO: Make this not send unexpected signal.
 						action()
 					}
 					gfxPipeline = gfxPipeline[1:]
@@ -124,6 +124,7 @@ func Sweep() {
 								instance.dataMutex.RUnlock()
 							}
 						}
+						// TODO: Look into optimizing GPU overhead from instanced rendering.
 						iMesh.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
 
 						iMesh.Disable()
@@ -141,12 +142,12 @@ func Sweep() {
 	gfxPipeline = append(gfxPipeline, pipeline)
 	queue := actionQueue
 	actionQueue = nil
-	go func() {
-		for _, action := range queue {
-			pipeline <- action
-		}
-		close(pipeline)
-	}()
+	// go func() {
+	for _, action := range queue {
+		pipeline <- action // TODO: Make this not send unexpected signal.
+	}
+	close(pipeline)
+	// }()
 }
 
 func AddRenderable(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) {

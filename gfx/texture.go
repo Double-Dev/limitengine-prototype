@@ -1,6 +1,9 @@
 package gfx
 
-import "github.com/double-dev/limitengine/gfx/framework"
+import (
+	"github.com/double-dev/limitengine/gfx/framework"
+	"github.com/double-dev/limitengine/gio"
+)
 
 var (
 	textureIndex = uint32(1)
@@ -26,13 +29,13 @@ func CreateEmptyTexture() *Texture {
 	return texture
 }
 
-func CreateTexture(image []uint8, width, height int32) *Texture {
+func CreateTexture(image *gio.Image) *Texture {
 	texture := &Texture{
 		id: textureIndex,
 	}
 	textureIndex++
 	actionQueue = append(actionQueue, func() {
-		textures[texture.id] = context.CreateTexture(image, width, height)
+		textures[texture.id] = context.CreateTexture(image.Data(), image.Width(), image.Height())
 	})
 	return texture
 }
