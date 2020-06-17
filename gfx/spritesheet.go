@@ -1,7 +1,6 @@
-package utils2d
+package gfx
 
 import (
-	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gmath"
 )
 
@@ -22,7 +21,7 @@ func CreateSpriteSheet(spriteWidth, spriteHeight, padding float32) *SpriteSheet 
 	return spriteSheet
 }
 
-func (spriteSheet *SpriteSheet) Apply(instance *gfx.Instance, index uint32) {
+func (spriteSheet *SpriteSheet) Apply(instance *Instance, index uint32) {
 	instance.SetTextureBounds(
 		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
 		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,

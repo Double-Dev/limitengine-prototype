@@ -1,10 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"reflect"
-
-	"github.com/double-dev/limitengine/utils2d"
 
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gfx"
@@ -45,21 +44,20 @@ func main() {
 	playerMaterial := gfx.CreateTextureMaterial(playerTexture)
 	playerMaterial.SetTint(gmath.NewVector3(0.5, 0.5, 0.0), 0.5)
 
-	playerSpriteSheet := utils2d.CreateSpriteSheet(0.25, 0.25, 0.003)
+	playerSpriteSheet := gfx.CreateSpriteSheet(0.25, 0.25, 0.003)
 
 	playerInstance := gfx.NewInstance()
 	playerSpriteSheet.Apply(playerInstance, 0)
 
 	// Text
+	font := gio.LoadFNT(".", "calibri.fnt")
 	fontTexture := gfx.CreateTexture(gio.LoadPNG("calibri.png"))
 	fontTexture.SetLinearFilter(true, false)
 	fontMaterial := gfx.CreateTextureMaterial(fontTexture)
 
-	fontAtlas := utils2d.CreateTextureAtlas()
-	fontAtlas.Add("A", gmath.NewVector4(0.0, 0.0, 0.25, 0.25))
-
 	textInstance := gfx.NewInstance()
-	textInstance.SetTextureBoundsV(fontAtlas.Query("A"))
+	charBounds := font.GetChar("w").Bounds()
+	textInstance.SetTextureBoundsV(charBounds)
 
 	// Walls
 	material = gfx.CreateColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
@@ -124,41 +122,41 @@ func main() {
 			Instance: playerInstance,
 		},
 		&PlayerAnimationComponent{
-			Player:        utils2d.CreateFrameAnimationPlayer(),
-			RightIdleAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
-			RightWalkAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
-			RightJumpAnim: utils2d.CreateFrameAnimation(
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(8), func() bool {
+			Player:        gfx.CreateFrameAnimationPlayer(),
+			RightIdleAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
+			RightWalkAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
+			RightJumpAnim: gfx.CreateFrameAnimation(
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(8), func() bool {
 					return !(playerMotion.Velocity[1] >= 1.9)
 				}),
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(9), func() bool {
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(9), func() bool {
 					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
 				}),
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(10), func() bool {
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(10), func() bool {
 					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
 				}),
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(11), func() bool {
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(11), func() bool {
 					return !(playerMotion.Velocity[1] <= -1.0)
 				}),
 			),
-			RightWallAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(8), 0.5), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(10), 0.5)),
-			LeftIdleAnim:  utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
-			LeftWalkAnim:  utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
-			LeftJumpAnim: utils2d.CreateFrameAnimation(
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(12), func() bool {
+			RightWallAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(8), 0.5), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(10), 0.5)),
+			LeftIdleAnim:  gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
+			LeftWalkAnim:  gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
+			LeftJumpAnim: gfx.CreateFrameAnimation(
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(12), func() bool {
 					return !(playerMotion.Velocity[1] >= 1.9)
 				}),
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(13), func() bool {
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(13), func() bool {
 					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
 				}),
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(14), func() bool {
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(14), func() bool {
 					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
 				}),
-				utils2d.CreateTriggerFrame(playerSpriteSheet.GetBounds(15), func() bool {
+				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(15), func() bool {
 					return !(playerMotion.Velocity[1] <= -1.0)
 				}),
 			),
-			LeftWallAnim: utils2d.CreateFrameAnimation(utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(12), 0.5), utils2d.CreateDurationFrame(playerSpriteSheet.GetBounds(14), 0.5)),
+			LeftWallAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(12), 0.5), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(14), 0.5)),
 		},
 		&ControlComponent{
 			XAxis: xAxis,
@@ -166,11 +164,12 @@ func main() {
 		},
 	)
 
+	fmt.Println(charBounds[2] / charBounds[3])
 	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, 0.0, -0.6),
 			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.2, 0.2, 1.0),
+			Scale:    gmath.NewVector3(charBounds[2], charBounds[3], 1.0),
 		},
 		&gfx.RenderComponent{
 			Camera:   camera,
@@ -381,10 +380,10 @@ type ControlComponent struct {
 type PlayerAnimationComponent struct {
 	direction bool
 
-	Player *utils2d.FrameAnimationPlayer
+	Player *gfx.FrameAnimationPlayer
 
-	RightIdleAnim, RightWalkAnim, RightJumpAnim, RightWallAnim *utils2d.FrameAnimation
-	LeftIdleAnim, LeftWalkAnim, LeftJumpAnim, LeftWallAnim     *utils2d.FrameAnimation
+	RightIdleAnim, RightWalkAnim, RightJumpAnim, RightWallAnim *gfx.FrameAnimation
+	LeftIdleAnim, LeftWalkAnim, LeftJumpAnim, LeftWallAnim     *gfx.FrameAnimation
 }
 
 // INTERACTION TESTS

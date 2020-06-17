@@ -1,9 +1,8 @@
-package utils2d
+package gfx
 
 import (
 	"sync"
 
-	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gmath"
 )
 
@@ -37,6 +36,6 @@ func (textureAtlas *TextureAtlas) Query(key string) gmath.Vector4 {
 	return bounds
 }
 
-func (textureAtlas *TextureAtlas) Apply(instance *gfx.Instance, key string) {
+func (textureAtlas *TextureAtlas) Apply(instance *Instance, key string) {
 	instance.SetTextureBoundsV(textureAtlas.Query(key))
 }

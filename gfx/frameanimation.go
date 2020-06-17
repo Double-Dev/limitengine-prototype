@@ -1,9 +1,7 @@
-package utils2d
+package gfx
 
 import (
 	"github.com/double-dev/limitengine/gmath"
-
-	"github.com/double-dev/limitengine/gfx"
 )
 
 type Frame interface {
@@ -53,7 +51,7 @@ func CreateFrameAnimation(frames ...Frame) *FrameAnimation {
 	}
 }
 
-func (frameAnimation *FrameAnimation) Apply(index int, instance *gfx.Instance) {
+func (frameAnimation *FrameAnimation) Apply(index int, instance *Instance) {
 	instance.SetTextureBoundsV(frameAnimation.frames[index].Bounds())
 }
 
@@ -69,13 +67,13 @@ func CreateFrameAnimationPlayer() *FrameAnimationPlayer {
 	return &FrameAnimationPlayer{}
 }
 
-func (player *FrameAnimationPlayer) Play(animation *FrameAnimation, times int, instance *gfx.Instance) {
+func (player *FrameAnimationPlayer) Play(animation *FrameAnimation, times int, instance *Instance) {
 	if !player.playing {
 		player.PlayInterrupt(animation, times, instance)
 	}
 }
 
-func (player *FrameAnimationPlayer) PlayInterrupt(animation *FrameAnimation, times int, instance *gfx.Instance) {
+func (player *FrameAnimationPlayer) PlayInterrupt(animation *FrameAnimation, times int, instance *Instance) {
 	if player.currentAnimation != animation && len(animation.frames) > 0 {
 		player.currentAnimation = animation
 		player.playing = true
@@ -86,7 +84,7 @@ func (player *FrameAnimationPlayer) PlayInterrupt(animation *FrameAnimation, tim
 	}
 }
 
-func (player *FrameAnimationPlayer) Update(delta float32, instance *gfx.Instance) {
+func (player *FrameAnimationPlayer) Update(delta float32, instance *Instance) {
 	if player.playing {
 		player.time += delta * player.speed
 		if player.currentAnimation.frames[player.index].endTrigger(player.time) {
