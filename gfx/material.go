@@ -45,8 +45,6 @@ func NewTextureMaterial(texture *Texture) *TextureMaterial {
 	}
 	textureMaterial.prefs.AddVector3("fragtintColor", gmath.NewZeroVector3())
 	textureMaterial.prefs.AddFloat("fragtintAmount", 0.0)
-	// textureMaterial.prefs.AddVector4("fragtintColor", gmath.NewVector4(0.0, 0.25, 0.75, 1.0))
-	// textureMaterial.prefs.AddFloat("fragtintAmount", 0.5)
 	return textureMaterial
 }
 

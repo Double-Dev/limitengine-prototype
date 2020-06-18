@@ -14,6 +14,15 @@ var (
 
 func init() { shaders[0] = nil }
 
+func deleteShaders() {
+	for _, iShader := range shaders {
+		if iShader != nil {
+			iShader.Delete()
+		}
+	}
+	shaders = nil
+}
+
 type Shader struct {
 	id             uint32
 	uniformLoader  UniformLoader
@@ -29,7 +38,7 @@ func NewShader(leslSrc string) *Shader {
 		vertSrc, fragSrc, textureVars := processLESL(leslSrc)
 		shaders[shader.id] = context.NewShader(vertSrc, fragSrc)
 		totalInstanceSize := 0
-		instanceDefs := shader.GetInstanceDefs()
+		instanceDefs := shader.InstanceDefs()
 		for _, instanceDef := range instanceDefs {
 			totalInstanceSize += instanceDef.Size
 		}
@@ -42,7 +51,7 @@ func NewShader(leslSrc string) *Shader {
 	return shader
 }
 
-func (shader *Shader) GetInstanceDefs() []struct {
+func (shader *Shader) InstanceDefs() []struct {
 	Name  string
 	Size  int
 	Index int
@@ -132,4 +141,13 @@ func (uniformLoader UniformLoader) AddMatrix4(varName string, val gmath.Matrix4)
 	uniformLoader.mutex.Lock()
 	uniformLoader.uniformMatrix4s[varName] = val
 	uniformLoader.mutex.Unlock()
+}
+
+// DeleteShader queues a gfx action that deletes the input shader.
+func DeleteShader(shader *Shader) {
+	actionQueue = append(actionQueue, func() {
+		iShader := shaders[shader.id]
+		iShader.Delete()
+		delete(shaders, shader.id)
+	})
 }

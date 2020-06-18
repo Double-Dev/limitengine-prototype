@@ -13,8 +13,8 @@ const (
 )
 
 var (
-	frameBufferIndex = uint32(1)
-	frameBuffers     = make(map[uint32]framework.IFramebuffer)
+	framebufferIndex = uint32(1)
+	framebuffers     = make(map[uint32]framework.IFramebuffer)
 	cameras          = []*Camera{}
 
 	defaultCamera = &Camera{
@@ -26,14 +26,25 @@ var (
 )
 
 func init() {
-	frameBuffers[0] = nil
-
+	framebuffers[0] = nil
 	defaultCamera.prefs.AddMatrix4(
 		"vertprojMat",
 		gmath.NewIdentityMatrix4(),
 	)
 	defaultCamera.SetViewMat(gmath.NewIdentityMatrix4())
 	cameras = append(cameras, defaultCamera)
+}
+
+func deleteFramebuffers() {
+	framebufferIndex = 0
+	for _, iFramebuffer := range framebuffers {
+		if iFramebuffer != nil {
+			iFramebuffer.Delete()
+		}
+	}
+	framebuffers = nil
+	cameras = nil
+	defaultCamera = nil
 }
 
 // Camera is a gfx framebuffer.
@@ -57,16 +68,16 @@ func DefaultCamera() *Camera {
 // TODO: Think about turning Camera into interface to allow easy creation of variations.
 func NewCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
-		id:                     frameBufferIndex,
+		id:                     framebufferIndex,
 		colorAttachment:        colorAttachment,
 		depthStencilAttachment: depthAttachment,
 		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType:         projNone,
 		prefs:                  NewUniformLoader(),
 	}
-	frameBufferIndex++
+	framebufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 1)
+		framebuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.frameworkAttachment(), camera.depthStencilAttachment.frameworkAttachment(), 1.0, 1.0, 1)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -82,16 +93,16 @@ func NewCamera(colorAttachment, depthAttachment Attachment) *Camera {
 // the z-axis.
 func NewCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
-		id:                     frameBufferIndex,
+		id:                     framebufferIndex,
 		colorAttachment:        colorAttachment,
 		depthStencilAttachment: depthAttachment,
 		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
 		projectionType:         proj2D,
 		prefs:                  NewUniformLoader(),
 	}
-	frameBufferIndex++
+	framebufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
+		framebuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.frameworkAttachment(), camera.depthStencilAttachment.frameworkAttachment(), 1.0, 1.0, 4)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -104,7 +115,7 @@ func NewCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 
 func NewCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farPlane, fov float32) *Camera {
 	camera := &Camera{
-		id:                     frameBufferIndex,
+		id:                     framebufferIndex,
 		colorAttachment:        colorAttachment,
 		depthStencilAttachment: depthAttachment,
 		clearColor:             gmath.NewVector4(0.0, 0.0, 0.0, 1.0),
@@ -114,9 +125,9 @@ func NewCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farPlan
 		fov:                    fov,
 		prefs:                  NewUniformLoader(),
 	}
-	frameBufferIndex++
+	framebufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
+		framebuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.frameworkAttachment(), camera.depthStencilAttachment.frameworkAttachment(), 1.0, 1.0, 4)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -165,8 +176,8 @@ func (camera *Camera) SetViewMat(viewMat gmath.Matrix4) {
 }
 
 func (camera *Camera) resize(width, height int) {
-	if frameBuffers[camera.id] != nil {
-		actionQueue = append(actionQueue, func() { frameBuffers[camera.id].Resize(int32(width), int32(height)) })
+	if framebuffers[camera.id] != nil {
+		actionQueue = append(actionQueue, func() { framebuffers[camera.id].Resize(int32(width), int32(height)) })
 	}
 	aspectRatio := float32(height) / float32(width)
 	switch camera.projectionType {
@@ -183,4 +194,13 @@ func (camera *Camera) resize(width, height int) {
 		)
 		break
 	}
+}
+
+// DeleteCamera queues a gfx action that deletes the input camera.
+func DeleteCamera(camera *Camera) {
+	actionQueue = append(actionQueue, func() {
+		iFramebuffer := framebuffers[camera.id]
+		iFramebuffer.Delete()
+		delete(framebuffers, camera.id)
+	})
 }

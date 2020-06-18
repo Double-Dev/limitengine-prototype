@@ -15,27 +15,13 @@ type ECS struct {
 	ecs       map[ECSEntity]map[reflect.Type]Component
 	mutex     sync.RWMutex
 	listeners []ECSListener
+	active    bool
 }
 
 func NewECS() *ECS {
 	return &ECS{
 		ecs: make(map[ECSEntity]map[reflect.Type]Component),
 	}
-
-	// go func() {
-	// 	currentTime := time.Now().UnixNano()
-	// 	for Running() {
-	// 		if time.Now().UnixNano()-currentTime > int64((1.0/TargetUpdatesPerSecond)*1000000000.0) {
-	// 			lastTime := currentTime
-	// 			currentTime = time.Now().UnixNano()
-	// 			delta := float32(currentTime-lastTime) / 1000000000.0
-	// 			UpdateSystems(delta)
-	// 		} else {
-	// 			time.Sleep(time.Millisecond * 10)
-	// 		}
-
-	// 	}
-	// }()
 }
 
 type ECSEntity struct {
@@ -50,6 +36,8 @@ type ECSListener interface {
 	OnAddComponent(entity ECSEntity, component Component)
 	OnRemoveComponent(entity ECSEntity, component Component)
 	OnRemoveEntity(entity ECSEntity)
+	OnActive()
+	OnInactive()
 	GetTargetComponents() []reflect.Type
 	GetEntities() []ECSEntity
 	ShouldListenForAllComponents() bool
@@ -195,3 +183,19 @@ func (ecs *ECS) RemoveECSListener(listener ECSListener) {
 		}
 	}
 }
+
+func (ecs *ECS) SetActive() {
+	ecs.active = true
+	for _, listener := range ecs.listeners {
+		listener.OnActive()
+	}
+}
+
+func (ecs *ECS) SetInactive() {
+	ecs.active = false
+	for _, listener := range ecs.listeners {
+		listener.OnInactive()
+	}
+}
+
+func (ecs *ECS) Active() bool { return ecs.active }

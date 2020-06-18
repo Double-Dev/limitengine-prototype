@@ -14,6 +14,15 @@ var (
 
 func init() { textures[0] = nil }
 
+func deleteTextures() {
+	for _, iTexture := range textures {
+		if iTexture != nil {
+			iTexture.Delete()
+		}
+	}
+	textures = nil
+}
+
 type Texture struct {
 	id uint32
 }
@@ -55,6 +64,15 @@ func (texture *Texture) SetLinearFilter(mipmap, antisotrophic bool) {
 }
 
 // Attachment function:
-func (texture *Texture) getFrameworkAttachment() framework.IAttachment {
+func (texture *Texture) frameworkAttachment() framework.IAttachment {
 	return textures[texture.id]
+}
+
+// DeleteTexture queues a gfx action that deletes the input texture.
+func DeleteTexture(texture *Texture) {
+	actionQueue = append(actionQueue, func() {
+		iTexture := textures[texture.id]
+		iTexture.Delete()
+		delete(textures, texture.id)
+	})
 }

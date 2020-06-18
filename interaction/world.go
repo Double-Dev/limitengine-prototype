@@ -146,6 +146,9 @@ func (world *World) OnRemoveEntity(entity limitengine.ECSEntity) {
 	world.entitiesToRemove = append(world.entitiesToRemove, entity)
 }
 
+func (world *World) OnActive()   {}
+func (world *World) OnInactive() {}
+
 func (world *World) ProcessInteractions(delta float32) {
 	for _, removeEntity := range world.entitiesToRemove {
 		world.spacialStructure.Remove(world.entities[removeEntity])

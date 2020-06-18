@@ -105,6 +105,7 @@ func init() {
 // Launch begins the thread which runs the engine's update logic until the engine closes.
 // This must be called on the main thread.
 func Launch(initState *State) {
+	initState.ecs.SetActive()
 	state = initState
 	go func() {
 		currentTime := time.Now().UnixNano()
@@ -127,7 +128,11 @@ func Launch(initState *State) {
 }
 
 // SetState sets a new application state for the engine to process.
-func SetState(newState *State) { state = newState }
+func SetState(newState *State) {
+	state.ecs.SetInactive()
+	newState.ecs.SetActive()
+	state = newState
+}
 
 // AppView returns the engine's view.
 func AppView() View { return view }

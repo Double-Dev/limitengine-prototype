@@ -1,13 +1,18 @@
 package limitengine
 
 type State struct {
-	ecs     *ECS
-	systems []*ECSSystem
+	ecs        *ECS
+	systems    []*ECSSystem
+	updateFunc func(delta float32)
 }
 
-func NewState() *State {
+func NewState(updateFunc func(delta float32)) *State {
+	if updateFunc == nil {
+		updateFunc = func(delta float32) {}
+	}
 	return &State{
-		ecs: NewECS(),
+		ecs:        NewECS(),
+		updateFunc: updateFunc,
 	}
 }
 
@@ -20,6 +25,7 @@ func (state *State) RemoveEntity(entity ECSEntity) bool {
 }
 
 func (state *State) Update(delta float32) {
+	state.updateFunc(delta)
 	for _, system := range state.systems {
 		system.Update(delta)
 	}

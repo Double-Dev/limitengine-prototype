@@ -38,6 +38,7 @@ func NewRenderSystem() *limitengine.ECSSystem {
 
 type GFXListener struct {
 	entities map[limitengine.ECSEntity]RenderComponent
+	active   bool
 }
 
 func NewGFXListener() GFXListener {
@@ -49,25 +50,47 @@ func NewGFXListener() GFXListener {
 func (gfxListener GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
 	render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
 	gfxListener.entities[entity] = *render
-	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	if gfxListener.active {
+		AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	}
 }
 
 func (gfxListener GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	render := component.(*RenderComponent)
 	gfxListener.entities[entity] = *render
-	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	if gfxListener.active {
+		AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	}
 }
 
 func (gfxListener GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	render := gfxListener.entities[entity]
-	RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	if gfxListener.active {
+		RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	}
 	delete(gfxListener.entities, entity)
 }
 
 func (gfxListener GFXListener) OnRemoveEntity(entity limitengine.ECSEntity) {
 	render := gfxListener.entities[entity]
-	RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	if gfxListener.active {
+		RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	}
 	delete(gfxListener.entities, entity)
+}
+
+func (gfxListener GFXListener) OnActive() {
+	gfxListener.active = true
+	for _, render := range gfxListener.entities {
+		AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	}
+}
+
+func (gfxListener GFXListener) OnInactive() {
+	gfxListener.active = false
+	for _, render := range gfxListener.entities {
+		RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
+	}
 }
 
 func (gfxListener GFXListener) GetTargetComponents() []reflect.Type  { return targets }

@@ -89,6 +89,9 @@ func (system *ECSSystem) OnRemoveEntity(entity ECSEntity) {
 	}
 }
 
+func (system *ECSSystem) OnActive()   {}
+func (system *ECSSystem) OnInactive() {}
+
 func (system *ECSSystem) GetTargetComponents() []reflect.Type {
 	return system.targetComponents
 }

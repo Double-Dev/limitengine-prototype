@@ -33,6 +33,7 @@ var (
 func init() {
 	if limitengine.Running() {
 		go func() {
+			// GFX Init
 			runtime.LockOSThread()
 			view := limitengine.AppView()
 			view.SetContext()
@@ -41,7 +42,6 @@ func init() {
 			if err != nil {
 				log.Err("Context could not be initialized.", err)
 			}
-
 			limitengine.AddResizeCallback(func(width, height int) {
 				fmt.Println(width, height)
 				actionQueue = append(actionQueue, func() { context.Resize(width, height) })
@@ -49,7 +49,7 @@ func init() {
 					camera.resize(width, height)
 				}
 			})
-
+			// GFX Loop
 			currentTime := time.Now().UnixNano()
 			for limitengine.Running() {
 				if len(gfxPipeline) > 0 && time.Now().UnixNano()-currentTime > int64((1.0/TargetFPS)*1000000000.0) {
@@ -69,6 +69,15 @@ func init() {
 					time.Sleep(time.Millisecond)
 				}
 			}
+			// GFX Cleanup
+			renderBatch = nil
+			actionQueue = nil
+			gfxPipeline = nil
+			deleteFramebuffers()
+			deleteShaders()
+			deleteRenderbuffers()
+			deleteTextures()
+			deleteMeshes()
 		}()
 		log.Log("GFX online...")
 	}
@@ -88,7 +97,7 @@ func Sweep() {
 	actionQueue = append(actionQueue, func() {
 		queuedFrames--
 		for camera, batch0 := range renderBatch {
-			iFrameBuffer := frameBuffers[camera.id]
+			iFrameBuffer := framebuffers[camera.id]
 			if iFrameBuffer != nil {
 				iFrameBuffer.Bind()
 			} else {
@@ -117,7 +126,7 @@ func Sweep() {
 						data := []float32{} // TODO: Don't new a new slice every frame.
 
 						for _, instance := range instances {
-							instanceDefs := shader.GetInstanceDefs()
+							instanceDefs := shader.InstanceDefs()
 							for _, instanceDef := range instanceDefs {
 								instance.dataMutex.RLock()
 								data = append(data, instance.data[instanceDef.Name][0:instanceDef.Size]...)
@@ -125,7 +134,7 @@ func Sweep() {
 							}
 						}
 						// TODO: Look into optimizing GPU overhead from instanced rendering.
-						iMesh.Render(shader.instanceBuffer, shader.GetInstanceDefs(), data, int32(len(instances)))
+						iMesh.Render(shader.instanceBuffer, shader.InstanceDefs(), data, int32(len(instances)))
 
 						iMesh.Disable()
 					}
@@ -133,7 +142,7 @@ func Sweep() {
 				iShader.Stop()
 			}
 			for _, blitCamera := range camera.blitCameras {
-				iFrameBuffer.BlitToFramebuffer(frameBuffers[blitCamera.id])
+				iFrameBuffer.BlitToFramebuffer(framebuffers[blitCamera.id])
 			}
 		}
 
