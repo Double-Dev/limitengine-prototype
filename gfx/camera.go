@@ -55,7 +55,7 @@ func DefaultCamera() *Camera {
 }
 
 // TODO: Think about turning Camera into interface to allow easy creation of variations.
-func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
+func NewCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
 		id:                     frameBufferIndex,
 		colorAttachment:        colorAttachment,
@@ -66,7 +66,7 @@ func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 1)
+		frameBuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 1)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -77,10 +77,10 @@ func CreateCamera(colorAttachment, depthAttachment Attachment) *Camera {
 	return camera
 }
 
-// CreateCamera2D creates a camera initialized with a 2D projection matrix.
+// NewCamera2D news a camera initialized with a 2D projection matrix.
 // Note: A 2D camera cannot 'see' anything more than 1.0 units away on
 // the z-axis.
-func CreateCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
+func NewCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 	camera := &Camera{
 		id:                     frameBufferIndex,
 		colorAttachment:        colorAttachment,
@@ -91,7 +91,7 @@ func CreateCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
+		frameBuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",
@@ -102,7 +102,7 @@ func CreateCamera2D(colorAttachment, depthAttachment Attachment) *Camera {
 	return camera
 }
 
-func CreateCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farPlane, fov float32) *Camera {
+func NewCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farPlane, fov float32) *Camera {
 	camera := &Camera{
 		id:                     frameBufferIndex,
 		colorAttachment:        colorAttachment,
@@ -116,7 +116,7 @@ func CreateCamera3D(colorAttachment, depthAttachment Attachment, nearPlane, farP
 	}
 	frameBufferIndex++
 	actionQueue = append(actionQueue, func() {
-		frameBuffers[camera.id] = context.CreateFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
+		frameBuffers[camera.id] = context.NewFramebuffer(camera.colorAttachment.getFrameworkAttachment(), camera.depthStencilAttachment.getFrameworkAttachment(), 1.0, 1.0, 4)
 	})
 	camera.prefs.AddMatrix4(
 		"vertprojMat",

@@ -11,13 +11,13 @@ type TextureAtlas struct {
 	mutex sync.RWMutex
 }
 
-func CreateTextureAtlas() *TextureAtlas {
+func NewTextureAtlas() *TextureAtlas {
 	return &TextureAtlas{
 		atlas: make(map[string]gmath.Vector4),
 	}
 }
 
-func CreateTextureAtlasExisting(atlas map[string]gmath.Vector4) *TextureAtlas {
+func NewTextureAtlasExisting(atlas map[string]gmath.Vector4) *TextureAtlas {
 	return &TextureAtlas{
 		atlas: make(map[string]gmath.Vector4),
 	}

@@ -10,7 +10,7 @@ type AwfulStructure struct {
 	entities []*InteractEntity
 }
 
-// NewAwfulStructure creates a new AwfulStructure.
+// NewAwfulStructure news a new AwfulStructure.
 // Are you sure you want to do this?
 func NewAwfulStructure() *AwfulStructure {
 	return &AwfulStructure{}

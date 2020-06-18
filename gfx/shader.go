@@ -20,14 +20,14 @@ type Shader struct {
 	instanceBuffer framework.IInstanceBuffer
 }
 
-func CreateShader(leslSrc string) *Shader {
+func NewShader(leslSrc string) *Shader {
 	shader := &Shader{
 		id: shaderIndex,
 	}
 	shaderIndex++
 	actionQueue = append(actionQueue, func() {
 		vertSrc, fragSrc, textureVars := processLESL(leslSrc)
-		shaders[shader.id] = context.CreateShader(vertSrc, fragSrc)
+		shaders[shader.id] = context.NewShader(vertSrc, fragSrc)
 		totalInstanceSize := 0
 		instanceDefs := shader.GetInstanceDefs()
 		for _, instanceDef := range instanceDefs {
@@ -37,7 +37,7 @@ func CreateShader(leslSrc string) *Shader {
 		for key, value := range textureVars {
 			shader.uniformLoader.AddInt(key, value)
 		}
-		shader.instanceBuffer = context.CreateInstanceBuffer(totalInstanceSize)
+		shader.instanceBuffer = context.NewInstanceBuffer(totalInstanceSize)
 	})
 	return shader
 }

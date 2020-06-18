@@ -1,6 +1,6 @@
 package framework
 
 type Context interface {
-	CreateSound()
-	CreateSource()
+	NewSound()
+	NewSource()
 }

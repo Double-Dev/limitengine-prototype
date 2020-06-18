@@ -15,7 +15,7 @@ type texture struct {
 	id, textureType uint32
 }
 
-func createTexture(textureType uint32) *texture {
+func newTexture(textureType uint32) *texture {
 	var id uint32
 	gl.GenTextures(1, &id)
 	texture := &texture{

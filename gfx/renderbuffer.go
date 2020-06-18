@@ -11,13 +11,13 @@ type Renderbuffer struct {
 	id uint32
 }
 
-func CreateRenderbuffer(multisample bool) *Renderbuffer {
+func NewRenderbuffer(multisample bool) *Renderbuffer {
 	renderbuffer := &Renderbuffer{
 		id: renderbufferIndex,
 	}
 	renderbufferIndex++
 	actionQueue = append(actionQueue, func() {
-		renderbuffers[renderbuffer.id] = context.CreateRenderbuffer(multisample)
+		renderbuffers[renderbuffer.id] = context.NewRenderbuffer(multisample)
 	})
 	return renderbuffer
 }

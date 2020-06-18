@@ -12,7 +12,7 @@ type vao struct {
 	vbos       []vbo
 }
 
-func createVAO() *vao {
+func newVAO() *vao {
 	var id uint32
 	gl.GenVertexArrays(1, &id)
 	return &vao{
@@ -75,7 +75,7 @@ func (vao *vao) Disable() {
 }
 
 func (vao *vao) addIndices(indices []uint32) {
-	vbo := createVBO(vboElementArrayBufferType)
+	vbo := newVBO(vboElementArrayBufferType)
 	vbo.Bind()
 	vbo.storeUIntData(indices)
 	vao.vertexNum = int32(len(indices))
@@ -83,7 +83,7 @@ func (vao *vao) addIndices(indices []uint32) {
 }
 
 func (vao *vao) addIntAttrib(data []int32, index uint32, varsPerVertex int32, normalized bool) {
-	vbo := createVBO(vboArrayBufferType)
+	vbo := newVBO(vboArrayBufferType)
 	vbo.Bind()
 	vbo.storeIntData(data)
 	gl.VertexAttribPointer(index, varsPerVertex, gl.INT, normalized, 0, nil)
@@ -93,7 +93,7 @@ func (vao *vao) addIntAttrib(data []int32, index uint32, varsPerVertex int32, no
 }
 
 func (vao *vao) addFloatAttrib(data []float32, index uint32, varsPerVertex int32, normalized bool) {
-	vbo := createVBO(vboArrayBufferType)
+	vbo := newVBO(vboArrayBufferType)
 	vbo.Bind()
 	vbo.storeFloatData(data)
 	gl.VertexAttribPointer(index, varsPerVertex, gl.FLOAT, normalized, 0, nil)

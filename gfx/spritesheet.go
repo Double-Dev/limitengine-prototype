@@ -10,7 +10,7 @@ type SpriteSheet struct {
 	columns, rows             uint32
 }
 
-func CreateSpriteSheet(spriteWidth, spriteHeight, padding float32) *SpriteSheet {
+func NewSpriteSheet(spriteWidth, spriteHeight, padding float32) *SpriteSheet {
 	spriteSheet := &SpriteSheet{
 		spriteWidth:  spriteWidth,
 		spriteHeight: spriteHeight,

@@ -7,7 +7,7 @@ import (
 // Matrix4 contains a slice of vectors and has methods to perform matrix mathematics.
 type Matrix4 []Vector4
 
-// NewIdentityMatrix4 creates a new Matrix4 from two uint32s denoting the number of columns and rows.
+// NewIdentityMatrix4 news a new Matrix4 from two uint32s denoting the number of columns and rows.
 func NewIdentityMatrix4() Matrix4 {
 	matrix := Matrix4{NewZeroVector4(), NewZeroVector4(), NewZeroVector4(), NewZeroVector4()}
 	matrix[0][0] = 1.0

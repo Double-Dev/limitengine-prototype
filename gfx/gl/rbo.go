@@ -10,7 +10,7 @@ type rbo struct {
 	multisample bool
 }
 
-func createRBO(multisample bool) *rbo {
+func newRBO(multisample bool) *rbo {
 	var id uint32
 	gl.GenRenderbuffers(1, &id)
 	return &rbo{

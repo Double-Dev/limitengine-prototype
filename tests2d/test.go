@@ -36,49 +36,50 @@ func main() {
 	state := limitengine.NewState()
 
 	// Assets
-	shader = gfx.CreateShader(gio.LoadAsString("testshader.lesl"))
+	shader = gfx.NewShader(gio.LoadAsString("testshader.lesl"))
 
 	// Player
-	playerTexture := gfx.CreateTexture(gio.LoadPNG("slime.png"))
+	playerTexture := gfx.NewTexture(gio.LoadPNG("slime.png"))
 	playerTexture.SetPointFilter(true, false)
-	playerMaterial := gfx.CreateTextureMaterial(playerTexture)
+	playerMaterial := gfx.NewTextureMaterial(playerTexture)
 	playerMaterial.SetTint(gmath.NewVector3(0.5, 0.5, 0.0), 0.5)
 
-	playerSpriteSheet := gfx.CreateSpriteSheet(0.25, 0.25, 0.003)
+	playerSpriteSheet := gfx.NewSpriteSheet(0.25, 0.25, 0.003)
 
 	playerInstance := gfx.NewInstance()
 	playerSpriteSheet.Apply(playerInstance, 0)
 
 	// Text
 	font := gio.LoadFNT(".", "calibri.fnt")
-	fontTexture := gfx.CreateTexture(gio.LoadPNG("calibri.png"))
+	fontTexture := gfx.NewTexture(gio.LoadPNG("calibri.png"))
 	fontTexture.SetLinearFilter(true, false)
-	fontMaterial := gfx.CreateTextureMaterial(fontTexture)
+	fontMaterial := gfx.NewTextureMaterial(fontTexture)
+	fontMaterial.SetTint(gmath.NewVector3(0.0, 0.0, 0.0), 1.0)
 
 	textInstance := gfx.NewInstance()
-	charBounds := font.GetChar("w").Bounds()
+	charBounds := font.GetChar("E").Bounds()
 	textInstance.SetTextureBoundsV(charBounds)
 
 	// Walls
-	material = gfx.CreateColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
+	material = gfx.NewColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
 
 	mesh = gfx.SpriteMesh()
 
 	// TODO: Fix issue where having a texture as a framebuffer depth attachment doesn't work.
-	cam1Color := gfx.CreateRenderbuffer(true)
-	cam1Depth := gfx.CreateRenderbuffer(true)
-	camera = gfx.CreateCamera2D(cam1Color, cam1Depth)
+	cam1Color := gfx.NewRenderbuffer(true)
+	cam1Depth := gfx.NewRenderbuffer(true)
+	camera = gfx.NewCamera2D(cam1Color, cam1Depth)
 	// camera.SetClearColor(0.0, 0.25, 0.25, 1.0)
 	camera.SetClearColor(0.9, 0.9, 0.9, 1.0)
 
-	cam2Color := gfx.CreateEmptyTexture()
-	cam2Depth := gfx.CreateEmptyTexture()
-	camera2 := gfx.CreateCamera(cam2Color, cam2Depth)
+	cam2Color := gfx.NewEmptyTexture()
+	cam2Depth := gfx.NewEmptyTexture()
+	camera2 := gfx.NewCamera(cam2Color, cam2Depth)
 
 	camera.AddBlitCamera(camera2)
 
-	fboShader := gfx.CreateShader(gio.LoadAsString("fboshader.lesl"))
-	cam2Mat := gfx.CreateTextureMaterial(cam2Color)
+	fboShader := gfx.NewShader(gio.LoadAsString("fboshader.lesl"))
+	cam2Mat := gfx.NewTextureMaterial(cam2Color)
 
 	pos := gfx.NewInstance()
 	pos.SetTransform(gmath.NewTransformMatrix(gmath.NewVector3(0.0, 0.0, 0.5), gmath.NewIdentityQuaternion(), gmath.NewVector3(1.0, 1.0, 1.0)))
@@ -122,41 +123,41 @@ func main() {
 			Instance: playerInstance,
 		},
 		&PlayerAnimationComponent{
-			Player:        gfx.CreateFrameAnimationPlayer(),
-			RightIdleAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
-			RightWalkAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
-			RightJumpAnim: gfx.CreateFrameAnimation(
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(8), func() bool {
+			Player:        gfx.NewFrameAnimationPlayer(),
+			RightIdleAnim: gfx.NewFrameAnimation(gfx.NewDurationFrame(playerSpriteSheet.GetBounds(0), 1.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(3), 1.25)),
+			RightWalkAnim: gfx.NewFrameAnimation(gfx.NewDurationFrame(playerSpriteSheet.GetBounds(0), 0.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(1), 0.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(2), 0.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(3), 0.25)),
+			RightJumpAnim: gfx.NewFrameAnimation(
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(8), func() bool {
 					return !(playerMotion.Velocity[1] >= 1.9)
 				}),
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(9), func() bool {
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(9), func() bool {
 					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
 				}),
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(10), func() bool {
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(10), func() bool {
 					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
 				}),
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(11), func() bool {
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(11), func() bool {
 					return !(playerMotion.Velocity[1] <= -1.0)
 				}),
 			),
-			RightWallAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(8), 0.5), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(10), 0.5)),
-			LeftIdleAnim:  gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
-			LeftWalkAnim:  gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
-			LeftJumpAnim: gfx.CreateFrameAnimation(
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(12), func() bool {
+			RightWallAnim: gfx.NewFrameAnimation(gfx.NewDurationFrame(playerSpriteSheet.GetBounds(8), 0.5), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(10), 0.5)),
+			LeftIdleAnim:  gfx.NewFrameAnimation(gfx.NewDurationFrame(playerSpriteSheet.GetBounds(4), 1.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(7), 1.25)),
+			LeftWalkAnim:  gfx.NewFrameAnimation(gfx.NewDurationFrame(playerSpriteSheet.GetBounds(4), 0.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(5), 0.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(6), 0.25), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(7), 0.25)),
+			LeftJumpAnim: gfx.NewFrameAnimation(
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(12), func() bool {
 					return !(playerMotion.Velocity[1] >= 1.9)
 				}),
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(13), func() bool {
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(13), func() bool {
 					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
 				}),
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(14), func() bool {
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(14), func() bool {
 					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
 				}),
-				gfx.CreateTriggerFrame(playerSpriteSheet.GetBounds(15), func() bool {
+				gfx.NewTriggerFrame(playerSpriteSheet.GetBounds(15), func() bool {
 					return !(playerMotion.Velocity[1] <= -1.0)
 				}),
 			),
-			LeftWallAnim: gfx.CreateFrameAnimation(gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(12), 0.5), gfx.CreateDurationFrame(playerSpriteSheet.GetBounds(14), 0.5)),
+			LeftWallAnim: gfx.NewFrameAnimation(gfx.NewDurationFrame(playerSpriteSheet.GetBounds(12), 0.5), gfx.NewDurationFrame(playerSpriteSheet.GetBounds(14), 0.5)),
 		},
 		&ControlComponent{
 			XAxis: xAxis,
@@ -220,15 +221,15 @@ func main() {
 	)
 
 	// Left Wall
-	CreateStaticEntity(state, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	NewStaticEntity(state, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Right Wall
-	CreateStaticEntity(state, gmath.NewVector3(1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	NewStaticEntity(state, gmath.NewVector3(1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Top Wall
-	CreateStaticEntity(state, gmath.NewVector3(0.0, 1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	NewStaticEntity(state, gmath.NewVector3(0.0, 1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Bottom Wall
-	CreateStaticEntity(state, gmath.NewVector3(0.0, -1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	NewStaticEntity(state, gmath.NewVector3(0.0, -1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
 
-	CreateStaticEntity(state, gmath.NewVector3(-0.6, -0.3, -0.4), gmath.NewVector3(0.1, 0.7, 1.0))
+	NewStaticEntity(state, gmath.NewVector3(-0.6, -0.3, -0.4), gmath.NewVector3(0.1, 0.7, 1.0))
 
 	// Systems
 	interactionWorld := interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
@@ -348,7 +349,7 @@ func main() {
 }
 
 // STATIC ENTITY FUNC
-func CreateStaticEntity(state *limitengine.State, position, scale gmath.Vector3) {
+func NewStaticEntity(state *limitengine.State, position, scale gmath.Vector3) {
 	state.NewEntity(
 		&gmath.TransformComponent{
 			Position: position,

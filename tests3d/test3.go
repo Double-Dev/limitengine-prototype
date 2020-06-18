@@ -24,14 +24,14 @@ func main() {
 	state := limitengine.NewState()
 
 	// Assets
-	shader := gfx.CreateShader(gio.LoadAsString("testShader.lesl"))
-	texture := gfx.CreateTexture(gio.LoadPNG("lamp.png"))
-	material := gfx.CreateTextureMaterial(texture)
-	mesh := gfx.CreateMesh(gio.LoadOBJ("monkey.obj"))
+	shader := gfx.NewShader(gio.LoadAsString("testShader.lesl"))
+	texture := gfx.NewTexture(gio.LoadPNG("lamp.png"))
+	material := gfx.NewTextureMaterial(texture)
+	mesh := gfx.NewMesh(gio.LoadOBJ("monkey.obj"))
 
-	camColor := gfx.CreateRenderbuffer(true)
-	camDepth := gfx.CreateRenderbuffer(true)
-	camera := gfx.CreateCamera3D(camColor, camDepth, 0.001, 1000.0, 60.0)
+	camColor := gfx.NewRenderbuffer(true)
+	camDepth := gfx.NewRenderbuffer(true)
+	camera := gfx.NewCamera3D(camColor, camDepth, 0.001, 1000.0, 60.0)
 	camera.SetClearColor(0.0, 0.1, 0.25, 1.0)
 	camera.AddBlitCamera(gfx.DefaultCamera())
 

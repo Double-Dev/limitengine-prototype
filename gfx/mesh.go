@@ -18,7 +18,7 @@ var (
 func init() {
 	// Sets zero mesh to plane.
 	actionQueue = append(actionQueue, func() {
-		meshes[0] = context.CreateMesh(
+		meshes[0] = context.NewMesh(
 			[]uint32{
 				0, 1, 3, 3, 1, 2,
 			},
@@ -45,7 +45,7 @@ func init() {
 
 	// Sets zero mesh to cube.
 	// actionQueue = append(actionQueue, func() {
-	// 	meshes[0] = context.CreateMesh(
+	// 	meshes[0] = context.NewMesh(
 	// 		[]uint32{
 	// 			3, 1, 0, 2, 1, 3,
 	// 			4, 5, 7, 7, 5, 6,
@@ -92,8 +92,8 @@ type Mesh struct {
 	WriteDepth  bool
 }
 
-// CreateMesh queues a gfx action that creates a mesh using the input mesh data.
-func CreateMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh {
+// NewMesh queues a gfx action that news a mesh using the input mesh data.
+func NewMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh {
 	mesh := &Mesh{
 		id:          meshIndex,
 		DepthTest:   true,
@@ -101,7 +101,7 @@ func CreateMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh 
 		WriteDepth:  true,
 	}
 	meshIndex++
-	actionQueue = append(actionQueue, func() { meshes[mesh.id] = context.CreateMesh(indices, vertices, texCoords, normals) })
+	actionQueue = append(actionQueue, func() { meshes[mesh.id] = context.NewMesh(indices, vertices, texCoords, normals) })
 	return mesh
 }
 

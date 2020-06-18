@@ -15,7 +15,7 @@ type fbo struct {
 	samples       int32
 }
 
-func createFBO(width, height float32, samples int32) *fbo {
+func newFBO(width, height float32, samples int32) *fbo {
 	var id uint32
 	gl.GenFramebuffers(1, &id)
 	return &fbo{

@@ -18,24 +18,24 @@ type Texture struct {
 	id uint32
 }
 
-func CreateEmptyTexture() *Texture {
+func NewEmptyTexture() *Texture {
 	texture := &Texture{
 		id: textureIndex,
 	}
 	textureIndex++
 	actionQueue = append(actionQueue, func() {
-		textures[texture.id] = context.CreateEmptyTexture()
+		textures[texture.id] = context.NewEmptyTexture()
 	})
 	return texture
 }
 
-func CreateTexture(image *gio.Image) *Texture {
+func NewTexture(image *gio.Image) *Texture {
 	texture := &Texture{
 		id: textureIndex,
 	}
 	textureIndex++
 	actionQueue = append(actionQueue, func() {
-		textures[texture.id] = context.CreateTexture(image.Data(), image.Width(), image.Height())
+		textures[texture.id] = context.NewTexture(image.Data(), image.Width(), image.Height())
 	})
 	return texture
 }

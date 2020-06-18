@@ -114,7 +114,7 @@ func Sweep() {
 						iMesh := meshes[mesh.id]
 						iMesh.Enable()
 
-						data := []float32{} // TODO: Don't create a new slice every frame.
+						data := []float32{} // TODO: Don't new a new slice every frame.
 
 						for _, instance := range instances {
 							instanceDefs := shader.GetInstanceDefs()

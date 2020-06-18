@@ -16,7 +16,7 @@ type ColorMaterial struct {
 	transparency bool
 }
 
-func CreateColorMaterial(color gmath.Vector3) *ColorMaterial {
+func NewColorMaterial(color gmath.Vector3) *ColorMaterial {
 	colorMaterial := &ColorMaterial{
 		prefs: NewUniformLoader(),
 	}
@@ -38,7 +38,7 @@ type TextureMaterial struct {
 	prefs   UniformLoader
 }
 
-func CreateTextureMaterial(texture *Texture) *TextureMaterial {
+func NewTextureMaterial(texture *Texture) *TextureMaterial {
 	textureMaterial := &TextureMaterial{
 		texture: texture,
 		prefs:   NewUniformLoader(),

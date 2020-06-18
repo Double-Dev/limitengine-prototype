@@ -14,7 +14,7 @@ type DurationFrame struct {
 	duration float32
 }
 
-func CreateDurationFrame(bounds gmath.Vector4, duration float32) *DurationFrame {
+func NewDurationFrame(bounds gmath.Vector4, duration float32) *DurationFrame {
 	return &DurationFrame{
 		bounds:   bounds,
 		duration: duration,
@@ -31,7 +31,7 @@ type TriggerFrame struct {
 	triggerFunc func() bool
 }
 
-func CreateTriggerFrame(bounds gmath.Vector4, endTrigger func() bool) *TriggerFrame {
+func NewTriggerFrame(bounds gmath.Vector4, endTrigger func() bool) *TriggerFrame {
 	return &TriggerFrame{
 		bounds:      bounds,
 		triggerFunc: endTrigger,
@@ -45,7 +45,7 @@ type FrameAnimation struct {
 	frames []Frame
 }
 
-func CreateFrameAnimation(frames ...Frame) *FrameAnimation {
+func NewFrameAnimation(frames ...Frame) *FrameAnimation {
 	return &FrameAnimation{
 		frames: frames,
 	}
@@ -63,7 +63,7 @@ type FrameAnimationPlayer struct {
 	loopNum          int
 }
 
-func CreateFrameAnimationPlayer() *FrameAnimationPlayer {
+func NewFrameAnimationPlayer() *FrameAnimationPlayer {
 	return &FrameAnimationPlayer{}
 }
 

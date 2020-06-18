@@ -51,7 +51,7 @@ func NewWorld(spacialStructure SpacialStructure, targetUpdatesPerSecond float32)
 }
 
 func (world *World) OnAddEntity(entity limitengine.ECSEntity) {
-	interactEntity := world.createInteractEntity(entity)
+	interactEntity := world.newInteractEntity(entity)
 	world.entities[entity] = interactEntity
 	world.spacialStructure.Add(interactEntity)
 }
@@ -59,7 +59,7 @@ func (world *World) OnAddEntity(entity limitengine.ECSEntity) {
 func (world *World) OnAddComponent(entity limitengine.ECSEntity, component limitengine.Component) {
 	if (reflect.TypeOf(component) == targets[0] && entity.HasComponent(targets[1])) ||
 		(reflect.TypeOf(component) == targets[1] && entity.HasComponent(targets[0])) {
-		interactEntity := world.createInteractEntity(entity)
+		interactEntity := world.newInteractEntity(entity)
 		world.entities[entity] = interactEntity
 		world.spacialStructure.Add(interactEntity)
 	} else if entity.HasComponent(targets[0]) && entity.HasComponent(targets[1]) {
@@ -76,7 +76,7 @@ func (world *World) OnAddComponent(entity limitengine.ECSEntity, component limit
 	}
 }
 
-func (world *World) createInteractEntity(entity limitengine.ECSEntity) *InteractEntity {
+func (world *World) newInteractEntity(entity limitengine.ECSEntity) *InteractEntity {
 	var motion *gmath.MotionComponent
 	if entity.GetComponent((*gmath.MotionComponent)(nil)) != nil {
 		motion = entity.GetComponent((*gmath.MotionComponent)(nil)).(*gmath.MotionComponent)

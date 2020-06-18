@@ -34,8 +34,8 @@ func (glContext glContext) ClearScreen(r, g, b, a float32) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-func (glContext glContext) CreateFramebuffer(colorAttachment, depthAttachment framework.IAttachment, width, height float32, samples int32) framework.IFramebuffer {
-	framebuffer := createFBO(width, height, samples)
+func (glContext glContext) NewFramebuffer(colorAttachment, depthAttachment framework.IAttachment, width, height float32, samples int32) framework.IFramebuffer {
+	framebuffer := newFBO(width, height, samples)
 	framebuffer.SetColorAttachment(colorAttachment)
 	framebuffer.SetDepthAttachment(depthAttachment)
 	return framebuffer
@@ -45,26 +45,26 @@ func (glContext glContext) UnbindFramebuffers() {
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
 }
 
-func (glContext glContext) CreateRenderbuffer(multisample bool) framework.IRenderbuffer {
-	renderbuffer := createRBO(multisample)
+func (glContext glContext) NewRenderbuffer(multisample bool) framework.IRenderbuffer {
+	renderbuffer := newRBO(multisample)
 	return renderbuffer
 }
 
-func (glContext glContext) CreateShader(vertSrc, fragSrc string) framework.IShader {
-	shader := createShader(vertSrc, fragSrc)
+func (glContext glContext) NewShader(vertSrc, fragSrc string) framework.IShader {
+	shader := newShader(vertSrc, fragSrc)
 	return shader
 }
 
-func (glContext glContext) CreateEmptyTexture() framework.ITexture {
-	texture := createTexture(textureType2D)
+func (glContext glContext) NewEmptyTexture() framework.ITexture {
+	texture := newTexture(textureType2D)
 	texture.Bind()
 	texture.LinearFilter(false, false)
 	glContext.UnbindTextures()
 	return texture
 }
 
-func (glContext glContext) CreateTexture(image []uint8, width, height int32) framework.ITexture {
-	texture := createTexture(textureType2D)
+func (glContext glContext) NewTexture(image []uint8, width, height int32) framework.ITexture {
+	texture := newTexture(textureType2D)
 	texture.Bind()
 	texture.TextureData(image, width, height)
 	texture.LinearFilter(true, false)
@@ -76,8 +76,8 @@ func (glContext glContext) UnbindTextures() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-func (glContext glContext) CreateMesh(indices []uint32, vertices, texCoords, normals []float32) framework.IMesh {
-	mesh := createVAO()
+func (glContext glContext) NewMesh(indices []uint32, vertices, texCoords, normals []float32) framework.IMesh {
+	mesh := newVAO()
 	mesh.bind()
 	mesh.addIndices(indices)
 	mesh.addFloatAttrib(vertices, 0, 3, false)
@@ -98,8 +98,8 @@ func (glContext glContext) CreateMesh(indices []uint32, vertices, texCoords, nor
 	return mesh
 }
 
-func (glContext glContext) CreateInstanceBuffer(instanceDataSize int) framework.IInstanceBuffer {
-	instanceBuffer := createVBO(vboArrayBufferType)
+func (glContext glContext) NewInstanceBuffer(instanceDataSize int) framework.IInstanceBuffer {
+	instanceBuffer := newVBO(vboArrayBufferType)
 	instanceBuffer.Bind()
 	instanceBuffer.setEmpty(glContext.GetMaxInstances() * instanceDataSize)
 	instanceBuffer.Unbind()

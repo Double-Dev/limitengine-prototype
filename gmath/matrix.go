@@ -7,7 +7,7 @@ import (
 // Matrix contains a slice of vectors and has methods to perform matrix mathematics.
 type Matrix []Vector
 
-// NewIdentityMatrix creates a new Matrix from two uint32s denoting the number of columns and rows.
+// NewIdentityMatrix news a new Matrix from two uint32s denoting the number of columns and rows.
 func NewIdentityMatrix(columns, rows int) Matrix {
 	matrix := Matrix{}
 	for i := 0; i < columns; i++ {
