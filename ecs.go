@@ -6,16 +6,14 @@ import (
 )
 
 var (
-	// TargetUpdatesPerSecond determine the amount of updates ECSSystems will attempt to perform per second.
-	TargetUpdatesPerSecond = float32(100.0)
-	entityIndex            = uint32(0)
+	entityIndex = uint32(0)
 )
 
 type ECS struct {
 	ecs       map[ECSEntity]map[reflect.Type]Component
 	mutex     sync.RWMutex
 	listeners []ECSListener
-	active    bool
+	systems   []*ECSSystem
 }
 
 func NewECS() *ECS {
@@ -36,8 +34,6 @@ type ECSListener interface {
 	OnAddComponent(entity ECSEntity, component Component)
 	OnRemoveComponent(entity ECSEntity, component Component)
 	OnRemoveEntity(entity ECSEntity)
-	OnActive()
-	OnInactive()
 	GetTargetComponents() []reflect.Type
 	GetEntities() []ECSEntity
 	ShouldListenForAllComponents() bool
@@ -176,26 +172,36 @@ func (ecs *ECS) AddECSListener(listener ECSListener) {
 }
 
 func (ecs *ECS) RemoveECSListener(listener ECSListener) {
+	for _, entity := range listener.GetEntities() {
+		listener.OnRemoveEntity(entity)
+	}
 	for i := 0; i < len(ecs.listeners); i++ {
 		if ecs.listeners[i] == listener {
 			ecs.listeners[i] = ecs.listeners[len(ecs.listeners)-1]
+			ecs.listeners[len(ecs.listeners)-1] = nil
 			ecs.listeners = ecs.listeners[:len(ecs.listeners)-1]
 		}
 	}
 }
 
-func (ecs *ECS) SetActive() {
-	ecs.active = true
-	for _, listener := range ecs.listeners {
-		listener.OnActive()
+func (ecs *ECS) AddECSSystem(system *ECSSystem) {
+	ecs.AddECSListener(system)
+	ecs.systems = append(ecs.systems, system)
+}
+
+func (ecs *ECS) UpdateSystems(delta float32) {
+	for _, system := range ecs.systems {
+		system.Update(delta)
 	}
 }
 
-func (ecs *ECS) SetInactive() {
-	ecs.active = false
-	for _, listener := range ecs.listeners {
-		listener.OnInactive()
+func (ecs *ECS) RemoveECSSystem(system *ECSSystem) {
+	ecs.RemoveECSListener(system)
+	for i := 0; i < len(ecs.systems); i++ {
+		if ecs.systems[i] == system {
+			ecs.systems[i] = ecs.systems[len(ecs.systems)-1]
+			ecs.systems[len(ecs.systems)-1] = nil
+			ecs.systems = ecs.systems[:len(ecs.systems)-1]
+		}
 	}
 }
-
-func (ecs *ECS) Active() bool { return ecs.active }

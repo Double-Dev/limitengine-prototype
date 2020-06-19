@@ -28,7 +28,10 @@ var (
 	log     = NewLogger("core")
 	running bool
 	view    View
-	state   *State
+	state   State
+
+	// TargetUpdatesPerSecond determine the amount of updates the engine will attempt to perform per second.
+	TargetUpdatesPerSecond = float32(100.0)
 
 	viewWidth, viewHeight int
 
@@ -104,8 +107,8 @@ func init() {
 
 // Launch begins the thread which runs the engine's update logic until the engine closes.
 // This must be called on the main thread.
-func Launch(initState *State) {
-	initState.ecs.SetActive()
+func Launch(initState State) {
+	initState.OnActive()
 	state = initState
 	go func() {
 		currentTime := time.Now().UnixNano()
@@ -128,11 +131,15 @@ func Launch(initState *State) {
 }
 
 // SetState sets a new application state for the engine to process.
-func SetState(newState *State) {
-	state.ecs.SetInactive()
-	newState.ecs.SetActive()
+func SetState(newState State) {
+	newState.OnActive()
+	oldState := state
 	state = newState
+	oldState.OnInactive()
 }
+
+// CurrentState returns the engine's current state.
+func CurrentState() State { return state }
 
 // AppView returns the engine's view.
 func AppView() View { return view }

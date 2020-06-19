@@ -9,11 +9,25 @@ import (
 	"github.com/double-dev/limitengine/tests2d/logic"
 )
 
-func NewMainState() *limitengine.State {
-	state := limitengine.NewState(nil)
+type MainState struct {
+	ecs *limitengine.ECS
+
+	gfxListener      gfx.GFXListener
+	interactionWorld *interaction.World
+
+	renderSystem          *limitengine.ECSSystem
+	motionSystem          *limitengine.ECSSystem
+	controlSystem         *limitengine.ECSSystem
+	playerAnimationSystem *limitengine.ECSSystem
+}
+
+func NewMainState() *MainState {
+	mainState := &MainState{
+		ecs: limitengine.NewECS(),
+	}
 
 	// Post-Processing Render
-	state.NewEntity(
+	mainState.ecs.NewEntity(
 		&gfx.RenderComponent{
 			Camera:   gfx.DefaultCamera(),
 			Shader:   assets.PostShader,
@@ -24,12 +38,12 @@ func NewMainState() *limitengine.State {
 	)
 
 	// Entities
-	logic.NewPlayerEntity(state)
+	logic.NewPlayerEntity(mainState.ecs)
 
 	textInstance := gfx.NewInstance()
 	charBounds := assets.CalibriFont.GetChar("E").Bounds()
 	textInstance.SetTextureBoundsV(charBounds)
-	state.NewEntity(
+	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, 0.0, -0.6),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -45,28 +59,51 @@ func NewMainState() *limitengine.State {
 	)
 
 	// Left Wall
-	logic.NewLevelWallEntity(state, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Right Wall
-	logic.NewLevelWallEntity(state, gmath.NewVector3(1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Top Wall
-	logic.NewLevelWallEntity(state, gmath.NewVector3(0.0, 1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, 1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Bottom Wall
-	logic.NewLevelWallEntity(state, gmath.NewVector3(0.0, -1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, -1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Seperator Wall
-	logic.NewLevelWallEntity(state, gmath.NewVector3(-0.6, -0.3, -0.4), gmath.NewVector3(0.1, 0.7, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-0.6, -0.3, -0.4), gmath.NewVector3(0.1, 0.7, 1.0))
 
 	// Systems
-	interactionWorld := interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
-	interactionWorld.AddInteraction(&logic.ControlInteraction{})
-	state.AddListener(interactionWorld)
+	mainState.interactionWorld = interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
+	mainState.interactionWorld.AddInteraction(&logic.ControlInteraction{})
 
-	gfxListener := gfx.NewGFXListener()
-	state.AddListener(gfxListener)
+	mainState.gfxListener = gfx.NewGFXListener()
 
-	state.AddSystem(gfx.NewRenderSystem())
-	state.AddSystem(gmath.NewMotionSystem(1.0))
-	state.AddSystem(logic.NewControlSystem())
-	state.AddSystem(logic.NewPlayerAnimationSystem())
+	mainState.renderSystem = gfx.NewRenderSystem()
+	mainState.motionSystem = gmath.NewMotionSystem(1.0)
+	mainState.controlSystem = logic.NewControlSystem()
+	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
 
-	return state
+	return mainState
+}
+
+func (mainState *MainState) OnActive() {
+	mainState.ecs.AddECSListener(mainState.interactionWorld)
+	mainState.ecs.AddECSListener(mainState.gfxListener)
+	mainState.ecs.AddECSSystem(mainState.renderSystem)
+	mainState.ecs.AddECSSystem(mainState.motionSystem)
+	mainState.ecs.AddECSSystem(mainState.controlSystem)
+	mainState.ecs.AddECSSystem(mainState.playerAnimationSystem)
+}
+
+func (mainState *MainState) Update(delta float32) {
+	mainState.renderSystem.Update(delta)
+	mainState.motionSystem.Update(delta)
+	mainState.controlSystem.Update(delta)
+	mainState.playerAnimationSystem.Update(delta)
+}
+
+func (mainState *MainState) OnInactive() {
+	mainState.ecs.RemoveECSListener(mainState.interactionWorld)
+	mainState.ecs.RemoveECSListener(mainState.gfxListener)
+	mainState.ecs.RemoveECSSystem(mainState.renderSystem)
+	mainState.ecs.RemoveECSSystem(mainState.motionSystem)
+	mainState.ecs.RemoveECSSystem(mainState.controlSystem)
+	mainState.ecs.RemoveECSSystem(mainState.playerAnimationSystem)
 }

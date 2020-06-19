@@ -9,7 +9,7 @@ import (
 	"github.com/double-dev/limitengine/ui"
 )
 
-func NewPlayerEntity(state *limitengine.State) limitengine.ECSEntity {
+func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 	xAxis := &ui.InputControl{}
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyA}, -1.0)
 	xAxis.AddTrigger(ui.InputEvent{Key: ui.KeyLeft}, -1.0)
@@ -26,7 +26,7 @@ func NewPlayerEntity(state *limitengine.State) limitengine.ECSEntity {
 		AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
 		AngAcceleration: gmath.NewIdentityQuaternion(),
 	}
-	return state.NewEntity(
+	return ecs.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, 0.0, -0.3),
 			Rotation: gmath.NewIdentityQuaternion(),
@@ -87,8 +87,8 @@ func NewPlayerEntity(state *limitengine.State) limitengine.ECSEntity {
 	)
 }
 
-func NewLevelWallEntity(state *limitengine.State, position, scale gmath.Vector3) {
-	state.NewEntity(
+func NewLevelWallEntity(ecs *limitengine.ECS, position, scale gmath.Vector3) {
+	ecs.NewEntity(
 		&gmath.TransformComponent{
 			Position: position,
 			Rotation: gmath.NewIdentityQuaternion(),

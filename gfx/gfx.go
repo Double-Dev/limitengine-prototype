@@ -25,7 +25,7 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
 
-	renderBatch = map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance{}
+	renderBatch = make(map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance)
 	actionQueue = []func(){}
 	gfxPipeline = [](chan func()){}
 )
@@ -223,5 +223,11 @@ func RemoveRenderable(camera *Camera, shader *Shader, material Material, mesh *M
 			}
 		}
 		batch2[mesh] = instances
+	})
+}
+
+func ClearRenderables() {
+	actionQueue = append(actionQueue, func() {
+		renderBatch = make(map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance)
 	})
 }

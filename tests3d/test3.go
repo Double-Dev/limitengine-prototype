@@ -21,7 +21,7 @@ func main() {
 	limitengine.AppView().SetAspectRatio(3, 2)
 
 	// Creating State
-	state := limitengine.NewState()
+	state := limitengine.NewState(nil)
 
 	// Assets
 	shader := gfx.NewShader(gio.LoadAsString("testShader.lesl"))
