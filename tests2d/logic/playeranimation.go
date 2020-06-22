@@ -16,7 +16,7 @@ type PlayerAnimationComponent struct {
 }
 
 func NewPlayerAnimationSystem() *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			playerAnim := components[0].(*PlayerAnimationComponent)
 			render := components[1].(*gfx.RenderComponent)

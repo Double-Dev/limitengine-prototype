@@ -17,7 +17,7 @@ type ControlComponent struct {
 }
 
 func NewControlSystem() *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			control := components[0].(*ControlComponent)
 			motion := components[1].(*gmath.MotionComponent)

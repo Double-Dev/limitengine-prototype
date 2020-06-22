@@ -24,7 +24,7 @@ func (motion *MotionComponent) IsAwake() bool {
 }
 
 func NewMotionSystem(damping float32) *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			transform := components[1].(*TransformComponent)
 			motion := components[0].(*MotionComponent)

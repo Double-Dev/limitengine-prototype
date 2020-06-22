@@ -22,7 +22,7 @@ type RenderComponent struct {
 }
 
 func NewRenderSystem() *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			transform := components[1].(*gmath.TransformComponent)
 
@@ -52,13 +52,13 @@ func (gfxListener GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
 	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 }
 
-func (gfxListener GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.Component) {
+func (gfxListener GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
 	render := component.(*RenderComponent)
 	gfxListener.entities[entity] = *render
 	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 }
 
-func (gfxListener GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.Component) {
+func (gfxListener GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
 	render := gfxListener.entities[entity]
 	RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
 	delete(gfxListener.entities, entity)

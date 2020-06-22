@@ -7,15 +7,15 @@ import (
 type ECSSystem struct {
 	targetComponents []reflect.Type
 	entities         []ECSEntity
-	components       [][]Component
-	update           func(delta float32, entities [][]Component)
+	components       [][]ECSComponent
+	update           func(delta float32, entities [][]ECSComponent)
 }
 
-func NewSystem(update func(delta float32, entities [][]Component), nilTargetComponents ...interface{}) *ECSSystem {
+func NewSystem(update func(delta float32, entities [][]ECSComponent), nilTargetComponents ...interface{}) *ECSSystem {
 	system := ECSSystem{
 		targetComponents: []reflect.Type{},
 		entities:         []ECSEntity{},
-		components:       [][]Component{},
+		components:       [][]ECSComponent{},
 		update:           update,
 	}
 	for _, nilTargetComponent := range nilTargetComponents {
@@ -29,7 +29,7 @@ func (system *ECSSystem) Update(delta float32) {
 }
 
 func (system *ECSSystem) OnAddEntity(entity ECSEntity) {
-	var components []Component
+	var components []ECSComponent
 	for _, target := range system.targetComponents {
 		components = append(components, entity.getComponentOfType(target))
 	}
@@ -37,9 +37,9 @@ func (system *ECSSystem) OnAddEntity(entity ECSEntity) {
 	system.entities = append(system.entities, entity)
 }
 
-func (system *ECSSystem) OnAddComponent(entity ECSEntity, component Component) {
+func (system *ECSSystem) OnAddComponent(entity ECSEntity, component ECSComponent) {
 	if entity.HasComponent(system.GetTargetComponents()...) {
-		var components []Component
+		var components []ECSComponent
 		for _, target := range system.targetComponents {
 			components = append(components, entity.getComponentOfType(target))
 		}
@@ -48,7 +48,7 @@ func (system *ECSSystem) OnAddComponent(entity ECSEntity, component Component) {
 	}
 }
 
-func (system *ECSSystem) OnRemoveComponent(entity ECSEntity, component Component) {
+func (system *ECSSystem) OnRemoveComponent(entity ECSEntity, component ECSComponent) {
 	for i, sysEntity := range system.entities {
 		if sysEntity == entity {
 			for j := 0; j < len(system.components); j++ {

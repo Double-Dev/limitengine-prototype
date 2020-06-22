@@ -10,7 +10,7 @@ var (
 )
 
 type ECS struct {
-	ecs       map[ECSEntity]map[reflect.Type]Component
+	ecs       map[ECSEntity]map[reflect.Type]ECSComponent
 	mutex     sync.RWMutex
 	listeners []ECSListener
 	systems   []*ECSSystem
@@ -18,7 +18,7 @@ type ECS struct {
 
 func NewECS() *ECS {
 	return &ECS{
-		ecs: make(map[ECSEntity]map[reflect.Type]Component),
+		ecs: make(map[ECSEntity]map[reflect.Type]ECSComponent),
 	}
 }
 
@@ -27,25 +27,25 @@ type ECSEntity struct {
 	ecs *ECS
 }
 
-type Component interface{}
+type ECSComponent interface{}
 
 type ECSListener interface {
 	OnAddEntity(entity ECSEntity)
-	OnAddComponent(entity ECSEntity, component Component)
-	OnRemoveComponent(entity ECSEntity, component Component)
+	OnAddComponent(entity ECSEntity, component ECSComponent)
+	OnRemoveComponent(entity ECSEntity, component ECSComponent)
 	OnRemoveEntity(entity ECSEntity)
 	GetTargetComponents() []reflect.Type
 	GetEntities() []ECSEntity
 	ShouldListenForAllComponents() bool
 }
 
-func (ecs *ECS) NewEntity(components ...Component) ECSEntity {
+func (ecs *ECS) NewEntity(components ...ECSComponent) ECSEntity {
 	entity := ECSEntity{
 		id:  entityIndex,
 		ecs: ecs,
 	}
 	ecs.mutex.Lock()
-	ecs.ecs[entity] = make(map[reflect.Type]Component)
+	ecs.ecs[entity] = make(map[reflect.Type]ECSComponent)
 	entityIndex++
 	for _, component := range components {
 		ecs.ecs[entity][reflect.TypeOf(component)] = component
@@ -60,7 +60,7 @@ func (ecs *ECS) NewEntity(components ...Component) ECSEntity {
 	return entity
 }
 
-func (entity ECSEntity) AddComponent(component Component) {
+func (entity ECSEntity) AddComponent(component ECSComponent) {
 	componentType := reflect.TypeOf(component)
 	entity.ecs.mutex.Lock()
 	entity.ecs.ecs[entity][componentType] = component
@@ -126,7 +126,7 @@ func (ecs *ECS) RemoveEntity(entity ECSEntity) bool {
 	return false
 }
 
-func (entity ECSEntity) GetComponent(nilComponent interface{}) Component {
+func (entity ECSEntity) GetComponent(nilComponent interface{}) ECSComponent {
 	entity.ecs.mutex.RLock()
 	if entity.ecs.ecs[entity] == nil {
 		entity.ecs.mutex.RUnlock()
@@ -137,7 +137,7 @@ func (entity ECSEntity) GetComponent(nilComponent interface{}) Component {
 	return component
 }
 
-func (entity ECSEntity) getComponentOfType(componentType reflect.Type) Component {
+func (entity ECSEntity) getComponentOfType(componentType reflect.Type) ECSComponent {
 	entity.ecs.mutex.RLock()
 	if entity.ecs.ecs[entity] == nil {
 		entity.ecs.mutex.RUnlock()

@@ -13,7 +13,7 @@ type TextComponent struct {
 }
 
 func NewTextSystem() *limitengine.ECSSystem {
-	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.Component) {
+	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			transform := components[1].(*gmath.TransformComponent)
 
