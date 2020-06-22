@@ -87,7 +87,7 @@ func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool {
 		entity.ecs.mutex.RUnlock()
 		for _, listener := range entity.ecs.listeners {
 			if listener.ShouldListenForAllComponents() {
-				listener.OnAddComponent(entity, component)
+				listener.OnRemoveComponent(entity, component)
 			} else {
 				for _, target := range listener.GetTargetComponents() {
 					if target == componentType {
