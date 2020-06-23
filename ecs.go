@@ -137,7 +137,7 @@ func (entity ECSEntity) GetComponent(nilComponent interface{}) ECSComponent {
 	return component
 }
 
-func (entity ECSEntity) getComponentOfType(componentType reflect.Type) ECSComponent {
+func (entity ECSEntity) GetComponentOfType(componentType reflect.Type) ECSComponent {
 	entity.ecs.mutex.RLock()
 	if entity.ecs.ecs[entity] == nil {
 		entity.ecs.mutex.RUnlock()

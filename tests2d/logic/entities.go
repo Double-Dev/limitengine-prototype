@@ -7,6 +7,7 @@ import (
 	"github.com/double-dev/limitengine/interaction"
 	"github.com/double-dev/limitengine/tests2d/assets"
 	"github.com/double-dev/limitengine/ui"
+	"github.com/double-dev/limitengine/utils2d"
 )
 
 func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
@@ -36,13 +37,7 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 		&interaction.ColliderComponent{
 			AABB: gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
 		},
-		&gfx.RenderComponent{
-			Camera:   assets.SceneCamera,
-			Shader:   assets.SceneShader,
-			Material: assets.PlayerMaterial,
-			Mesh:     gfx.SpriteMesh(),
-			Instance: gfx.NewInstance(),
-		},
+		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.PlayerMaterial, gfx.NewInstance()),
 		&PlayerAnimationComponent{
 			Player:        gfx.NewFrameAnimationPlayer(),
 			RightIdleAnim: assets.PlayerRightIdle,
@@ -97,12 +92,6 @@ func NewLevelWallEntity(ecs *limitengine.ECS, position, scale gmath.Vector3) {
 		&interaction.ColliderComponent{
 			AABB: gmath.NewAABB(gmath.NewVector3(-1.0*scale[0], -1.0*scale[1], 0.0), gmath.NewVector3(scale[0], scale[1], 0.0)),
 		},
-		&gfx.RenderComponent{
-			Camera:   assets.SceneCamera,
-			Shader:   assets.SceneShader,
-			Material: assets.LevelMaterial,
-			Mesh:     gfx.SpriteMesh(),
-			Instance: gfx.NewInstance(),
-		},
+		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance()),
 	)
 }

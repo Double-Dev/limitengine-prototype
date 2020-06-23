@@ -69,7 +69,7 @@ func (shader *Shader) InstanceDefs() []struct {
 	}
 }
 
-func (shader *Shader) GetUniformLoader() UniformLoader {
+func (shader *Shader) UniformLoader() UniformLoader {
 	return shader.uniformLoader
 }
 

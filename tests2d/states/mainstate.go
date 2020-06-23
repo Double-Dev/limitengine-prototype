@@ -7,15 +7,18 @@ import (
 	"github.com/double-dev/limitengine/interaction"
 	"github.com/double-dev/limitengine/tests2d/assets"
 	"github.com/double-dev/limitengine/tests2d/logic"
+	"github.com/double-dev/limitengine/utils2d"
 )
 
 type MainState struct {
 	ecs *limitengine.ECS
 
-	gfxListener      gfx.GFXListener
+	renderListener   *gfx.GFXListener
+	spriteListener   *gfx.GFXListener
 	interactionWorld *interaction.World
 
 	renderSystem          *limitengine.ECSSystem
+	spriteSystem          *limitengine.ECSSystem
 	motionSystem          *limitengine.ECSSystem
 	controlSystem         *limitengine.ECSSystem
 	playerAnimationSystem *limitengine.ECSSystem
@@ -28,13 +31,7 @@ func NewMainState() *MainState {
 
 	// Post-Processing Render
 	mainState.ecs.NewEntity(
-		&gfx.RenderComponent{
-			Camera:   gfx.DefaultCamera(),
-			Shader:   assets.PostShader,
-			Material: assets.PostMaterial,
-			Mesh:     gfx.SpriteMesh(),
-			Instance: gfx.NewInstance(),
-		},
+		gfx.NewRenderComponent(gfx.DefaultCamera(), assets.PostShader, assets.PostMaterial, gfx.SpriteMesh(), gfx.NewInstance()),
 	)
 
 	// Entities
@@ -49,13 +46,7 @@ func NewMainState() *MainState {
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(charBounds[2], charBounds[3], 1.0),
 		},
-		&gfx.RenderComponent{
-			Camera:   assets.SceneCamera,
-			Shader:   assets.SceneShader,
-			Material: assets.CalibriMaterial,
-			Mesh:     gfx.SpriteMesh(),
-			Instance: textInstance,
-		},
+		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.CalibriMaterial, textInstance),
 	)
 
 	// Left Wall
@@ -73,9 +64,11 @@ func NewMainState() *MainState {
 	mainState.interactionWorld = interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
 	mainState.interactionWorld.AddInteraction(&logic.ControlInteraction{})
 
-	mainState.gfxListener = gfx.NewGFXListener()
+	mainState.renderListener = gfx.NewRenderListener()
+	mainState.spriteListener = utils2d.NewSpriteListener()
 
 	mainState.renderSystem = gfx.NewRenderSystem()
+	mainState.spriteSystem = utils2d.NewSpriteSystem()
 	mainState.motionSystem = gmath.NewMotionSystem(1.0)
 	mainState.controlSystem = logic.NewControlSystem()
 	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
@@ -85,8 +78,10 @@ func NewMainState() *MainState {
 
 func (mainState *MainState) OnActive() {
 	mainState.ecs.AddECSListener(mainState.interactionWorld)
-	mainState.ecs.AddECSListener(mainState.gfxListener)
+	mainState.ecs.AddECSListener(mainState.renderListener)
+	mainState.ecs.AddECSListener(mainState.spriteListener)
 	mainState.ecs.AddECSSystem(mainState.renderSystem)
+	mainState.ecs.AddECSSystem(mainState.spriteSystem)
 	mainState.ecs.AddECSSystem(mainState.motionSystem)
 	mainState.ecs.AddECSSystem(mainState.controlSystem)
 	mainState.ecs.AddECSSystem(mainState.playerAnimationSystem)
@@ -94,15 +89,20 @@ func (mainState *MainState) OnActive() {
 
 func (mainState *MainState) Update(delta float32) {
 	mainState.renderSystem.Update(delta)
+	mainState.spriteSystem.Update(delta)
 	mainState.motionSystem.Update(delta)
 	mainState.controlSystem.Update(delta)
 	mainState.playerAnimationSystem.Update(delta)
+
+	gfx.Sweep()
 }
 
 func (mainState *MainState) OnInactive() {
 	mainState.ecs.RemoveECSListener(mainState.interactionWorld)
-	mainState.ecs.RemoveECSListener(mainState.gfxListener)
+	mainState.ecs.RemoveECSListener(mainState.renderListener)
+	mainState.ecs.RemoveECSListener(mainState.spriteListener)
 	mainState.ecs.RemoveECSSystem(mainState.renderSystem)
+	mainState.ecs.RemoveECSSystem(mainState.spriteSystem)
 	mainState.ecs.RemoveECSSystem(mainState.motionSystem)
 	mainState.ecs.RemoveECSSystem(mainState.controlSystem)
 	mainState.ecs.RemoveECSSystem(mainState.playerAnimationSystem)

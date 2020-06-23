@@ -7,18 +7,81 @@ import (
 	"github.com/double-dev/limitengine/gmath"
 )
 
-var (
-	targets = []reflect.Type{
-		reflect.TypeOf((*RenderComponent)(nil)),
+type GFXComponent interface {
+	Renderables() []*Renderable
+}
+
+type GFXListener struct {
+	entities map[limitengine.ECSEntity]GFXComponent
+	target   []reflect.Type
+}
+
+func NewGFXListener(nilGFXComponent GFXComponent) *GFXListener {
+	return &GFXListener{
+		entities: make(map[limitengine.ECSEntity]GFXComponent),
+		target:   []reflect.Type{reflect.TypeOf(nilGFXComponent)},
 	}
-)
+}
+
+func (gfxListener *GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
+	gfx := entity.GetComponentOfType(gfxListener.target[0]).(GFXComponent)
+	gfxListener.entities[entity] = gfx
+	for _, renderable := range gfx.Renderables() {
+		AddRenderable(renderable)
+	}
+}
+
+func (gfxListener *GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
+	gfx := component.(GFXComponent)
+	gfxListener.entities[entity] = gfx
+	for _, renderable := range gfx.Renderables() {
+		AddRenderable(renderable)
+	}
+}
+
+func (gfxListener *GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
+	gfx := gfxListener.entities[entity]
+	for _, renderable := range gfx.Renderables() {
+		RemoveRenderable(renderable)
+	}
+	delete(gfxListener.entities, entity)
+}
+
+func (gfxListener *GFXListener) OnRemoveEntity(entity limitengine.ECSEntity) {
+	gfx := gfxListener.entities[entity]
+	for _, renderable := range gfx.Renderables() {
+		RemoveRenderable(renderable)
+	}
+	delete(gfxListener.entities, entity)
+}
+
+func (gfxListener *GFXListener) GetTargetComponents() []reflect.Type  { return gfxListener.target }
+func (gfxListener *GFXListener) GetEntities() []limitengine.ECSEntity { return nil }
+func (gfxListener *GFXListener) ShouldListenForAllComponents() bool   { return false }
+
+// Render component, system, and listener for generic renders:
 
 type RenderComponent struct {
-	Camera   *Camera
-	Shader   *Shader
-	Material Material
-	Mesh     *Mesh
-	Instance *Instance
+	Renderable  *Renderable
+	renderables []*Renderable
+}
+
+func NewRenderComponent(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) *RenderComponent {
+	renderable := &Renderable{
+		Camera:   camera,
+		Shader:   shader,
+		Material: material,
+		Mesh:     mesh,
+		Instance: instance,
+	}
+	return &RenderComponent{
+		renderable,
+		[]*Renderable{renderable},
+	}
+}
+
+func (renderComponent *RenderComponent) Renderables() []*Renderable {
+	return renderComponent.renderables
 }
 
 func NewRenderSystem() *limitengine.ECSSystem {
@@ -29,47 +92,9 @@ func NewRenderSystem() *limitengine.ECSSystem {
 			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
 
 			render := components[0].(*RenderComponent)
-			render.Instance.SetTransform(transformMat)
+			render.Renderable.Instance.SetTransform(transformMat)
 		}
-
-		Sweep()
 	}, (*RenderComponent)(nil), (*gmath.TransformComponent)(nil))
 }
 
-type GFXListener struct {
-	entities map[limitengine.ECSEntity]RenderComponent
-}
-
-func NewGFXListener() GFXListener {
-	return GFXListener{
-		entities: make(map[limitengine.ECSEntity]RenderComponent),
-	}
-}
-
-func (gfxListener GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
-	render := entity.GetComponent((*RenderComponent)(nil)).(*RenderComponent)
-	gfxListener.entities[entity] = *render
-	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
-}
-
-func (gfxListener GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
-	render := component.(*RenderComponent)
-	gfxListener.entities[entity] = *render
-	AddRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
-}
-
-func (gfxListener GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
-	render := gfxListener.entities[entity]
-	RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
-	delete(gfxListener.entities, entity)
-}
-
-func (gfxListener GFXListener) OnRemoveEntity(entity limitengine.ECSEntity) {
-	render := gfxListener.entities[entity]
-	RemoveRenderable(render.Camera, render.Shader, render.Material, render.Mesh, render.Instance)
-	delete(gfxListener.entities, entity)
-}
-
-func (gfxListener GFXListener) GetTargetComponents() []reflect.Type  { return targets }
-func (gfxListener GFXListener) GetEntities() []limitengine.ECSEntity { return nil }
-func (gfxListener GFXListener) ShouldListenForAllComponents() bool   { return false }
+func NewRenderListener() *GFXListener { return NewGFXListener((*RenderComponent)(nil)) }

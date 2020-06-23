@@ -159,70 +159,78 @@ func Sweep() {
 	// }()
 }
 
-func AddRenderable(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) {
+type Renderable struct {
+	Camera   *Camera
+	Shader   *Shader
+	Material Material
+	Mesh     *Mesh
+	Instance *Instance
+}
+
+func AddRenderable(renderable *Renderable) {
 	actionQueue = append(actionQueue, func() {
-		batch0 := renderBatch[camera]
+		batch0 := renderBatch[renderable.Camera]
 		if batch0 == nil {
 			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
-			renderBatch[camera] = batch0
+			renderBatch[renderable.Camera] = batch0
 		}
-		batch1 := batch0[shader]
+		batch1 := batch0[renderable.Shader]
 		if batch1 == nil {
 			batch1 = make(map[Material]map[*Mesh][]*Instance)
-			batch0[shader] = batch1
+			batch0[renderable.Shader] = batch1
 		}
-		batch2 := batch1[material]
+		batch2 := batch1[renderable.Material]
 		if batch2 == nil {
 			batch2 = make(map[*Mesh][]*Instance)
-			batch1[material] = batch2
+			batch1[renderable.Material] = batch2
 		}
 
 		// TODO: Fix transparency sorting for translucent objects of different materials,
 		// shaders, meshes, etc., unless that doesn't need to be supported.
-		if material.Transparency() {
-			instances := batch2[mesh]
+		if renderable.Material.Transparency() {
+			instances := batch2[renderable.Mesh]
 			i := 0
-			for i < len(instances) && instances[i].GetData("verttransformMat3")[2] > instance.GetData("verttransformMat3")[2] {
+			for i < len(instances) && instances[i].GetData("verttransformMat3")[2] > renderable.Instance.GetData("verttransformMat3")[2] {
 				i++
 			}
 			instances = append(instances, nil)
 			copy(instances[i+1:], instances[i:])
-			instances[i] = instance
-			batch2[mesh] = instances
+			instances[i] = renderable.Instance
+			batch2[renderable.Mesh] = instances
 		} else {
-			batch2[mesh] = append(batch2[mesh], instance)
+			batch2[renderable.Mesh] = append(batch2[renderable.Mesh], renderable.Instance)
 		}
 	})
 }
 
-func RemoveRenderable(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) {
+func RemoveRenderable(renderable *Renderable) {
 	actionQueue = append(actionQueue, func() {
-		batch0 := renderBatch[camera]
+		batch0 := renderBatch[renderable.Camera]
 		if batch0 == nil {
 			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
-			renderBatch[camera] = batch0
+			renderBatch[renderable.Camera] = batch0
 		}
-		batch1 := batch0[shader]
+		batch1 := batch0[renderable.Shader]
 		if batch1 == nil {
 			batch1 = make(map[Material]map[*Mesh][]*Instance)
-			batch0[shader] = batch1
+			batch0[renderable.Shader] = batch1
 		}
-		batch2 := batch1[material]
+		batch2 := batch1[renderable.Material]
 		if batch2 == nil {
 			batch2 = make(map[*Mesh][]*Instance)
-			batch1[material] = batch2
+			batch1[renderable.Material] = batch2
 		}
 
-		instances := batch2[mesh]
+		instances := batch2[renderable.Mesh]
 		for i, batchInstance := range instances {
-			if batchInstance == instance {
+			if batchInstance == renderable.Instance {
 				copy(instances[i:], instances[i+1:])
 				instances[len(instances)-1] = nil
 				instances = instances[:len(instances)-1]
 				break
 			}
 		}
-		batch2[mesh] = instances
+		batch2[renderable.Mesh] = instances
 	})
 }
 
