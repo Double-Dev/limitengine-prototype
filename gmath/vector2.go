@@ -74,14 +74,12 @@ func (vector Vector2) DivV(other Vector2) Vector2 {
 func (vector Vector2) DivSc(scalar float32) Vector2 {
 	vector[0] /= scalar
 	vector[1] /= scalar
-	vector[2] /= scalar
 	return vector
 }
 
 func (vector Vector2) Dot(other Vector2) float32 {
 	return vector[0]*other[0] +
-		vector[1]*other[1] +
-		vector[2]*other[2]
+		vector[1]*other[1]
 }
 
 func (vector Vector2) IsGreater(other Vector2) bool {

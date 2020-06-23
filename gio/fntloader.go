@@ -21,6 +21,9 @@ type Char struct {
 }
 
 func (char *Char) Bounds() gmath.Vector4 { return char.bounds }
+func (char *Char) Offset() gmath.Vector2 { return char.offset }
+func (char *Char) Advance() float32      { return char.advance }
+func (char *Char) Page() int32           { return char.page }
 
 type Font struct {
 	pages      []*Image

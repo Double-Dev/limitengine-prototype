@@ -15,10 +15,13 @@ type MainState struct {
 
 	renderListener   *gfx.GFXListener
 	spriteListener   *gfx.GFXListener
+	textListener     *gfx.GFXListener
 	interactionWorld *interaction.World
 
-	renderSystem          *limitengine.ECSSystem
-	spriteSystem          *limitengine.ECSSystem
+	renderSystem *limitengine.ECSSystem
+	spriteSystem *limitengine.ECSSystem
+	textSystem   *limitengine.ECSSystem
+
 	motionSystem          *limitengine.ECSSystem
 	controlSystem         *limitengine.ECSSystem
 	playerAnimationSystem *limitengine.ECSSystem
@@ -37,17 +40,32 @@ func NewMainState() *MainState {
 	// Entities
 	logic.NewPlayerEntity(mainState.ecs)
 
-	textInstance := gfx.NewInstance()
-	charBounds := assets.CalibriFont.GetChar("E").Bounds()
-	textInstance.SetTextureBoundsV(charBounds)
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
 			Position: gmath.NewVector3(0.0, 0.0, -0.6),
 			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(charBounds[2], charBounds[3], 1.0),
+			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
-		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.CalibriMaterial, textInstance),
+		gfx.NewTextComponent(
+			assets.SceneCamera,
+			assets.SceneShader,
+			gfx.NewFont(assets.CalibriFont, gmath.NewVector3(0.75, 0.5, 0.75)),
+			[]string{"H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", "!"},
+		),
 	)
+
+	// mainState.ecs.NewEntity(
+	// 	&gmath.TransformComponent{
+	// 		Position: gmath.NewVector3(0.0, 0.0, -0.7),
+	// 		Rotation: gmath.NewIdentityQuaternion(),
+	// 		Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
+	// 	},
+	// 	utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.CalibriMaterial, gfx.NewInstance()),
+	// )
+
+	// mainState.ecs.NewEntity(
+	// 	gfx.NewTextComponent(assets.SceneCamera, assets.SceneShader, gfx.NewFont(assets.CalibriFont), []string{"A", "B", "C", "D", "E", "F", "G"}),
+	// )
 
 	// Left Wall
 	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
@@ -66,9 +84,11 @@ func NewMainState() *MainState {
 
 	mainState.renderListener = gfx.NewRenderListener()
 	mainState.spriteListener = utils2d.NewSpriteListener()
+	mainState.textListener = gfx.NewTextListener()
 
 	mainState.renderSystem = gfx.NewRenderSystem()
 	mainState.spriteSystem = utils2d.NewSpriteSystem()
+	mainState.textSystem = gfx.NewTextSystem()
 	mainState.motionSystem = gmath.NewMotionSystem(1.0)
 	mainState.controlSystem = logic.NewControlSystem()
 	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
@@ -80,8 +100,11 @@ func (mainState *MainState) OnActive() {
 	mainState.ecs.AddECSListener(mainState.interactionWorld)
 	mainState.ecs.AddECSListener(mainState.renderListener)
 	mainState.ecs.AddECSListener(mainState.spriteListener)
+	mainState.ecs.AddECSListener(mainState.textListener)
+
 	mainState.ecs.AddECSSystem(mainState.renderSystem)
 	mainState.ecs.AddECSSystem(mainState.spriteSystem)
+	mainState.ecs.AddECSSystem(mainState.textSystem)
 	mainState.ecs.AddECSSystem(mainState.motionSystem)
 	mainState.ecs.AddECSSystem(mainState.controlSystem)
 	mainState.ecs.AddECSSystem(mainState.playerAnimationSystem)
@@ -90,6 +113,7 @@ func (mainState *MainState) OnActive() {
 func (mainState *MainState) Update(delta float32) {
 	mainState.renderSystem.Update(delta)
 	mainState.spriteSystem.Update(delta)
+	mainState.textSystem.Update(delta)
 	mainState.motionSystem.Update(delta)
 	mainState.controlSystem.Update(delta)
 	mainState.playerAnimationSystem.Update(delta)
@@ -101,8 +125,11 @@ func (mainState *MainState) OnInactive() {
 	mainState.ecs.RemoveECSListener(mainState.interactionWorld)
 	mainState.ecs.RemoveECSListener(mainState.renderListener)
 	mainState.ecs.RemoveECSListener(mainState.spriteListener)
+	mainState.ecs.RemoveECSListener(mainState.textListener)
+
 	mainState.ecs.RemoveECSSystem(mainState.renderSystem)
 	mainState.ecs.RemoveECSSystem(mainState.spriteSystem)
+	mainState.ecs.RemoveECSSystem(mainState.textSystem)
 	mainState.ecs.RemoveECSSystem(mainState.motionSystem)
 	mainState.ecs.RemoveECSSystem(mainState.controlSystem)
 	mainState.ecs.RemoveECSSystem(mainState.playerAnimationSystem)
