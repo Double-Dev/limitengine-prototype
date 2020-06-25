@@ -36,7 +36,26 @@ func NewTextComponent(camera *Camera, shader *Shader, font *Font, text string) *
 	fontSize := float32(1.0)
 	var renderables []*Renderable
 	var relativeTransforms []gmath.Matrix4
-	xOffset := float32(0.0)
+
+	var xTotal, yTotal float32
+	for _, character := range text {
+		char := font.font.GetChar(character)
+		if char == nil {
+			fmt.Println(string(character)+":", character)
+			continue
+		}
+		charAdvance := char.Advance()
+		if character != 32 {
+			charBounds := char.Bounds()
+			charSize := gmath.NewVector2(charBounds[2], charBounds[3]).MulSc(limitengine.AspectRatio())
+			charOffset := char.Offset().Mul(limitengine.AspectRatio(), 1.0)
+			xTotal += (charAdvance) * fontSize
+			yTotal = gmath.Max(yTotal, (charOffset[1] + charSize[1]))
+		} else {
+			xTotal += (charAdvance * 2.0) * fontSize
+		}
+	}
+	var xOffset float32
 	for _, character := range text {
 		char := font.font.GetChar(character)
 		if char == nil {
@@ -53,7 +72,7 @@ func NewTextComponent(camera *Camera, shader *Shader, font *Font, text string) *
 			instance.SetTextureBoundsV(charBounds)
 
 			transform := gmath.NewTransformMatrix(
-				gmath.NewVector3(xOffset+((charOffset[0]+charSize[0]*0.5)*fontSize), (-charOffset[1]-charSize[1]*0.5), 0.0),
+				gmath.NewVector3(xOffset+((charOffset[0]+charSize[0]*0.5)*fontSize)-xTotal/2.0, (-charOffset[1]-charSize[1]*0.5)+yTotal/2.0, 0.0),
 				gmath.NewIdentityQuaternion(),
 				gmath.NewVector3(charSize[0]*fontSize, charSize[1]*fontSize, 1.0),
 			)

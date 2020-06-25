@@ -50,7 +50,18 @@ func NewMainState() *MainState {
 			assets.SceneCamera,
 			assets.SceneShader,
 			gfx.NewFont(assets.CalibriFont, gmath.NewVector3(0.75, 0.5, 0.75)),
-			"HELLO WORLD!",
+			"Hello World!",
+		),
+	)
+
+	mainState.ecs.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.0, 0.0, -0.6),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.01, 0.01, 0.01),
+		},
+		utils2d.NewSpriteComponent(
+			assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance(),
 		),
 	)
 
