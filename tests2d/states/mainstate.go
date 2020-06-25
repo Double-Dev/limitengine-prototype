@@ -50,7 +50,7 @@ func NewMainState() *MainState {
 			assets.SceneCamera,
 			assets.SceneShader,
 			gfx.NewFont(assets.CalibriFont, gmath.NewVector3(0.75, 0.5, 0.75)),
-			[]string{"H", "e", "l", "l", "o", " ", "W", "o", "r", "l", "d", "!"},
+			"HELLO WORLD!",
 		),
 	)
 

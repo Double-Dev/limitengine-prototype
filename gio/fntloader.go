@@ -27,15 +27,15 @@ func (char *Char) Page() int32           { return char.page }
 
 type Font struct {
 	pages      []*Image
-	atlas      map[string]*Char
+	atlas      map[rune]*Char
 	padding    []float32
 	lineHeight float32
 }
 
-func (font *Font) Pages() []*Image          { return font.pages }
-func (font *Font) GetChar(key string) *Char { return font.atlas[key] }
-func (font *Font) Padding() []float32       { return font.padding }
-func (font *Font) LineHeight() float32      { return font.lineHeight }
+func (font *Font) Pages() []*Image        { return font.pages }
+func (font *Font) GetChar(key rune) *Char { return font.atlas[key] }
+func (font *Font) Padding() []float32     { return font.padding }
+func (font *Font) LineHeight() float32    { return font.lineHeight }
 
 func LoadFNT(directoryPath, fileName string) *Font {
 	fileStr := LoadAsString(directoryPath + "/" + fileName)
@@ -44,7 +44,7 @@ func LoadFNT(directoryPath, fileName string) *Font {
 
 	var scaleW, scaleH float32
 	font := &Font{
-		atlas: make(map[string]*Char),
+		atlas: make(map[rune]*Char),
 	}
 
 	for _, lineStr := range fileStrs {
@@ -96,7 +96,7 @@ func LoadFNT(directoryPath, fileName string) *Font {
 			}
 			break
 		case "char":
-			var key string
+			var key rune
 			char := &Char{
 				bounds: gmath.NewZeroVector4(),
 				offset: gmath.NewZeroVector2(),
@@ -106,7 +106,7 @@ func LoadFNT(directoryPath, fileName string) *Font {
 
 				switch varStrs[0] {
 				case "id":
-					key = string(parseInt(varStrs[1]))
+					key = parseInt(varStrs[1])
 					break
 				case "x":
 					char.bounds[0] = float32(parseInt(varStrs[1])) / scaleW

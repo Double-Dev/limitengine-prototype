@@ -27,22 +27,25 @@ type TextComponent struct {
 	camera             *Camera
 	shader             *Shader
 	font               *Font
-	text               []string
+	text               string
 	relativeTransforms []gmath.Matrix4
 	renderables        []*Renderable
 }
 
-func NewTextComponent(camera *Camera, shader *Shader, font *Font, text []string) *TextComponent {
+func NewTextComponent(camera *Camera, shader *Shader, font *Font, text string) *TextComponent {
 	fontSize := float32(1.0)
 	var renderables []*Renderable
 	var relativeTransforms []gmath.Matrix4
 	xOffset := float32(0.0)
 	for _, character := range text {
 		char := font.font.GetChar(character)
+		if char == nil {
+			continue
+		}
 		charAdvance := char.Advance()
-		fmt.Println(character+":", character[0])
+		fmt.Println(string(character)+":", character)
 
-		if character != " " {
+		if character != 32 {
 			charBounds := char.Bounds()
 			charSize := gmath.NewVector2(charBounds[2], charBounds[3]).MulSc(limitengine.AspectRatio())
 			charOffset := char.Offset().Mul(limitengine.AspectRatio(), 1.0)

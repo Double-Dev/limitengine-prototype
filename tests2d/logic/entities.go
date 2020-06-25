@@ -43,11 +43,11 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 			RightIdleAnim: assets.PlayerRightIdle,
 			RightWalkAnim: assets.PlayerRightWalk,
 			RightJumpAnim: gfx.NewFrameAnimation(
-				gfx.NewTriggerFrame(assets.PlayerSpriteSheet.GetBounds(8), func() bool {
-					return !(playerMotion.Velocity[1] >= 1.9)
-				}),
 				gfx.NewTriggerFrame(assets.PlayerSpriteSheet.GetBounds(9), func() bool {
-					return !(playerMotion.Velocity[1] < 1.9 && playerMotion.Velocity[1] > 0.0)
+					return !(playerMotion.Velocity[1] >= 0.1)
+				}),
+				gfx.NewTriggerFrame(assets.PlayerSpriteSheet.GetBounds(8), func() bool {
+					return !(playerMotion.Velocity[1] < 0.1 && playerMotion.Velocity[1] > 0.0)
 				}),
 				gfx.NewTriggerFrame(assets.PlayerSpriteSheet.GetBounds(10), func() bool {
 					return !(playerMotion.Velocity[1] <= 0.0 && playerMotion.Velocity[1] > -1.0)
