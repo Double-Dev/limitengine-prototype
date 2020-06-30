@@ -1,13 +1,16 @@
-#vert
-
-void vert() {
-	
-}
-#end
-
-#frag
-
-void frag() {
-	// lesl.outColor = vec4(lesl.textureCoord.x, lesl.textureCoord.y, cos(lesl.textureCoord.x), 0.9);
-}
-#end
+vert{
+    vars{
+    },
+    funcs{
+    },
+    main{
+    },
+},
+frag{
+    vars{
+    },
+    funcs{
+    },
+    main{
+	},
+},

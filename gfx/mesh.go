@@ -31,7 +31,6 @@ func init() {
 			[]float32{0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0},
 		)
 	})
-
 	// Sets [1] mesh to cube.
 	actionQueue = append(actionQueue, func() {
 		meshes[1] = context.NewMesh(

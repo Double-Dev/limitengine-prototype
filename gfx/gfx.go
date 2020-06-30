@@ -38,7 +38,7 @@ func init() {
 			view := limitengine.AppView()
 			view.SetContext()
 			var err error
-			context, err = gl.NewGLContext()
+			context, err = gl.NewContext()
 			if err != nil {
 				log.Err("Context could not be initialized.", err)
 			}
@@ -120,6 +120,9 @@ func Sweep() {
 					}
 					for mesh, instances := range batch2 {
 						mesh.prefs.loadTo(iShader)
+						context.DepthTest(mesh.DepthTest)
+						context.BackCulling(mesh.BackCulling)
+						context.WriteDepth(mesh.WriteDepth)
 						iMesh := meshes[mesh.id]
 						iMesh.Enable()
 

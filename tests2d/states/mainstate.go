@@ -48,9 +48,10 @@ func NewMainState() *MainState {
 		},
 		gfx.NewTextComponent(
 			assets.SceneCamera,
-			assets.SceneShader,
-			gfx.NewFont(assets.CalibriFont, gmath.NewVector3(0.75, 0.5, 0.75)),
+			assets.TextShader,
+			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
 			"Hello World!",
+			1.0,
 		),
 	)
 

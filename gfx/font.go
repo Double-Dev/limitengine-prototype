@@ -8,16 +8,72 @@ import (
 	"github.com/double-dev/limitengine/gmath"
 )
 
-type Font struct {
-	textureMaterials []*TextureMaterial
-	font             *gio.Font
+var (
+	textPlugin = CreateLESLPlugin(`
+frag{
+	vars{
+		uniform vec3 color;
+		uniform float width;
+		uniform float edge;
+		uniform vec3 borderColor;
+		uniform float borderWidth;
+		uniform float borderEdge;
+	},
+	main{
+		float distance = 1.0 - lesl.outColor.a;
+		float outlineAlpha = 1.0 - smoothstep(borderWidth, borderWidth+borderEdge, distance);
+		if (outlineAlpha == 0.0) {
+			discard;
+		}
+		float alpha = 1.0 - smoothstep(width, width+edge, distance);
+		vec3 color = mix(borderColor, color, alpha);
+		lesl.outColor = vec4(color, outlineAlpha);
+	},
+},`)
+)
+
+type TextShader struct {
+	shader *Shader
 }
 
-func NewFont(font *gio.Font, color gmath.Vector3) *Font {
-	var textures []*TextureMaterial
+func NewTextShader(leslPlugins ...*LESLPlugin) *TextShader {
+	return &TextShader{NewShader(append([]*LESLPlugin{textureBoundsPlugin, textPlugin}, leslPlugins...)...)}
+}
+
+func (textShader *TextShader) Shader() *Shader { return textShader.shader }
+
+type TextMaterial struct {
+	texture *Texture
+	prefs   UniformLoader
+}
+
+func NewTextMaterial(texture *Texture, color gmath.Vector3, width, edge float32, borderColor gmath.Vector3, borderWidth, borderEdge float32) *TextMaterial {
+	textMaterial := &TextMaterial{
+		texture: texture,
+		prefs:   NewUniformLoader(),
+	}
+	textMaterial.prefs.AddVector3("color", color)
+	textMaterial.prefs.AddFloat("width", width)
+	textMaterial.prefs.AddFloat("edge", edge)
+	textMaterial.prefs.AddVector3("borderColor", borderColor)
+	textMaterial.prefs.AddFloat("borderWidth", borderWidth)
+	textMaterial.prefs.AddFloat("borderEdge", borderEdge)
+	return textMaterial
+}
+
+func (textMaterial *TextMaterial) Texture() *Texture    { return textMaterial.texture }
+func (textMaterial *TextMaterial) Prefs() UniformLoader { return textMaterial.prefs }
+func (textMaterial *TextMaterial) Transparency() bool   { return true }
+
+type Font struct {
+	textMaterials []*TextMaterial
+	font          *gio.Font
+}
+
+func NewFont(font *gio.Font, color gmath.Vector3, width, edge float32, borderColor gmath.Vector3, borderWidth, borderEdge float32) *Font {
+	var textures []*TextMaterial
 	for _, image := range font.Pages() {
-		material := NewTextureMaterial(NewTexture(image))
-		material.SetTint(color, 1.0)
+		material := NewTextMaterial(NewTexture(image), color, width, edge, borderColor, borderWidth, borderEdge)
 		textures = append(textures, material)
 	}
 	return &Font{textures, font}
@@ -28,11 +84,12 @@ type TextComponent struct {
 	shader             *Shader
 	font               *Font
 	text               string
+	lineWidth          float32
 	relativeTransforms []gmath.Matrix4
 	renderables        []*Renderable
 }
 
-func NewTextComponent(camera *Camera, shader *Shader, font *Font, text string) *TextComponent {
+func NewTextComponent(camera *Camera, shader *TextShader, font *Font, text string, lineWidth float32) *TextComponent {
 	fontSize := float32(1.0)
 	var renderables []*Renderable
 	var relativeTransforms []gmath.Matrix4
@@ -83,8 +140,8 @@ func NewTextComponent(camera *Camera, shader *Shader, font *Font, text string) *
 			relativeTransforms = append(relativeTransforms, transform)
 			renderables = append(renderables, &Renderable{
 				Camera:   camera,
-				Shader:   shader,
-				Material: font.textureMaterials[char.Page()],
+				Shader:   shader.Shader(),
+				Material: font.textMaterials[char.Page()],
 				Mesh:     SpriteMesh(),
 				Instance: instance,
 			})
@@ -95,9 +152,10 @@ func NewTextComponent(camera *Camera, shader *Shader, font *Font, text string) *
 
 	return &TextComponent{
 		camera,
-		shader,
+		shader.Shader(),
 		font,
 		text,
+		lineWidth,
 		relativeTransforms,
 		renderables,
 	}

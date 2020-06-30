@@ -4,6 +4,7 @@ import (
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gio"
 	"github.com/double-dev/limitengine/gmath"
+	"github.com/double-dev/limitengine/utils2d"
 )
 
 var (
@@ -14,7 +15,8 @@ var (
 	PostCamera   *gfx.Camera
 
 	// Shaders
-	SceneShader *gfx.Shader
+	SceneShader *utils2d.SpriteShader
+	TextShader  *gfx.TextShader
 	PostShader  *gfx.Shader
 
 	// Level
@@ -34,9 +36,9 @@ var (
 	PlayerLeftWallSlide *gfx.FrameAnimation
 
 	// Font
-	CalibriFont     *gio.Font
-	CalibriTexture  *gfx.Texture
-	CalibriMaterial *gfx.TextureMaterial
+	SegoeFont     *gio.Font
+	SegoeTexture  *gfx.Texture
+	SegoeMaterial *gfx.TextureMaterial
 )
 
 func LoadAssets() {
@@ -49,8 +51,12 @@ func LoadAssets() {
 	SceneCamera.AddBlitCamera(PostCamera)
 
 	// Shaders
-	SceneShader = gfx.NewShader(gio.LoadAsString("assets/testshader.lesl"))
-	PostShader = gfx.NewShader(gio.LoadAsString("assets/fboshader.lesl"))
+	TestLESL := gfx.CreateLESLPlugin(gio.LoadAsString("assets/testshader.lesl"))
+	FBOLESL := gfx.CreateLESLPlugin(gio.LoadAsString("assets/fboshader.lesl"))
+
+	SceneShader = utils2d.NewSpriteShader(TestLESL)
+	TextShader = gfx.NewTextShader()
+	PostShader = gfx.NewShader(FBOLESL)
 
 	// Level
 	LevelMaterial = gfx.NewColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))
@@ -73,9 +79,9 @@ func LoadAssets() {
 	PlayerLeftWallSlide = gfx.NewFrameAnimation(gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(12), 0.5), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(14), 0.5))
 
 	// Font
-	CalibriFont = gio.LoadFNT("assets", "calibri.fnt")
-	CalibriTexture = gfx.NewTexture(gio.LoadPNG("assets/calibri.png"))
-	CalibriTexture.SetLinearFilter(true, false)
-	CalibriMaterial = gfx.NewTextureMaterial(CalibriTexture)
-	CalibriMaterial.SetTint(gmath.NewVector3(0.0, 0.0, 0.0), 1.0)
+	SegoeFont = gio.LoadFNT("assets", "segoe.fnt")
+	SegoeTexture = gfx.NewTexture(gio.LoadPNG("assets/segoe.png"))
+	SegoeTexture.SetLinearFilter(true, false)
+	SegoeMaterial = gfx.NewTextureMaterial(SegoeTexture)
+	SegoeMaterial.SetTint(gmath.NewVector3(0.0, 0.0, 0.0), 1.0)
 }

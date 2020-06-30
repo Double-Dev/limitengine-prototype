@@ -29,13 +29,13 @@ type Shader struct {
 	instanceBuffer framework.IInstanceBuffer
 }
 
-func NewShader(leslSrc string) *Shader {
+func NewShader(leslPlugins ...*LESLPlugin) *Shader {
 	shader := &Shader{
 		id: shaderIndex,
 	}
 	shaderIndex++
 	actionQueue = append(actionQueue, func() {
-		vertSrc, fragSrc, textureVars := processLESL(leslSrc)
+		vertSrc, fragSrc, textureVars := processLESL(leslPlugins)
 		shaders[shader.id] = context.NewShader(vertSrc, fragSrc)
 		totalInstanceSize := 0
 		instanceDefs := shader.InstanceDefs()

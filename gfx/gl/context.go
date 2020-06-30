@@ -7,9 +7,9 @@ import (
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
-type glContext struct{}
+type context struct{}
 
-func NewGLContext() (glContext, error) {
+func NewContext() (context, error) {
 	var err error
 	if err = gl.Init(); err != nil {
 		err = fmt.Errorf("Error starting OpenGL instance: %s", err)
@@ -22,61 +22,82 @@ func NewGLContext() (glContext, error) {
 	gl.CullFace(gl.BACK)
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-	return glContext{}, err
+	return context{}, err
 }
 
-func (glContext glContext) Resize(width, height int) {
+func (context context) Resize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 }
 
-func (glContext glContext) ClearScreen(r, g, b, a float32) {
+func (context context) ClearScreen(r, g, b, a float32) {
 	gl.ClearColor(r, g, b, a)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
-func (glContext glContext) NewFramebuffer(colorAttachment, depthAttachment framework.IAttachment, width, height float32, samples int32) framework.IFramebuffer {
+func (context context) DepthTest(depthTest bool) {
+	if depthTest {
+		gl.Enable(gl.CULL_FACE)
+		gl.CullFace(gl.BACK)
+	} else {
+		gl.Disable(gl.CULL_FACE)
+	}
+}
+
+func (context context) BackCulling(backCulling bool) {
+	if backCulling {
+		gl.Enable(gl.DEPTH_TEST)
+	} else {
+		gl.Disable(gl.DEPTH_TEST)
+	}
+}
+
+func (context context) WriteDepth(writeDepth bool) {
+	gl.DepthMask(writeDepth)
+}
+
+func (context context) NewFramebuffer(colorAttachment, depthAttachment framework.IAttachment, width, height float32, samples int32) framework.IFramebuffer {
 	framebuffer := newFBO(width, height, samples)
 	framebuffer.SetColorAttachment(colorAttachment)
 	framebuffer.SetDepthAttachment(depthAttachment)
 	return framebuffer
 }
 
-func (glContext glContext) UnbindFramebuffers() {
+func (context context) UnbindFramebuffers() {
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
 }
 
-func (glContext glContext) NewRenderbuffer(multisample bool) framework.IRenderbuffer {
+func (context context) NewRenderbuffer(multisample bool) framework.IRenderbuffer {
 	renderbuffer := newRBO(multisample)
 	return renderbuffer
 }
 
-func (glContext glContext) NewShader(vertSrc, fragSrc string) framework.IShader {
+func (context context) NewShader(vertSrc, fragSrc string) framework.IShader {
 	shader := newShader(vertSrc, fragSrc)
 	return shader
 }
 
-func (glContext glContext) NewEmptyTexture() framework.ITexture {
+func (context context) NewEmptyTexture() framework.ITexture {
 	texture := newTexture(textureType2D)
 	texture.Bind()
 	texture.LinearFilter(false, false)
-	glContext.UnbindTextures()
+	context.UnbindTextures()
 	return texture
 }
 
-func (glContext glContext) NewTexture(image []uint8, width, height int32) framework.ITexture {
+func (context context) NewTexture(image []uint8, width, height int32) framework.ITexture {
 	texture := newTexture(textureType2D)
 	texture.Bind()
 	texture.TextureData(image, width, height)
 	texture.LinearFilter(true, false)
-	glContext.UnbindTextures()
+	context.UnbindTextures()
 	return texture
 }
 
-func (glContext glContext) UnbindTextures() {
+func (context context) UnbindTextures() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-func (glContext glContext) NewMesh(indices []uint32, vertices, texCoords, normals []float32) framework.IMesh {
+func (context context) NewMesh(indices []uint32, vertices, texCoords, normals []float32) framework.IMesh {
 	mesh := newVAO()
 	mesh.bind()
 	mesh.addIndices(indices)
@@ -88,24 +109,24 @@ func (glContext glContext) NewMesh(indices []uint32, vertices, texCoords, normal
 		mesh.addFloatAttrib(normals, 2, 3, false)
 	}
 	// mesh.addInstancedFloatAttrib(
-	// 	glContext.GetMaxInstances()*glContext.GetMaxInstanceData(),
+	// 	context.GetMaxInstances()*context.GetMaxInstanceData(),
 	// 	3,
 	// 	4,
-	// 	int32(glContext.GetMaxInstanceData()),
+	// 	int32(context.GetMaxInstanceData()),
 	// 	false,
 	// )
 	mesh.unbind()
 	return mesh
 }
 
-func (glContext glContext) NewInstanceBuffer(instanceDataSize int) framework.IInstanceBuffer {
+func (context context) NewInstanceBuffer(instanceDataSize int) framework.IInstanceBuffer {
 	instanceBuffer := newVBO(vboArrayBufferType)
 	instanceBuffer.Bind()
-	instanceBuffer.setEmpty(glContext.GetMaxInstances() * instanceDataSize)
+	instanceBuffer.setEmpty(context.GetMaxInstances() * instanceDataSize)
 	instanceBuffer.Unbind()
 	return instanceBuffer
 }
 
-func (glContext glContext) GetMaxInstances() int {
+func (context context) GetMaxInstances() int {
 	return 10000
 }

@@ -11,10 +11,10 @@ type SpriteComponent struct {
 	renderables []*gfx.Renderable
 }
 
-func NewSpriteComponent(camera *gfx.Camera, shader *gfx.Shader, material gfx.Material, instance *gfx.Instance) *SpriteComponent {
+func NewSpriteComponent(camera *gfx.Camera, shader *SpriteShader, material gfx.Material, instance *gfx.Instance) *SpriteComponent {
 	renderable := &gfx.Renderable{
 		Camera:   camera,
-		Shader:   shader,
+		Shader:   shader.Shader(),
 		Material: material,
 		Mesh:     gfx.SpriteMesh(),
 		Instance: instance,
