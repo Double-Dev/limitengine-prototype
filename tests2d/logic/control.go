@@ -3,6 +3,8 @@ package logic
 import (
 	"reflect"
 
+	"github.com/double-dev/limitengine/sfx"
+
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/interaction"
@@ -44,6 +46,8 @@ func NewControlSystem() *limitengine.ECSSystem {
 					control.gravityEnabled = true
 					control.canJump = false
 					motion.Velocity[1] = 1.0
+					// SFX Test
+					sfx.PlaySound()
 				} else if control.canWallJump {
 					control.gravityEnabled = true
 					control.canWallJump = false
