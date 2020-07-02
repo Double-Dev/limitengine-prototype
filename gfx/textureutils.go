@@ -10,11 +10,11 @@ var (
 	textureBoundsPlugin = CreateLESLPlugin(`
 vert{
 	vars{
-		layout(location = 7) in vec4 vertTextureBounds;
+		instance vec4 textureBounds;
 		out vec4 fragTextureBounds;
 	},
 	main{
-		fragTextureBounds = vertTextureBounds;
+		fragTextureBounds = textureBounds;
 	},
 },
 frag{
@@ -62,7 +62,8 @@ func NewSpriteSheet(spriteWidth, spriteHeight, padding float32) *SpriteSheet {
 }
 
 func (spriteSheet *SpriteSheet) Apply(instance *Instance, index uint32) {
-	instance.SetTextureBounds(
+	instance.ModifyData(
+		"textureBounds",
 		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
 		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,
 		spriteSheet.spriteWidth-(2.0*spriteSheet.padding),
@@ -110,5 +111,5 @@ func (textureAtlas *TextureAtlas) Query(key string) gmath.Vector4 {
 }
 
 func (textureAtlas *TextureAtlas) Apply(instance *Instance, key string) {
-	instance.SetTextureBoundsV(textureAtlas.Query(key))
+	instance.SetData("textureBounds", textureAtlas.Query(key))
 }

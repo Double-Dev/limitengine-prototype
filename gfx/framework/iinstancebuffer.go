@@ -5,3 +5,9 @@ type IInstanceBuffer interface {
 	StoreInstancedData(data []float32)
 	Unbind()
 }
+
+type InstanceDef struct {
+	Name  string
+	Size  int
+	Index int
+}

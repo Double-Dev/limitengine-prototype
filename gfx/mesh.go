@@ -64,12 +64,7 @@ type Mesh struct {
 
 // NewMesh queues a gfx action that news a mesh using the input mesh data.
 func NewMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh {
-	mesh := &Mesh{
-		id:          meshIndex,
-		DepthTest:   true,
-		BackCulling: true,
-		WriteDepth:  true,
-	}
+	mesh := &Mesh{id: meshIndex, DepthTest: true, BackCulling: true, WriteDepth: true}
 	meshIndex++
 	actionQueue = append(actionQueue, func() { meshes[mesh.id] = context.NewMesh(indices, vertices, texCoords, normals) })
 	return mesh

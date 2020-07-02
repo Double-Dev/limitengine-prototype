@@ -3,6 +3,8 @@ package gfx
 import (
 	"fmt"
 	"strings"
+
+	"github.com/double-dev/limitengine/gfx/framework"
 )
 
 const (
@@ -73,9 +75,7 @@ var (
 )
 
 func CreateLESLPlugin(src string, dependencies ...*LESLPlugin) *LESLPlugin {
-	leslPlugin := &LESLPlugin{
-		textures: make(map[string]int32),
-	}
+	leslPlugin := &LESLPlugin{textures: make(map[string]int32)}
 
 	for _, dependency := range dependencies {
 		if !leslPlugin.hasDependency(dependency) {
@@ -175,7 +175,7 @@ func processReservedVars(src string, reservedVars []string) {
 	}
 }
 
-func processLESL(leslPlugins []*LESLPlugin) (string, string, map[string]int32) {
+func processLESL(leslPlugins []*LESLPlugin) (string, string, []framework.InstanceDef, map[string]int32) {
 	vertVars := vertHeader
 	var vertFuncs string
 	vertMain := vertMain
@@ -212,10 +212,47 @@ func processLESL(leslPlugins []*LESLPlugin) (string, string, map[string]int32) {
 		}
 	}
 
+	var instanceDefs []framework.InstanceDef
+
+	inVarLocation := 7
+	instanceDefIndex := 16
+	instanceIndex := strings.Index(vertVars, "instance")
+	for instanceIndex != -1 {
+		endIndex := strings.Index(vertVars[instanceIndex:], ";")
+		instanceVarLine := strings.Split(vertVars[instanceIndex:][:endIndex], " ")
+		var instanceVarSize int
+		switch instanceVarLine[1] {
+		case "float":
+			instanceVarSize = 1
+			break
+		case "vec2":
+			instanceVarSize = 2
+			break
+		case "vec3":
+			instanceVarSize = 3
+			break
+		case "vec4":
+			instanceVarSize = 4
+			break
+		default:
+			log.ForceErr("LESL does not support instance variables of type: " + instanceVarLine[1])
+		}
+
+		instanceDefs = append(instanceDefs, framework.InstanceDef{
+			Name: instanceVarLine[2], Size: instanceVarSize, Index: instanceDefIndex,
+		})
+		instanceDefIndex += instanceVarSize
+
+		vertVars = strings.Replace(vertVars, "instance", fmt.Sprint("layout(location =", inVarLocation)+") in", 1)
+		inVarLocation++
+
+		instanceIndex = strings.Index(vertVars, "instance")
+	}
+
 	// fmt.Println("VERTEX SHADER SRC:\n", vertVars+vertFuncs+vertMain+"}")
 	// fmt.Println("FRAGMENT SHADER SRC:\n", fragVars+fragFuncs+fragMain+"}")
 
-	return vertVars + vertFuncs + vertMain + "}", fragVars + fragFuncs + fragMain + "}", textures
+	return vertVars + vertFuncs + vertMain + "}", fragVars + fragFuncs + fragMain + "}", instanceDefs, textures
 }
 
 type LESLPlugin struct {

@@ -126,7 +126,7 @@ func NewTextComponent(camera *Camera, shader *TextShader, font *Font, text strin
 			charSize := gmath.NewVector2(charBounds[2], charBounds[3]).MulSc(limitengine.AspectRatio())
 			charOffset := char.Offset().Mul(limitengine.AspectRatio(), 1.0)
 			instance := NewInstance()
-			instance.SetTextureBoundsV(charBounds)
+			instance.SetData("textureBounds", charBounds)
 
 			transform := gmath.NewTransformMatrix(
 				gmath.NewVector3(xOffset+((charOffset[0]+charSize[0]*0.5)*fontSize)-xTotal/2.0, (-charOffset[1]-charSize[1]*0.5)+yTotal/2.0, 0.0),

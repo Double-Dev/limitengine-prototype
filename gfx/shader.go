@@ -25,23 +25,27 @@ func deleteShaders() {
 
 type Shader struct {
 	id             uint32
+	instanceDefs   []framework.InstanceDef
 	uniformLoader  UniformLoader
 	instanceBuffer framework.IInstanceBuffer
 }
 
 func NewShader(leslPlugins ...*LESLPlugin) *Shader {
-	shader := &Shader{
-		id: shaderIndex,
-	}
+	shader := &Shader{id: shaderIndex}
 	shaderIndex++
+	vertSrc, fragSrc, instanceDefs, textureVars := processLESL(leslPlugins)
+	shader.instanceDefs = append([]framework.InstanceDef{
+		framework.InstanceDef{Name: "verttransformMat0", Size: 4, Index: 0},
+		framework.InstanceDef{Name: "verttransformMat1", Size: 4, Index: 4},
+		framework.InstanceDef{Name: "verttransformMat2", Size: 4, Index: 8},
+		framework.InstanceDef{Name: "verttransformMat3", Size: 4, Index: 12},
+	}, instanceDefs...)
+	totalInstanceSize := 0
+	for _, instanceDef := range shader.InstanceDefs() {
+		totalInstanceSize += instanceDef.Size
+	}
 	actionQueue = append(actionQueue, func() {
-		vertSrc, fragSrc, textureVars := processLESL(leslPlugins)
 		shaders[shader.id] = context.NewShader(vertSrc, fragSrc)
-		totalInstanceSize := 0
-		instanceDefs := shader.InstanceDefs()
-		for _, instanceDef := range instanceDefs {
-			totalInstanceSize += instanceDef.Size
-		}
 		shader.uniformLoader = NewUniformLoader()
 		for key, value := range textureVars {
 			shader.uniformLoader.AddInt(key, value)
@@ -51,27 +55,8 @@ func NewShader(leslPlugins ...*LESLPlugin) *Shader {
 	return shader
 }
 
-func (shader *Shader) InstanceDefs() []struct {
-	Name  string
-	Size  int
-	Index int
-} {
-	return []struct {
-		Name  string
-		Size  int
-		Index int
-	}{
-		{"verttransformMat0", 4, 0},
-		{"verttransformMat1", 4, 4},
-		{"verttransformMat2", 4, 8},
-		{"verttransformMat3", 4, 12},
-		{"verttextureBounds", 4, 16},
-	}
-}
-
-func (shader *Shader) UniformLoader() UniformLoader {
-	return shader.uniformLoader
-}
+func (shader *Shader) InstanceDefs() []framework.InstanceDef { return shader.instanceDefs }
+func (shader *Shader) UniformLoader() UniformLoader          { return shader.uniformLoader }
 
 // TODO: Add support for more variables + array uniforms.
 type UniformLoader struct {

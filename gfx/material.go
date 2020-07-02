@@ -17,9 +17,7 @@ type ColorMaterial struct {
 }
 
 func NewColorMaterial(color gmath.Vector3) *ColorMaterial {
-	colorMaterial := &ColorMaterial{
-		prefs: NewUniformLoader(),
-	}
+	colorMaterial := &ColorMaterial{prefs: NewUniformLoader()}
 	colorMaterial.prefs.AddVector3("tintColor", color)
 	colorMaterial.prefs.AddFloat("tintAmount", 1.0)
 	return colorMaterial
@@ -39,10 +37,7 @@ type TextureMaterial struct {
 }
 
 func NewTextureMaterial(texture *Texture) *TextureMaterial {
-	textureMaterial := &TextureMaterial{
-		texture: texture,
-		prefs:   NewUniformLoader(),
-	}
+	textureMaterial := &TextureMaterial{texture: texture, prefs: NewUniformLoader()}
 	textureMaterial.prefs.AddVector3("tintColor", gmath.NewZeroVector3())
 	textureMaterial.prefs.AddFloat("tintAmount", 0.0)
 	return textureMaterial

@@ -12,6 +12,9 @@ type SpriteComponent struct {
 }
 
 func NewSpriteComponent(camera *gfx.Camera, shader *SpriteShader, material gfx.Material, instance *gfx.Instance) *SpriteComponent {
+	if instance.GetData("textureBounds") == nil {
+		instance.SetData("textureBounds", gmath.NewVector4(0.0, 0.0, 1.0, 1.0))
+	}
 	renderable := &gfx.Renderable{
 		Camera:   camera,
 		Shader:   shader.Shader(),

@@ -18,7 +18,6 @@ func NewInstance() *Instance {
 			"verttransformMat1": []float32{0.0, 1.0, 0.0, 0.0},
 			"verttransformMat2": []float32{0.0, 0.0, 1.0, 0.0},
 			"verttransformMat3": []float32{0.0, 0.0, 0.0, 1.0},
-			"verttextureBounds": []float32{0.0, 0.0, 1.0, 1.0},
 		},
 	}
 }
@@ -32,18 +31,18 @@ func (instance *Instance) SetTransform(transform gmath.Matrix4) {
 	instance.dataMutex.Unlock()
 }
 
-func (instance *Instance) SetTextureBounds(x, y, width, height float32) {
+func (instance *Instance) SetData(key string, value []float32) {
 	instance.dataMutex.Lock()
-	instance.data["verttextureBounds"][0] = x
-	instance.data["verttextureBounds"][1] = y
-	instance.data["verttextureBounds"][2] = width
-	instance.data["verttextureBounds"][3] = height
+	instance.data[key] = value
 	instance.dataMutex.Unlock()
 }
 
-func (instance *Instance) SetTextureBoundsV(bounds gmath.Vector4) {
+func (instance *Instance) ModifyData(key string, values ...float32) {
 	instance.dataMutex.Lock()
-	instance.data["verttextureBounds"] = bounds
+	dataLen := gmath.MinI(len(instance.data[key]), len(values))
+	for i := 0; i < dataLen; i++ {
+		instance.data[key][i] = values[i]
+	}
 	instance.dataMutex.Unlock()
 }
 

@@ -52,7 +52,7 @@ func NewFrameAnimation(frames ...Frame) *FrameAnimation {
 }
 
 func (frameAnimation *FrameAnimation) Apply(index int, instance *Instance) {
-	instance.SetTextureBoundsV(frameAnimation.frames[index].Bounds())
+	instance.SetData("textureBounds", frameAnimation.frames[index].Bounds())
 }
 
 type FrameAnimationPlayer struct {
