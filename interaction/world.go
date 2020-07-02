@@ -208,7 +208,6 @@ func (world *World) ProcessInteractions(delta float32) {
 				// END TEMPORARY CODE
 
 				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
-					// TODO: Fix bouncing bug.
 					var otherVel gmath.Vector3
 					if interactEntityB.Motion != nil {
 						otherVel = interactEntityB.Motion.Velocity.Clone()
@@ -220,7 +219,7 @@ func (world *World) ProcessInteractions(delta float32) {
 					if normVelocity > 0 {
 						continue
 					}
-					e := float32(1.0) // Restitution
+					e := float32(0.0) // Restitution NOTE: Modifying this variable will bring back the bouncy bugs.
 					j := -(1.0 + e) * normVelocity
 					j /= interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass
 					impulse := normal.Clone().MulSc(j)

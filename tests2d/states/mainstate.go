@@ -39,6 +39,7 @@ func NewMainState() *MainState {
 
 	// Entities
 	logic.NewPlayerEntity(mainState.ecs)
+	logic.NewPlayerEntity(mainState.ecs)
 
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
