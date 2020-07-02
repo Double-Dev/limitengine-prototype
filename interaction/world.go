@@ -18,7 +18,8 @@ var (
 type ColliderComponent struct {
 	IsTrigger bool
 
-	AABB gmath.AABB
+	AABB    gmath.AABB
+	InvMass float32
 }
 
 type World struct {
@@ -207,10 +208,25 @@ func (world *World) ProcessInteractions(delta float32) {
 				// END TEMPORARY CODE
 
 				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
-					// TODO: Replace with proper physics equations.
-					interactEntityA.Transform.Position.SubV(normal.Clone().MulSc(penetration))
-					newVelocity := interactEntityA.Motion.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactEntityA.Motion.Velocity)))
-					interactEntityA.Motion.Velocity.SetV(newVelocity)
+					// TODO: Fix bouncing bug.
+					var otherVel gmath.Vector3
+					if interactEntityB.Motion != nil {
+						otherVel = interactEntityB.Motion.Velocity.Clone()
+					} else {
+						otherVel = gmath.NewZeroVector3()
+					}
+					rv := otherVel.SubV(interactEntityA.Motion.Velocity)
+					normVelocity := rv.Dot(normal)
+					if normVelocity > 0 {
+						continue
+					}
+					e := float32(1.0) // Restitution
+					j := -(1.0 + e) * normVelocity
+					j /= interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass
+					impulse := normal.Clone().MulSc(j)
+					interactEntityA.Motion.Velocity.SubV(impulse.MulSc(interactEntityA.Collider.InvMass))
+					correction := normal.Clone().MulSc(penetration / (interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass) * 0.8)
+					interactEntityA.Transform.Position.SubV(correction.MulSc(interactEntityA.Collider.InvMass))
 				}
 
 				interactEntityA.collidingEntities[interactEntityB] = normal

@@ -35,7 +35,8 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 		},
 		playerMotion,
 		&interaction.ColliderComponent{
-			AABB: gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
+			AABB:    gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
+			InvMass: 1.0,
 		},
 		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.PlayerMaterial, gfx.NewInstance()),
 		&PlayerAnimationComponent{
