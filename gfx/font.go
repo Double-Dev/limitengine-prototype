@@ -33,14 +33,19 @@ frag{
 )
 
 type TextShader struct {
-	shader *Shader
+	renderProgram *RenderProgram
+	uniformLoader UniformLoader
 }
 
 func NewTextShader(leslPlugins ...*LESLPlugin) *TextShader {
-	return &TextShader{NewShader(append([]*LESLPlugin{textureBoundsPlugin, textPlugin}, leslPlugins...)...)}
+	return &TextShader{
+		NewRenderProgram(append([]*LESLPlugin{textureBoundsPlugin, textPlugin}, leslPlugins...)...),
+		NewUniformLoader(),
+	}
 }
 
-func (textShader *TextShader) Shader() *Shader { return textShader.shader }
+func (shader *TextShader) RenderProgram() *RenderProgram { return shader.renderProgram }
+func (shader *TextShader) UniformLoader() UniformLoader  { return shader.uniformLoader }
 
 type TextMaterial struct {
 	texture *Texture
@@ -81,7 +86,7 @@ func NewFont(font *gio.Font, color gmath.Vector3, width, edge float32, borderCol
 
 type TextComponent struct {
 	camera             *Camera
-	shader             *Shader
+	shader             *TextShader
 	font               *Font
 	text               string
 	lineWidth          float32
@@ -140,7 +145,7 @@ func NewTextComponent(camera *Camera, shader *TextShader, font *Font, text strin
 			relativeTransforms = append(relativeTransforms, transform)
 			renderables = append(renderables, &Renderable{
 				Camera:   camera,
-				Shader:   shader.Shader(),
+				Shader:   shader,
 				Material: font.textMaterials[char.Page()],
 				Mesh:     SpriteMesh(),
 				Instance: instance,
@@ -152,7 +157,7 @@ func NewTextComponent(camera *Camera, shader *TextShader, font *Font, text strin
 
 	return &TextComponent{
 		camera,
-		shader.Shader(),
+		shader,
 		font,
 		text,
 		lineWidth,

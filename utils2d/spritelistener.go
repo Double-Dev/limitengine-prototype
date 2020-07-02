@@ -17,7 +17,7 @@ func NewSpriteComponent(camera *gfx.Camera, shader *SpriteShader, material gfx.M
 	}
 	renderable := &gfx.Renderable{
 		Camera:   camera,
-		Shader:   shader.Shader(),
+		Shader:   shader,
 		Material: material,
 		Mesh:     gfx.SpriteMesh(),
 		Instance: instance,

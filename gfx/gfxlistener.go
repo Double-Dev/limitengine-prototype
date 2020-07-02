@@ -66,7 +66,7 @@ type RenderComponent struct {
 	renderables []*Renderable
 }
 
-func NewRenderComponent(camera *Camera, shader *Shader, material Material, mesh *Mesh, instance *Instance) *RenderComponent {
+func NewRenderComponent(camera *Camera, shader Shader, material Material, mesh *Mesh, instance *Instance) *RenderComponent {
 	renderable := &Renderable{
 		Camera:   camera,
 		Shader:   shader,

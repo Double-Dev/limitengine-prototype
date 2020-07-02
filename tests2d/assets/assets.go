@@ -17,7 +17,7 @@ var (
 	// Shaders
 	SceneShader *utils2d.SpriteShader
 	TextShader  *gfx.TextShader
-	PostShader  *gfx.Shader
+	PostShader  *gfx.GenericShader
 
 	// Level
 	LevelMaterial *gfx.ColorMaterial
@@ -56,7 +56,7 @@ func LoadAssets() {
 
 	SceneShader = utils2d.NewSpriteShader(TestLESL)
 	TextShader = gfx.NewTextShader()
-	PostShader = gfx.NewShader(FBOLESL)
+	PostShader = gfx.NewGenericShader(gfx.NewRenderProgram(FBOLESL))
 
 	// Level
 	LevelMaterial = gfx.NewColorMaterial(gmath.NewVector3(0.4, 0.4, 0.45))

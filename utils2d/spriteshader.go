@@ -5,11 +5,16 @@ import (
 )
 
 type SpriteShader struct {
-	shader *gfx.Shader
+	renderProgram *gfx.RenderProgram
+	uniformLoader gfx.UniformLoader
 }
 
 func NewSpriteShader(leslPlugins ...*gfx.LESLPlugin) *SpriteShader {
-	return &SpriteShader{gfx.NewShader(append([]*gfx.LESLPlugin{gfx.TextureBoundsPlugin(), gfx.TextureTintPlugin()}, leslPlugins...)...)}
+	return &SpriteShader{
+		gfx.NewRenderProgram(append([]*gfx.LESLPlugin{gfx.TextureBoundsPlugin(), gfx.TextureTintPlugin()}, leslPlugins...)...),
+		gfx.NewUniformLoader(),
+	}
 }
 
-func (spriteShader *SpriteShader) Shader() *gfx.Shader { return spriteShader.shader }
+func (shader *SpriteShader) RenderProgram() *gfx.RenderProgram { return shader.renderProgram }
+func (shader *SpriteShader) UniformLoader() gfx.UniformLoader  { return shader.uniformLoader }

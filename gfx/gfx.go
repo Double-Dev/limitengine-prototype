@@ -25,7 +25,7 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
 
-	renderBatch = make(map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance)
+	renderBatch = make(map[*Camera]map[Shader]map[Material]map[*Mesh][]*Instance)
 	actionQueue = []func(){}
 	gfxPipeline = [](chan func()){}
 )
@@ -105,10 +105,11 @@ func Sweep() {
 			}
 			context.ClearScreen(camera.clearColor[0], camera.clearColor[1], camera.clearColor[2], camera.clearColor[3])
 			for shader, batch1 := range batch0 {
-				iShader := shaders[shader.id]
+				renderProgram := shader.RenderProgram()
+				iShader := shaders[renderProgram.id]
 				iShader.Start()
 				camera.prefs.loadTo(iShader)
-				shader.uniformLoader.loadTo(iShader)
+				shader.UniformLoader().loadTo(iShader)
 
 				for material, batch2 := range batch1 {
 					material.Prefs().loadTo(iShader)
@@ -129,7 +130,7 @@ func Sweep() {
 						data := []float32{} // TODO: Don't new a new slice every frame.
 
 						for _, instance := range instances {
-							instanceDefs := shader.InstanceDefs()
+							instanceDefs := renderProgram.InstanceDefs()
 							for _, instanceDef := range instanceDefs {
 								instance.dataMutex.RLock()
 								data = append(data, instance.data[instanceDef.Name][0:instanceDef.Size]...)
@@ -137,7 +138,7 @@ func Sweep() {
 							}
 						}
 						// TODO: Look into optimizing GPU overhead from instanced rendering.
-						iMesh.Render(shader.instanceBuffer, shader.InstanceDefs(), data, int32(len(instances)))
+						iMesh.Render(renderProgram.instanceBuffer, renderProgram.InstanceDefs(), data, int32(len(instances)))
 
 						iMesh.Disable()
 					}
@@ -164,7 +165,7 @@ func Sweep() {
 
 type Renderable struct {
 	Camera   *Camera
-	Shader   *Shader
+	Shader   Shader
 	Material Material
 	Mesh     *Mesh
 	Instance *Instance
@@ -174,7 +175,7 @@ func AddRenderable(renderable *Renderable) {
 	actionQueue = append(actionQueue, func() {
 		batch0 := renderBatch[renderable.Camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
+			batch0 = make(map[Shader]map[Material]map[*Mesh][]*Instance)
 			renderBatch[renderable.Camera] = batch0
 		}
 		batch1 := batch0[renderable.Shader]
@@ -210,7 +211,7 @@ func RemoveRenderable(renderable *Renderable) {
 	actionQueue = append(actionQueue, func() {
 		batch0 := renderBatch[renderable.Camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
+			batch0 = make(map[Shader]map[Material]map[*Mesh][]*Instance)
 			renderBatch[renderable.Camera] = batch0
 		}
 		batch1 := batch0[renderable.Shader]
@@ -239,6 +240,6 @@ func RemoveRenderable(renderable *Renderable) {
 
 func ClearRenderables() {
 	actionQueue = append(actionQueue, func() {
-		renderBatch = make(map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance)
+		renderBatch = make(map[*Camera]map[Shader]map[Material]map[*Mesh][]*Instance)
 	})
 }
