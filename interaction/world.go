@@ -208,6 +208,7 @@ func (world *World) ProcessInteractions(delta float32) {
 				// END TEMPORARY CODE
 
 				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
+					// TODO: Finish/optimize collision resolution calculations.
 					var otherVel gmath.Vector3
 					if interactEntityB.Motion != nil {
 						otherVel = interactEntityB.Motion.Velocity.Clone()
