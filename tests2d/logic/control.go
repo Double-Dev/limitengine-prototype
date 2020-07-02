@@ -101,7 +101,10 @@ func (interation *ControlInteraction) EndInteract(delta float32, interactor, int
 	fmt.Println("end interact")
 	control := interactor.Entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
 	if !interactee.Collider.IsTrigger {
-		if gmath.Abs(normal[0]) > 0.9 {
+		if normal[1] < -0.5 {
+			control.canJump = false
+			control.gravityEnabled = true
+		} else if gmath.Abs(normal[0]) > 0.9 {
 			control.canWallJump = false
 		}
 	}
