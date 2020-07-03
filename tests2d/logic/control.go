@@ -30,6 +30,7 @@ func NewControlSystem() *limitengine.ECSSystem {
 			} else if control.XAxis.Amount() < -0.01 {
 				motion.Acceleration[0] = -speed
 			} else {
+				// TODO: Implement friction in collision calculations to avoid doing this.
 				motion.Acceleration[0] = 0.0
 				if !control.gravityEnabled {
 					motion.Velocity[0] *= 0.95
@@ -80,11 +81,9 @@ func (interation *ControlInteraction) StartInteract(delta float32, interactor, i
 	control := interactor.Entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
 	if !interactee.Collider.IsTrigger {
 		if normal[1] < -0.5 {
-			interactor.Motion.Velocity[1] = 0.0
 			control.canJump = true
 			control.gravityEnabled = false
 		} else if gmath.Abs(normal[0]) > 0.9 {
-			interactor.Motion.Velocity[0] = 0.0
 			interactor.Motion.Velocity[1] = -0.1
 			control.canWallJump = true
 			control.gravityEnabled = false
