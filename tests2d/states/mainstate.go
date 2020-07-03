@@ -42,7 +42,7 @@ func NewMainState() *MainState {
 
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.75),
+			Position: gmath.NewVector3(0.0, 0.0, 0.0),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
@@ -54,7 +54,7 @@ func NewMainState() *MainState {
 	)
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, -0.25, -0.75),
+			Position: gmath.NewVector3(0.0, -0.25, 0.0),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
@@ -66,15 +66,15 @@ func NewMainState() *MainState {
 	)
 
 	// Left Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, 0.0), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Right Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(1.5, 0.0, 0.0), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Top Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, 1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, 1.0, 0.0), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Bottom Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, -1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, -1.0, 0.0), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Seperator Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-0.6, -0.3, -0.4), gmath.NewVector3(0.1, 0.7, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-0.6, -0.3, 0.0), gmath.NewVector3(0.1, 0.7, 1.0))
 
 	// Systems
 	mainState.interactionWorld = interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)

@@ -29,7 +29,7 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 	}
 	return ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.3),
+			Position: gmath.NewVector3(0.0, 0.0, 0.0),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.075, 0.075, 1.0),
 		},
