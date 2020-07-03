@@ -9,9 +9,9 @@ var (
 	meshes     = make(map[uint32]framework.IMesh)
 	spriteMesh = &Mesh{
 		id:          0,
-		DepthTest:   false, // Enabling this causes a depth buffer issue with the POST shader in the tests.
+		DepthTest:   true, // Enabling depth test with write depth false causes a depth buffer issue with the POST shader in the tests.
 		BackCulling: false,
-		WriteDepth:  false,
+		WriteDepth:  true,
 	}
 	cubeMesh = &Mesh{
 		id:          1,
