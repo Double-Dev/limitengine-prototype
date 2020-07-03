@@ -24,7 +24,7 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 	playerMotion := &gmath.MotionComponent{
 		Velocity:        gmath.NewVector3(0.1, 0.0, 0.0),
 		Acceleration:    gmath.NewZeroVector3(),
-		AngVelocity:     gmath.NewQuaternion(0.1, 0.0, 1.0, 0.0),
+		AngVelocity:     gmath.NewIdentityQuaternion(),
 		AngAcceleration: gmath.NewIdentityQuaternion(),
 	}
 	return ecs.NewEntity(
@@ -38,7 +38,7 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 			AABB:    gmath.NewAABB(gmath.NewVector3(-0.075, -0.075, 0.0), gmath.NewVector3(0.075, 0.075, 0.0)),
 			InvMass: 1.0,
 		},
-		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.PlayerMaterial, gfx.NewInstance()),
+		utils2d.NewSpriteComponent(0, assets.SceneCamera, assets.SceneShader, assets.PlayerMaterial, gfx.NewInstance()),
 		&PlayerAnimationComponent{
 			Player:        gfx.NewFrameAnimationPlayer(),
 			RightIdleAnim: assets.PlayerRightIdle,
@@ -93,6 +93,6 @@ func NewLevelWallEntity(ecs *limitengine.ECS, position, scale gmath.Vector3) {
 		&interaction.ColliderComponent{
 			AABB: gmath.NewAABB(gmath.NewVector3(-1.0*scale[0], -1.0*scale[1], 0.0), gmath.NewVector3(scale[0], scale[1], 0.0)),
 		},
-		utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance()),
+		utils2d.NewSpriteComponent(1, assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance()),
 	)
 }

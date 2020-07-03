@@ -94,7 +94,7 @@ type TextComponent struct {
 	renderables        []*Renderable
 }
 
-func NewTextComponent(camera *Camera, shader *TextShader, font *Font, text string, lineWidth float32) *TextComponent {
+func NewTextComponent(layer int32, camera *Camera, shader *TextShader, font *Font, text string, lineWidth float32) *TextComponent {
 	fontSize := float32(1.0)
 	var renderables []*Renderable
 	var relativeTransforms []gmath.Matrix4
@@ -144,6 +144,7 @@ func NewTextComponent(camera *Camera, shader *TextShader, font *Font, text strin
 
 			relativeTransforms = append(relativeTransforms, transform)
 			renderables = append(renderables, &Renderable{
+				Layer:    layer,
 				Camera:   camera,
 				Shader:   shader,
 				Material: font.textMaterials[char.Page()],

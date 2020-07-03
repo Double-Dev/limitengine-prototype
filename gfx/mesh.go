@@ -9,7 +9,7 @@ var (
 	meshes     = make(map[uint32]framework.IMesh)
 	spriteMesh = &Mesh{
 		id:          0,
-		DepthTest:   false,
+		DepthTest:   true,
 		BackCulling: false,
 		WriteDepth:  false,
 	}

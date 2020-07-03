@@ -36,18 +36,19 @@ func (context context) ClearScreen(r, g, b, a float32) {
 
 func (context context) DepthTest(depthTest bool) {
 	if depthTest {
-		gl.Enable(gl.CULL_FACE)
-		gl.CullFace(gl.BACK)
+		gl.Enable(gl.DEPTH_TEST)
 	} else {
-		gl.Disable(gl.CULL_FACE)
+		gl.Disable(gl.DEPTH_TEST)
 	}
+
 }
 
 func (context context) BackCulling(backCulling bool) {
 	if backCulling {
-		gl.Enable(gl.DEPTH_TEST)
+		gl.Enable(gl.CULL_FACE)
+		gl.CullFace(gl.BACK)
 	} else {
-		gl.Disable(gl.DEPTH_TEST)
+		gl.Disable(gl.CULL_FACE)
 	}
 }
 

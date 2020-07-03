@@ -14,6 +14,7 @@ type Material interface {
 type ColorMaterial struct {
 	prefs        UniformLoader
 	transparency bool
+	priority     int32
 }
 
 func NewColorMaterial(color gmath.Vector3) *ColorMaterial {
@@ -29,7 +30,7 @@ func (colorMaterial *ColorMaterial) SetColor(color gmath.Vector3) {
 
 func (colorMaterial *ColorMaterial) Texture() *Texture    { return nilTexture }
 func (colorMaterial *ColorMaterial) Prefs() UniformLoader { return colorMaterial.prefs }
-func (colorMaterial *ColorMaterial) Transparency() bool   { return false }
+func (colorMaterial *ColorMaterial) Transparency() bool   { return true }
 
 type TextureMaterial struct {
 	texture *Texture

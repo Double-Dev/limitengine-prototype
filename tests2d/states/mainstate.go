@@ -34,7 +34,7 @@ func NewMainState() *MainState {
 
 	// Post-Processing Render
 	mainState.ecs.NewEntity(
-		gfx.NewRenderComponent(gfx.DefaultCamera(), assets.PostShader, assets.PostMaterial, gfx.SpriteMesh(), gfx.NewInstance()),
+		gfx.NewRenderComponent(10, gfx.DefaultCamera(), assets.PostShader, assets.PostMaterial, gfx.SpriteMesh(), gfx.NewInstance()),
 	)
 
 	// Entities
@@ -42,16 +42,40 @@ func NewMainState() *MainState {
 
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.6),
+			Position: gmath.NewVector3(0.0, 0.0, -0.75),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
 		gfx.NewTextComponent(
+			2,
 			assets.SceneCamera,
 			assets.TextShader,
 			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
 			"Hello World!",
 			1.0,
+		),
+	)
+
+	testInstance := gfx.NewInstance()
+	testInstance.SetTransform(
+		gmath.NewTransformMatrix(
+			gmath.NewVector3(0.0, 0.0, 0.9),
+			gmath.NewIdentityQuaternion(),
+			gmath.NewVector3(1.0, 1.0, 1.0),
+		),
+	)
+	testInstance.SetData(
+		"textureBounds",
+		gmath.NewVector4(0.0, 0.0, 1.0, 1.0),
+	)
+	mainState.ecs.NewEntity(
+		&gmath.TransformComponent{
+			Position: gmath.NewVector3(0.0, 0.0, -0.75),
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
+		},
+		gfx.NewRenderComponent(
+			3, assets.SceneCamera, assets.SceneShader, assets.PlayerMaterial, gfx.SpriteMesh(), testInstance,
 		),
 	)
 
@@ -62,22 +86,9 @@ func NewMainState() *MainState {
 			Scale:    gmath.NewVector3(0.01, 0.01, 0.01),
 		},
 		utils2d.NewSpriteComponent(
-			assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance(),
+			1, assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance(),
 		),
 	)
-
-	// mainState.ecs.NewEntity(
-	// 	&gmath.TransformComponent{
-	// 		Position: gmath.NewVector3(0.0, 0.0, -0.7),
-	// 		Rotation: gmath.NewIdentityQuaternion(),
-	// 		Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
-	// 	},
-	// 	utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.CalibriMaterial, gfx.NewInstance()),
-	// )
-
-	// mainState.ecs.NewEntity(
-	// 	gfx.NewTextComponent(assets.SceneCamera, assets.SceneShader, gfx.NewFont(assets.CalibriFont), []string{"A", "B", "C", "D", "E", "F", "G"}),
-	// )
 
 	// Left Wall
 	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
