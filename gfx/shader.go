@@ -46,6 +46,7 @@ func (shader *GenericShader) UniformLoader() UniformLoader  { return shader.unif
 type RenderProgram struct {
 	id             uint32
 	instanceDefs   []framework.InstanceDef
+	instanceSize   int
 	instanceBuffer framework.IInstanceBuffer
 }
 
@@ -59,9 +60,8 @@ func NewRenderProgram(leslPlugins ...*LESLPlugin) *RenderProgram {
 		framework.InstanceDef{Name: "verttransformMat2", Size: 4, Index: 8},
 		framework.InstanceDef{Name: "verttransformMat3", Size: 4, Index: 12},
 	}, instanceDefs...)
-	totalInstanceSize := 0
 	for _, instanceDef := range program.InstanceDefs() {
-		totalInstanceSize += instanceDef.Size
+		program.instanceSize += instanceDef.Size
 	}
 	actionQueue = append(actionQueue, func() {
 		iShader := context.NewShader(vertSrc, fragSrc)
@@ -71,12 +71,13 @@ func NewRenderProgram(leslPlugins ...*LESLPlugin) *RenderProgram {
 		}
 		iShader.Stop()
 		shaders[program.id] = iShader
-		program.instanceBuffer = context.NewInstanceBuffer(totalInstanceSize)
+		program.instanceBuffer = context.NewInstanceBuffer(program.instanceSize)
 	})
 	return program
 }
 
 func (program *RenderProgram) InstanceDefs() []framework.InstanceDef { return program.instanceDefs }
+func (program *RenderProgram) InstanceSize() int                     { return program.instanceSize }
 
 // TODO: Add support for more variables + array uniforms.
 type UniformLoader struct {

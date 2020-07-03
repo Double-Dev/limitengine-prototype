@@ -7,8 +7,9 @@ import (
 )
 
 type Instance struct {
-	data      map[string][]float32
-	dataMutex sync.RWMutex
+	data         map[string][]float32
+	dataMutex    sync.RWMutex
+	dataModified bool
 }
 
 func NewInstance() *Instance {
@@ -29,12 +30,14 @@ func (instance *Instance) SetTransform(transform gmath.Matrix4) {
 	instance.data["verttransformMat2"] = transform[2]
 	instance.data["verttransformMat3"] = transform[3]
 	instance.dataMutex.Unlock()
+	instance.dataModified = true
 }
 
 func (instance *Instance) SetData(key string, value []float32) {
 	instance.dataMutex.Lock()
 	instance.data[key] = value
 	instance.dataMutex.Unlock()
+	instance.dataModified = true
 }
 
 func (instance *Instance) ModifyData(key string, values ...float32) {
@@ -44,6 +47,7 @@ func (instance *Instance) ModifyData(key string, values ...float32) {
 		instance.data[key][i] = values[i]
 	}
 	instance.dataMutex.Unlock()
+	instance.dataModified = true
 }
 
 func (instance *Instance) GetData(key string) []float32 {
