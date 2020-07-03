@@ -72,6 +72,8 @@ func init() {
 				}
 			}
 			// GFX Cleanup
+			renderOrder = nil
+			renderCameras = nil
 			renderBatch = nil
 			actionQueue = nil
 			gfxPipeline = nil
@@ -136,7 +138,7 @@ func Sweep() {
 							context.WriteDepth(mesh.WriteDepth)
 							iMesh := meshes[mesh.id]
 							iMesh.Enable()
-							data := []float32{} // TODO: Don't new a new slice every frame.
+							data := []float32{} // TODO: Don't create a new slice every frame.
 							for _, instance := range instances {
 								instanceDefs := renderProgram.InstanceDefs()
 								for _, instanceDef := range instanceDefs {
@@ -224,8 +226,6 @@ func AddRenderable(renderable *Renderable) {
 		} else {
 			batch2[renderable.Mesh] = append(batch2[renderable.Mesh], renderable.Instance)
 		}
-		fmt.Println(renderOrder)
-		fmt.Println(renderBatch)
 	})
 }
 

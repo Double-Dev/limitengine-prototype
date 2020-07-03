@@ -47,46 +47,21 @@ func NewMainState() *MainState {
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
 		gfx.NewTextComponent(
-			2,
-			assets.SceneCamera,
-			assets.TextShader,
+			2, assets.SceneCamera, assets.TextShader,
 			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
-			"Hello World!",
-			1.0,
+			"Hello World!", 1.0,
 		),
-	)
-
-	testInstance := gfx.NewInstance()
-	testInstance.SetTransform(
-		gmath.NewTransformMatrix(
-			gmath.NewVector3(0.0, 0.0, 0.9),
-			gmath.NewIdentityQuaternion(),
-			gmath.NewVector3(1.0, 1.0, 1.0),
-		),
-	)
-	testInstance.SetData(
-		"textureBounds",
-		gmath.NewVector4(0.0, 0.0, 1.0, 1.0),
 	)
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.75),
+			Position: gmath.NewVector3(0.0, -0.25, -0.75),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
-		gfx.NewRenderComponent(
-			3, assets.SceneCamera, assets.SceneShader, assets.PlayerMaterial, gfx.SpriteMesh(), testInstance,
-		),
-	)
-
-	mainState.ecs.NewEntity(
-		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.6),
-			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.01, 0.01, 0.01),
-		},
-		utils2d.NewSpriteComponent(
-			1, assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance(),
+		gfx.NewTextComponent(
+			2, assets.SceneCamera, assets.TextShader,
+			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
+			"<Start Game>", 1.0,
 		),
 	)
 
@@ -142,6 +117,7 @@ func (mainState *MainState) Update(delta float32) {
 	mainState.playerAnimationSystem.Update(delta)
 
 	gfx.Sweep()
+	// limitengine.AppView().SetSize(1000, 625)
 }
 
 func (mainState *MainState) OnInactive() {

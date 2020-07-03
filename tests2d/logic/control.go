@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/double-dev/limitengine"
@@ -77,7 +76,7 @@ func NewControlSystem() *limitengine.ECSSystem {
 type ControlInteraction struct{}
 
 func (interation *ControlInteraction) StartInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
-	fmt.Println("BEGIN INTERACT")
+	// fmt.Println("BEGIN INTERACT")
 	control := interactor.Entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
 	if !interactee.Collider.IsTrigger {
 		if normal[1] < -0.5 {
@@ -97,7 +96,7 @@ func (interation *ControlInteraction) StartInteract(delta float32, interactor, i
 }
 
 func (interation *ControlInteraction) EndInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3) {
-	fmt.Println("end interact")
+	// fmt.Println("end interact")
 	control := interactor.Entity.GetComponent((*ControlComponent)(nil)).(*ControlComponent)
 	if !interactee.Collider.IsTrigger {
 		if normal[1] < -0.5 {

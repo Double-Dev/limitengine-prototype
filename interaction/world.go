@@ -224,9 +224,13 @@ func (world *World) ProcessInteractions(delta float32) {
 					j := -(1.0 + e) * normVelocity
 					j /= interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass
 					impulse := normal.Clone().MulSc(j)
-					interactEntityA.Motion.Velocity.SubV(impulse.MulSc(interactEntityA.Collider.InvMass))
+					interactEntityA.Motion.Velocity.SubV(impulse.Clone().MulSc(interactEntityA.Collider.InvMass))
 					correction := normal.Clone().MulSc(penetration / (interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass) * 0.8)
-					interactEntityA.Transform.Position.SubV(correction.MulSc(interactEntityA.Collider.InvMass))
+					interactEntityA.Transform.Position.SubV(correction.Clone().MulSc(interactEntityA.Collider.InvMass))
+					if interactEntityB.Motion != nil {
+						interactEntityB.Motion.Velocity.AddV(impulse.MulSc(interactEntityB.Collider.InvMass))
+						interactEntityB.Transform.Position.AddV(correction.MulSc(interactEntityB.Collider.InvMass))
+					}
 				}
 
 				interactEntityA.collidingEntities[interactEntityB] = normal
