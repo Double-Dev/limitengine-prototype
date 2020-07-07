@@ -80,6 +80,24 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 			XAxis: xAxis,
 			YAxis: yAxis,
 		},
+		&ParticleTrailComponent{
+			Particles: []limitengine.ECSEntity{
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+			},
+		},
 	)
 }
 
@@ -88,9 +106,9 @@ func NewParticleEntity(ecs *limitengine.ECS, position gmath.Vector3) limitengine
 	instance.SetTransform(gmath.NewTransformMatrix(position, gmath.NewIdentityQuaternion(), gmath.NewVector3(0.01, 0.01, 1.0)))
 	return ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: position,
+			Position: gmath.NewZeroVector3(),
 			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.01, 0.01, 1.0),
+			Scale:    gmath.NewVector3(0.005, 0.005, 1.0),
 		},
 		&gmath.MotionComponent{
 			Velocity:        gmath.NewZeroVector3(),
@@ -99,11 +117,11 @@ func NewParticleEntity(ecs *limitengine.ECS, position gmath.Vector3) limitengine
 			AngAcceleration: gmath.NewIdentityQuaternion(),
 		},
 		&ParticleComponent{
-			resetPos: gmath.NewZeroVector3(),
+			resetPos: position,
 		},
 		&interaction.ColliderComponent{
 			IsTrigger: true,
-			AABB:      gmath.NewAABB(gmath.NewVector3(-0.01, -0.01, 0.0), gmath.NewVector3(0.01, 0.01, 0.0)),
+			AABB:      gmath.NewAABB(gmath.NewVector3(-0.005, -0.005, 0.0), gmath.NewVector3(0.005, 0.005, 0.0)),
 			InvMass:   1.0,
 		},
 		utils2d.NewSpriteComponent(0, assets.SceneCamera, assets.SceneShader, assets.ParticleMaterial, instance),

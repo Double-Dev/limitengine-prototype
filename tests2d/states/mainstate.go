@@ -25,6 +25,8 @@ type MainState struct {
 	motionSystem          *limitengine.ECSSystem
 	controlSystem         *limitengine.ECSSystem
 	playerAnimationSystem *limitengine.ECSSystem
+
+	particleTrailSystem *limitengine.ECSSystem
 }
 
 func NewMainState() *MainState {
@@ -90,6 +92,7 @@ func NewMainState() *MainState {
 	mainState.motionSystem = gmath.NewMotionSystem(1.0)
 	mainState.controlSystem = logic.NewControlSystem()
 	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
+	mainState.particleTrailSystem = logic.NewParticleTrailSystem()
 
 	return mainState
 }
@@ -106,6 +109,7 @@ func (mainState *MainState) OnActive() {
 	mainState.ecs.AddECSSystem(mainState.motionSystem)
 	mainState.ecs.AddECSSystem(mainState.controlSystem)
 	mainState.ecs.AddECSSystem(mainState.playerAnimationSystem)
+	mainState.ecs.AddECSSystem(mainState.particleTrailSystem)
 }
 
 func (mainState *MainState) Update(delta float32) {
@@ -115,6 +119,7 @@ func (mainState *MainState) Update(delta float32) {
 	mainState.motionSystem.Update(delta)
 	mainState.controlSystem.Update(delta)
 	mainState.playerAnimationSystem.Update(delta)
+	mainState.particleTrailSystem.Update(delta)
 
 	gfx.Sweep()
 }
@@ -131,4 +136,5 @@ func (mainState *MainState) OnInactive() {
 	mainState.ecs.RemoveECSSystem(mainState.motionSystem)
 	mainState.ecs.RemoveECSSystem(mainState.controlSystem)
 	mainState.ecs.RemoveECSSystem(mainState.playerAnimationSystem)
+	mainState.ecs.RemoveECSSystem(mainState.particleTrailSystem)
 }
