@@ -18,7 +18,7 @@ type ECS struct {
 
 func NewECS() *ECS {
 	return &ECS{
-		ecs: make(map[ECSEntity]map[reflect.Type]ECSComponent),
+		ecs: make(map[ECSEntity]map[reflect.Type]ECSComponent), // TODO: Figure out an optimal 'max' size/number to entities needed in the program.
 	}
 }
 

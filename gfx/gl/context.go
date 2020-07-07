@@ -3,8 +3,8 @@ package gl
 import (
 	"fmt"
 
+	"github.com/double-dev/limitengine/dependencies/gl/v3.3-core/gl"
 	"github.com/double-dev/limitengine/gfx/framework"
-	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
 type context struct{}

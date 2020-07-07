@@ -2,7 +2,7 @@ package ui
 
 import (
 	"github.com/double-dev/limitengine"
-	"github.com/vulkan-go/glfw/v3.3/glfw"
+	"github.com/double-dev/limitengine/dependencies/glfw/v3.3/glfw"
 )
 
 // Definition for an input action.

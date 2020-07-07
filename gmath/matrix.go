@@ -13,7 +13,9 @@ func NewIdentityMatrix(columns, rows int) Matrix {
 	for i := 0; i < columns; i++ {
 		matrix = append(matrix, NewZeroVector(rows))
 	}
-	matrix.SetIdentity()
+	for i := 0; i < MinI(rows, columns); i++ {
+		matrix[i][i] = 1.0
+	}
 	return matrix
 }
 

@@ -4,7 +4,7 @@ import (
 	"image"
 	"runtime"
 
-	"github.com/vulkan-go/glfw/v3.3/glfw"
+	"github.com/double-dev/limitengine/dependencies/glfw/v3.3/glfw"
 )
 
 type glfwView struct {

@@ -91,7 +91,6 @@ func (matrix Matrix4) MulM(other Matrix4) Matrix4 {
 }
 
 func (matrix Matrix4) SetTranslate(translation Vector3) Matrix4 {
-	matrix.SetIdentity()
 	matrix[3][0] = translation[0]
 	matrix[3][1] = translation[1]
 	matrix[3][2] = translation[2]
@@ -116,18 +115,18 @@ func (matrix Matrix4) SetRotate(rotation Quaternion) Matrix4 {
 
 	matrix[2][1] = 2.0 * (rotation.vector[1]*rotation.vector[2] - rotation.vector[0]*rotation.vector[3])
 	matrix[1][2] = 2.0 * (rotation.vector[1]*rotation.vector[2] + rotation.vector[0]*rotation.vector[3])
-	// TODO: Fix rotation maths.
+	// TODO: Optimize rotation maths.
 	return matrix
 }
 
 func (matrix Matrix4) SetScale(scale Vector3) Matrix4 {
-	matrix[0][0] *= scale[0]
-	matrix[1][1] *= scale[1]
-	matrix[2][2] *= scale[2]
+	matrix[0][0] = scale[0]
+	matrix[1][1] = scale[1]
+	matrix[2][2] = scale[2]
 	return matrix
 }
 
-func (matrix Matrix4) ToArray() []float32 {
+func (matrix Matrix4) ToArray() []float32 { // TODO: Consider making matrix type []float32 to avoid this conversion.
 	arr := []float32{
 		matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
 		matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],

@@ -2,10 +2,9 @@ package gmath
 
 // Vector4 is an alternative to Vector optimized to perform operations on 4
 // floats.
-// NOTE: While Vector4 is a slice and can have elements appended and deleted
-// from it, it was never designed to do so and game devs that do so will do
-// at their own risk!
-type Vector4 []float32
+// NOTE: While Vector4 is a slice and can have elements appended to and
+// deleted from it, it is not meant to do so.
+type Vector4 []float32 // TODO: Consider making Vector type a struct with a float for each of its components to keep memory on the stack.
 
 func NewZeroVector4() Vector4 {
 	return Vector4{0.0, 0.0, 0.0, 0.0}

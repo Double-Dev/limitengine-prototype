@@ -64,3 +64,14 @@ func NewPlayerAnimationSystem() *limitengine.ECSSystem {
 		}
 	}, (*PlayerAnimationComponent)(nil), (*utils2d.SpriteComponent)(nil), (*ControlComponent)(nil), (*gmath.MotionComponent)(nil))
 }
+
+// type PlayerParticleComponent struct {
+// 	direction bool
+
+// 	Player *gfx.FrameAnimationPlayer
+
+// 	RightIdleAnim, RightWalkAnim, RightJumpAnim, RightWallAnim *gfx.FrameAnimation
+// 	LeftIdleAnim, LeftWalkAnim, LeftJumpAnim, LeftWallAnim     *gfx.FrameAnimation
+// }
+
+// func NewPlayerAnimationSystem() *limitengine.ECSSystem {
