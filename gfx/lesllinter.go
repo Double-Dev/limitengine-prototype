@@ -159,7 +159,7 @@ func processTextures(src string, textureVars map[string]int32) string {
 			}
 		}
 	}
-	fmt.Println(textureVars)
+	// fmt.Println(textureVars)
 	return src
 }
 

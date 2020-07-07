@@ -35,6 +35,9 @@ var (
 	PlayerLeftWalk      *gfx.FrameAnimation
 	PlayerLeftWallSlide *gfx.FrameAnimation
 
+	// Particle
+	ParticleMaterial *gfx.ColorMaterial
+
 	// Font
 	SegoeFont     *gio.Font
 	SegoeTexture  *gfx.Texture
@@ -77,6 +80,9 @@ func LoadAssets() {
 	PlayerLeftIdle = gfx.NewFrameAnimation(gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(4), 1.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(7), 1.25))
 	PlayerLeftWalk = gfx.NewFrameAnimation(gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(4), 0.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(5), 0.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(6), 0.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(7), 0.25))
 	PlayerLeftWallSlide = gfx.NewFrameAnimation(gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(12), 0.5), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(14), 0.5))
+
+	// Particle
+	ParticleMaterial = gfx.NewColorMaterial(gmath.NewVector3(0.7, 0.7, 0.4))
 
 	// Font
 	SegoeFont = gio.LoadFNT("assets", "segoe.fnt")

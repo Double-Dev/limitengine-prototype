@@ -3,6 +3,7 @@ package gfx
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -28,6 +29,7 @@ var (
 	renderOrder   []int32
 	renderCameras []*Camera
 	renderBatch   = make(map[int32]map[*Camera]map[Shader]map[Material]map[*Mesh]*instanceData)
+	renderMutex   = sync.RWMutex{}
 	actionQueue   = []func(){}
 	gfxPipeline   = [](chan func()){}
 )
@@ -202,7 +204,9 @@ func AddRenderable(renderable *Renderable) {
 		batchLayer := renderBatch[renderable.Layer]
 		if batchLayer == nil {
 			batchLayer = make(map[*Camera]map[Shader]map[Material]map[*Mesh]*instanceData)
+			renderMutex.Lock()
 			renderBatch[renderable.Layer] = batchLayer
+			renderMutex.Unlock()
 			i := 0
 			for i < len(renderOrder) && renderOrder[i] < renderable.Layer {
 				i++
@@ -214,23 +218,31 @@ func AddRenderable(renderable *Renderable) {
 		batch0 := batchLayer[renderable.Camera]
 		if batch0 == nil {
 			batch0 = make(map[Shader]map[Material]map[*Mesh]*instanceData)
+			renderMutex.Lock()
 			batchLayer[renderable.Camera] = batch0
+			renderMutex.Unlock()
 			renderCameras = append(renderCameras, renderable.Camera)
 		}
 		batch1 := batch0[renderable.Shader]
 		if batch1 == nil {
 			batch1 = make(map[Material]map[*Mesh]*instanceData)
+			renderMutex.Lock()
 			batch0[renderable.Shader] = batch1
+			renderMutex.Unlock()
 		}
 		batch2 := batch1[renderable.Material]
 		if batch2 == nil {
 			batch2 = make(map[*Mesh]*instanceData)
+			renderMutex.Lock()
 			batch1[renderable.Material] = batch2
+			renderMutex.Unlock()
 		}
 		batch3 := batch2[renderable.Mesh]
 		if batch3 == nil {
 			batch3 = &instanceData{}
+			renderMutex.Lock()
 			batch2[renderable.Mesh] = batch3
+			renderMutex.Unlock()
 		}
 		batch3.instances = append(batch3.instances, renderable.Instance)
 		data := []float32{}

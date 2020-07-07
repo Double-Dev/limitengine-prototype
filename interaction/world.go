@@ -2,6 +2,7 @@ package interaction
 
 import (
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -25,6 +26,7 @@ type ColliderComponent struct {
 type World struct {
 	spacialStructure SpacialStructure
 	entities         map[limitengine.ECSEntity]*InteractEntity
+	entitiesMutex    sync.RWMutex
 	entitiesToRemove []limitengine.ECSEntity
 	interactions     []Interaction
 }
@@ -33,6 +35,7 @@ func NewWorld(spacialStructure SpacialStructure, targetUpdatesPerSecond float32)
 	world := World{
 		spacialStructure: spacialStructure,
 		entities:         make(map[limitengine.ECSEntity]*InteractEntity),
+		entitiesMutex:    sync.RWMutex{},
 	}
 	go func() {
 		currentTime := time.Now().UnixNano()
@@ -53,8 +56,10 @@ func NewWorld(spacialStructure SpacialStructure, targetUpdatesPerSecond float32)
 
 func (world *World) OnAddEntity(entity limitengine.ECSEntity) {
 	interactEntity := world.newInteractEntity(entity)
+	world.entitiesMutex.Lock()
 	world.entities[entity] = interactEntity
 	world.spacialStructure.Add(interactEntity)
+	world.entitiesMutex.Unlock()
 }
 
 func (world *World) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
@@ -157,6 +162,7 @@ func (world *World) ProcessInteractions(delta float32) {
 	}
 	world.entitiesToRemove = nil
 
+	world.entitiesMutex.RLock()
 	for _, interactEntity := range world.entities {
 		if interactEntity.Motion != nil && interactEntity.Motion.IsAwake() {
 			world.spacialStructure.Update(interactEntity)
@@ -272,6 +278,7 @@ func (world *World) ProcessInteractions(delta float32) {
 			interactEntityA.collidingEntities = make(map[*InteractEntity]gmath.Vector3)
 		}
 	}
+	world.entitiesMutex.RUnlock()
 }
 
 func (world *World) AddInteraction(interaction Interaction) {

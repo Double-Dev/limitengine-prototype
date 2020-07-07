@@ -124,7 +124,7 @@ func NewTextComponent(layer int32, camera *Camera, shader *TextShader, font *Fon
 			continue
 		}
 		charAdvance := char.Advance()
-		fmt.Println(string(character)+":", character)
+		// fmt.Println(string(character)+":", character)
 
 		if character != 32 {
 			charBounds := char.Bounds()

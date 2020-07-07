@@ -117,7 +117,6 @@ func (mainState *MainState) Update(delta float32) {
 	mainState.playerAnimationSystem.Update(delta)
 
 	gfx.Sweep()
-	// limitengine.AppView().SetSize(1000, 625)
 }
 
 func (mainState *MainState) OnInactive() {

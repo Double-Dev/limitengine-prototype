@@ -83,6 +83,33 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 	)
 }
 
+func NewParticleEntity(ecs *limitengine.ECS, position gmath.Vector3) limitengine.ECSEntity {
+	instance := gfx.NewInstance()
+	instance.SetTransform(gmath.NewTransformMatrix(position, gmath.NewIdentityQuaternion(), gmath.NewVector3(0.01, 0.01, 1.0)))
+	return ecs.NewEntity(
+		&gmath.TransformComponent{
+			Position: position,
+			Rotation: gmath.NewIdentityQuaternion(),
+			Scale:    gmath.NewVector3(0.01, 0.01, 1.0),
+		},
+		&gmath.MotionComponent{
+			Velocity:        gmath.NewZeroVector3(),
+			Acceleration:    gmath.NewZeroVector3(),
+			AngVelocity:     gmath.NewIdentityQuaternion(),
+			AngAcceleration: gmath.NewIdentityQuaternion(),
+		},
+		&ParticleComponent{
+			resetPos: gmath.NewZeroVector3(),
+		},
+		&interaction.ColliderComponent{
+			IsTrigger: true,
+			AABB:      gmath.NewAABB(gmath.NewVector3(-0.01, -0.01, 0.0), gmath.NewVector3(0.01, 0.01, 0.0)),
+			InvMass:   1.0,
+		},
+		utils2d.NewSpriteComponent(0, assets.SceneCamera, assets.SceneShader, assets.ParticleMaterial, instance),
+	)
+}
+
 func NewLevelWallEntity(ecs *limitengine.ECS, position, scale gmath.Vector3) {
 	ecs.NewEntity(
 		&gmath.TransformComponent{
