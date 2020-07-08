@@ -4,7 +4,6 @@ import (
 	"image"
 
 	"github.com/double-dev/limitengine/gio"
-	"github.com/double-dev/limitengine/sfx"
 	"github.com/double-dev/limitengine/tests2d/states"
 
 	"github.com/double-dev/limitengine"
@@ -26,7 +25,7 @@ func main() {
 	// Load Assets
 	// assets.LoadAssets()
 
-	sfx.Setup()
+	// sfx.Setup()
 
 	// Launch!
 	limitengine.Launch(states.NewMainState())
