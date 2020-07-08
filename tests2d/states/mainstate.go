@@ -1,9 +1,6 @@
 package states
 
 import (
-	"fmt"
-	"math/rand"
-
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gmath"
@@ -98,23 +95,6 @@ func NewMainState() *MainState {
 	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
 	mainState.particleTrailSystem = logic.NewParticleTrailSystem()
 
-	for i := 0; i < 2; i++ {
-		testEntities = append(testEntities, mainState.ecs.NewEntity(
-			&gmath.TransformComponent{
-				Position: gmath.NewVector3(rand.Float32()-0.5, rand.Float32()-0.5, 0.0),
-				Rotation: gmath.NewIdentityQuaternion(),
-				Scale:    gmath.NewVector3(0.1, 0.1, 1.0),
-			},
-			&gmath.MotionComponent{
-				Velocity:        gmath.NewZeroVector3(),
-				Acceleration:    gmath.NewZeroVector3(),
-				AngVelocity:     gmath.NewIdentityQuaternion(),
-				AngAcceleration: gmath.NewIdentityQuaternion(),
-			},
-			utils2d.NewSpriteComponent(0, assets.SceneCamera, assets.SceneShader, assets.ParticleMaterial, gfx.NewInstance()),
-		))
-	}
-
 	return mainState
 }
 
@@ -133,9 +113,6 @@ func (mainState *MainState) OnActive() {
 	mainState.ecs.AddECSSystem(mainState.particleTrailSystem)
 }
 
-var time float32
-var testEntities []limitengine.ECSEntity
-
 func (mainState *MainState) Update(delta float32) {
 	mainState.renderSystem.Update(delta)
 	mainState.spriteSystem.Update(delta)
@@ -144,16 +121,6 @@ func (mainState *MainState) Update(delta float32) {
 	mainState.controlSystem.Update(delta)
 	mainState.playerAnimationSystem.Update(delta)
 	mainState.particleTrailSystem.Update(delta)
-
-	time += delta
-	if time > 1.0 {
-		if len(testEntities) > 0 {
-			mainState.ecs.RemoveEntity(testEntities[0])
-			testEntities = testEntities[1:]
-			fmt.Println("Entity removed.")
-		}
-		time = 0.0
-	}
 
 	gfx.Sweep()
 }
