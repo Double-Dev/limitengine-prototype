@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"math/rand"
 	"reflect"
 
@@ -56,6 +57,7 @@ type ParticleComponent struct {
 type ParticleInteraction struct{}
 
 func (interation *ParticleInteraction) StartInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
+	fmt.Println("Particle interact.")
 	interactor.Motion.Acceleration.Set(0.0, 0.0, 0.0)
 	interactor.Motion.Velocity.Set(0.0, 0.0, 0.0)
 	particle := interactor.Entity.GetComponent((*ParticleComponent)(nil)).(*ParticleComponent)

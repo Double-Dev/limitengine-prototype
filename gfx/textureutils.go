@@ -105,9 +105,8 @@ func (textureAtlas *TextureAtlas) Add(key string, bounds gmath.Vector4) {
 
 func (textureAtlas *TextureAtlas) Query(key string) gmath.Vector4 {
 	textureAtlas.mutex.RLock()
-	bounds := textureAtlas.atlas[key]
-	textureAtlas.mutex.RUnlock()
-	return bounds
+	defer textureAtlas.mutex.RUnlock()
+	return textureAtlas.atlas[key]
 }
 
 func (textureAtlas *TextureAtlas) Apply(instance *Instance, key string) {

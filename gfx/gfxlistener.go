@@ -11,52 +11,71 @@ type GFXComponent interface {
 	Renderables() []*Renderable
 }
 
-type GFXListener struct {
-	entities map[limitengine.ECSEntity]GFXComponent
-	target   []reflect.Type
+type GFXListener struct { // TODO: May need mutex for map.
+	target     []reflect.Type
+	entities   []limitengine.ECSEntity
+	components map[limitengine.ECSEntity]GFXComponent
 }
 
 func NewGFXListener(nilGFXComponent GFXComponent) *GFXListener {
 	return &GFXListener{
-		entities: make(map[limitengine.ECSEntity]GFXComponent),
-		target:   []reflect.Type{reflect.TypeOf(nilGFXComponent)},
+		target:     []reflect.Type{reflect.TypeOf(nilGFXComponent)},
+		components: make(map[limitengine.ECSEntity]GFXComponent),
 	}
 }
 
 func (gfxListener *GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
+	gfxListener.entities = append(gfxListener.entities, entity)
 	gfx := entity.GetComponentOfType(gfxListener.target[0]).(GFXComponent)
-	gfxListener.entities[entity] = gfx
+	gfxListener.components[entity] = gfx
 	for _, renderable := range gfx.Renderables() {
 		AddRenderable(renderable)
 	}
 }
 
 func (gfxListener *GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
+	gfxListener.entities = append(gfxListener.entities, entity)
 	gfx := component.(GFXComponent)
-	gfxListener.entities[entity] = gfx
+	gfxListener.components[entity] = gfx
 	for _, renderable := range gfx.Renderables() {
 		AddRenderable(renderable)
 	}
 }
 
 func (gfxListener *GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
-	gfx := gfxListener.entities[entity]
+	gfx := gfxListener.components[entity]
 	for _, renderable := range gfx.Renderables() {
 		RemoveRenderable(renderable)
 	}
-	delete(gfxListener.entities, entity)
+	delete(gfxListener.components, entity)
+	for i, potentialEntity := range gfxListener.entities {
+		if potentialEntity == entity {
+			gfxListener.entities[i] = gfxListener.entities[len(gfxListener.entities)-1]
+			gfxListener.entities[len(gfxListener.entities)-1] = limitengine.ECSEntity{}
+			gfxListener.entities = gfxListener.entities[:len(gfxListener.entities)-1]
+			break
+		}
+	}
 }
 
 func (gfxListener *GFXListener) OnRemoveEntity(entity limitengine.ECSEntity) {
-	gfx := gfxListener.entities[entity]
+	gfx := gfxListener.components[entity]
 	for _, renderable := range gfx.Renderables() {
 		RemoveRenderable(renderable)
 	}
-	delete(gfxListener.entities, entity)
+	delete(gfxListener.components, entity)
+	for i, potentialEntity := range gfxListener.entities {
+		if potentialEntity == entity {
+			gfxListener.entities[i] = gfxListener.entities[len(gfxListener.entities)-1]
+			gfxListener.entities[len(gfxListener.entities)-1] = limitengine.ECSEntity{}
+			gfxListener.entities = gfxListener.entities[:len(gfxListener.entities)-1]
+			break
+		}
+	}
 }
 
 func (gfxListener *GFXListener) GetTargetComponents() []reflect.Type  { return gfxListener.target }
-func (gfxListener *GFXListener) GetEntities() []limitengine.ECSEntity { return nil }
+func (gfxListener *GFXListener) GetEntities() []limitengine.ECSEntity { return gfxListener.entities }
 func (gfxListener *GFXListener) ShouldListenForAllComponents() bool   { return false }
 
 // Render component, system, and listener for generic renders:
