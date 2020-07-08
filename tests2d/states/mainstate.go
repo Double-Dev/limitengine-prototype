@@ -5,7 +5,6 @@ import (
 	"github.com/double-dev/limitengine/gfx"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/interaction"
-	"github.com/double-dev/limitengine/sfx"
 	"github.com/double-dev/limitengine/tests2d/assets"
 	"github.com/double-dev/limitengine/tests2d/logic"
 	"github.com/double-dev/limitengine/utils2d"
@@ -104,8 +103,6 @@ func NewMainState() *MainState {
 	mainState.motionSystem = gmath.NewMotionSystem(1.0)
 	mainState.controlSystem = logic.NewControlSystem()
 	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
-
-	sfx.Setup()
 
 	return mainState
 }

@@ -1,7 +1,10 @@
 package sfx
 
 import (
+	"fmt"
+
 	"github.com/double-dev/limitengine/sfx/al"
+	"github.com/double-dev/limitengine/sfx/vorbis"
 )
 
 var (
@@ -10,8 +13,16 @@ var (
 
 func Setup() {
 	buffer = al.GenBuffers(1)[0]
-	// buffer.BufferData()
 
+	channels := make([]int32, 1)
+	sampleRate := make([]int32, 1)
+	output := make([][]int16)
+
+	result := vorbis.DecodeFilename("../assets/jump.ogg", channels, sampleRate, output)
+
+	fmt.Println(output)
+
+	// buffer.BufferData(0, )
 }
 
 func PlaySound() {
