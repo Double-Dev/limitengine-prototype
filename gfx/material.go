@@ -14,24 +14,23 @@ type Material interface {
 type ColorMaterial struct {
 	prefs        UniformLoader
 	transparency bool
+	priority     int32
 }
 
 func NewColorMaterial(color gmath.Vector3) *ColorMaterial {
-	colorMaterial := &ColorMaterial{
-		prefs: NewUniformLoader(),
-	}
-	colorMaterial.prefs.AddVector3("fragtintColor", color)
-	colorMaterial.prefs.AddFloat("fragtintAmount", 1.0)
+	colorMaterial := &ColorMaterial{prefs: NewUniformLoader()}
+	colorMaterial.prefs.AddVector3("tintColor", color)
+	colorMaterial.prefs.AddFloat("tintAmount", 1.0)
 	return colorMaterial
 }
 
 func (colorMaterial *ColorMaterial) SetColor(color gmath.Vector3) {
-	colorMaterial.prefs.AddVector3("fragtintColor", color)
+	colorMaterial.prefs.AddVector3("tintColor", color)
 }
 
 func (colorMaterial *ColorMaterial) Texture() *Texture    { return nilTexture }
 func (colorMaterial *ColorMaterial) Prefs() UniformLoader { return colorMaterial.prefs }
-func (colorMaterial *ColorMaterial) Transparency() bool   { return false }
+func (colorMaterial *ColorMaterial) Transparency() bool   { return true }
 
 type TextureMaterial struct {
 	texture *Texture
@@ -39,18 +38,15 @@ type TextureMaterial struct {
 }
 
 func NewTextureMaterial(texture *Texture) *TextureMaterial {
-	textureMaterial := &TextureMaterial{
-		texture: texture,
-		prefs:   NewUniformLoader(),
-	}
-	textureMaterial.prefs.AddVector3("fragtintColor", gmath.NewZeroVector3())
-	textureMaterial.prefs.AddFloat("fragtintAmount", 0.0)
+	textureMaterial := &TextureMaterial{texture: texture, prefs: NewUniformLoader()}
+	textureMaterial.prefs.AddVector3("tintColor", gmath.NewZeroVector3())
+	textureMaterial.prefs.AddFloat("tintAmount", 0.0)
 	return textureMaterial
 }
 
 func (textureMaterial *TextureMaterial) SetTint(color gmath.Vector3, amount float32) {
-	textureMaterial.prefs.AddVector3("fragtintColor", color)
-	textureMaterial.prefs.AddFloat("fragtintAmount", amount)
+	textureMaterial.prefs.AddVector3("tintColor", color)
+	textureMaterial.prefs.AddFloat("tintAmount", amount)
 }
 
 func (textureMaterial *TextureMaterial) Texture() *Texture    { return textureMaterial.texture }

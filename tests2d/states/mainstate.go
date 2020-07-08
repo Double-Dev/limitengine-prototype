@@ -25,6 +25,8 @@ type MainState struct {
 	motionSystem          *limitengine.ECSSystem
 	controlSystem         *limitengine.ECSSystem
 	playerAnimationSystem *limitengine.ECSSystem
+
+	particleTrailSystem *limitengine.ECSSystem
 }
 
 func NewMainState() *MainState {
@@ -34,7 +36,7 @@ func NewMainState() *MainState {
 
 	// Post-Processing Render
 	mainState.ecs.NewEntity(
-		gfx.NewRenderComponent(gfx.DefaultCamera(), assets.PostShader, assets.PostMaterial, gfx.SpriteMesh(), gfx.NewInstance()),
+		gfx.NewRenderComponent(10, gfx.DefaultCamera(), assets.PostShader, assets.PostMaterial, gfx.SpriteMesh(), gfx.NewInstance()),
 	)
 
 	// Entities
@@ -42,52 +44,39 @@ func NewMainState() *MainState {
 
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.6),
+			Position: gmath.NewVector3(0.0, 0.0, 0.0),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
 		gfx.NewTextComponent(
-			assets.SceneCamera,
-			assets.SceneShader,
-			gfx.NewFont(assets.CalibriFont, gmath.NewVector3(0.75, 0.5, 0.75)),
-			"Hello World!",
+			2, assets.SceneCamera, assets.TextShader,
+			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
+			"Hello World!", 1.0,
 		),
 	)
-
 	mainState.ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, -0.6),
+			Position: gmath.NewVector3(0.0, -0.25, 0.0),
 			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(0.01, 0.01, 0.01),
+			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
 		},
-		utils2d.NewSpriteComponent(
-			assets.SceneCamera, assets.SceneShader, assets.LevelMaterial, gfx.NewInstance(),
+		gfx.NewTextComponent(
+			2, assets.SceneCamera, assets.TextShader,
+			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
+			"<Start Game>", 1.0,
 		),
 	)
 
-	// mainState.ecs.NewEntity(
-	// 	&gmath.TransformComponent{
-	// 		Position: gmath.NewVector3(0.0, 0.0, -0.7),
-	// 		Rotation: gmath.NewIdentityQuaternion(),
-	// 		Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
-	// 	},
-	// 	utils2d.NewSpriteComponent(assets.SceneCamera, assets.SceneShader, assets.CalibriMaterial, gfx.NewInstance()),
-	// )
-
-	// mainState.ecs.NewEntity(
-	// 	gfx.NewTextComponent(assets.SceneCamera, assets.SceneShader, gfx.NewFont(assets.CalibriFont), []string{"A", "B", "C", "D", "E", "F", "G"}),
-	// )
-
 	// Left Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, 0.0), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Right Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(1.5, 0.0, -0.45), gmath.NewVector3(0.1, 1.0, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(1.5, 0.0, 0.0), gmath.NewVector3(0.1, 1.0, 1.0))
 	// Top Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, 1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, 1.0, 0.0), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Bottom Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, -1.0, -0.4), gmath.NewVector3(1.5, 0.1, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(0.0, -1.0, 0.0), gmath.NewVector3(1.5, 0.1, 1.0))
 	// Seperator Wall
-	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-0.6, -0.3, -0.4), gmath.NewVector3(0.1, 0.7, 1.0))
+	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-0.6, -0.3, 0.0), gmath.NewVector3(0.1, 0.7, 1.0))
 
 	// Systems
 	mainState.interactionWorld = interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
@@ -103,6 +92,7 @@ func NewMainState() *MainState {
 	mainState.motionSystem = gmath.NewMotionSystem(1.0)
 	mainState.controlSystem = logic.NewControlSystem()
 	mainState.playerAnimationSystem = logic.NewPlayerAnimationSystem()
+	mainState.particleTrailSystem = logic.NewParticleTrailSystem()
 
 	return mainState
 }
@@ -119,6 +109,7 @@ func (mainState *MainState) OnActive() {
 	mainState.ecs.AddECSSystem(mainState.motionSystem)
 	mainState.ecs.AddECSSystem(mainState.controlSystem)
 	mainState.ecs.AddECSSystem(mainState.playerAnimationSystem)
+	mainState.ecs.AddECSSystem(mainState.particleTrailSystem)
 }
 
 func (mainState *MainState) Update(delta float32) {
@@ -128,6 +119,7 @@ func (mainState *MainState) Update(delta float32) {
 	mainState.motionSystem.Update(delta)
 	mainState.controlSystem.Update(delta)
 	mainState.playerAnimationSystem.Update(delta)
+	mainState.particleTrailSystem.Update(delta)
 
 	gfx.Sweep()
 }
@@ -144,4 +136,5 @@ func (mainState *MainState) OnInactive() {
 	mainState.ecs.RemoveECSSystem(mainState.motionSystem)
 	mainState.ecs.RemoveECSSystem(mainState.controlSystem)
 	mainState.ecs.RemoveECSSystem(mainState.playerAnimationSystem)
+	mainState.ecs.RemoveECSSystem(mainState.particleTrailSystem)
 }

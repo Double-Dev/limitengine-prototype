@@ -1,9 +1,9 @@
 package gl
 
 import (
+	"github.com/double-dev/limitengine/dependencies/gl/v3.3-core/gl"
 	"github.com/double-dev/limitengine/gfx/framework"
 	"github.com/double-dev/limitengine/gmath"
-	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
 // TODO: Clean up texture file.

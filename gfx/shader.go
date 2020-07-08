@@ -23,55 +23,61 @@ func deleteShaders() {
 	shaders = nil
 }
 
-type Shader struct {
+type Shader interface {
+	RenderProgram() *RenderProgram
+	UniformLoader() UniformLoader
+}
+
+type GenericShader struct {
+	renderProgram *RenderProgram
+	uniformLoader UniformLoader
+}
+
+func NewGenericShader(renderProgram *RenderProgram) *GenericShader {
+	return &GenericShader{
+		renderProgram,
+		NewUniformLoader(),
+	}
+}
+
+func (shader *GenericShader) RenderProgram() *RenderProgram { return shader.renderProgram }
+func (shader *GenericShader) UniformLoader() UniformLoader  { return shader.uniformLoader }
+
+type RenderProgram struct {
 	id             uint32
-	uniformLoader  UniformLoader
+	instanceDefs   []framework.InstanceDef
+	instanceSize   int
 	instanceBuffer framework.IInstanceBuffer
 }
 
-func NewShader(leslSrc string) *Shader {
-	shader := &Shader{
-		id: shaderIndex,
-	}
+func NewRenderProgram(leslPlugins ...*LESLPlugin) *RenderProgram {
+	program := &RenderProgram{id: shaderIndex}
 	shaderIndex++
-	actionQueue = append(actionQueue, func() {
-		vertSrc, fragSrc, textureVars := processLESL(leslSrc)
-		shaders[shader.id] = context.NewShader(vertSrc, fragSrc)
-		totalInstanceSize := 0
-		instanceDefs := shader.InstanceDefs()
-		for _, instanceDef := range instanceDefs {
-			totalInstanceSize += instanceDef.Size
-		}
-		shader.uniformLoader = NewUniformLoader()
-		for key, value := range textureVars {
-			shader.uniformLoader.AddInt(key, value)
-		}
-		shader.instanceBuffer = context.NewInstanceBuffer(totalInstanceSize)
-	})
-	return shader
-}
-
-func (shader *Shader) InstanceDefs() []struct {
-	Name  string
-	Size  int
-	Index int
-} {
-	return []struct {
-		Name  string
-		Size  int
-		Index int
-	}{
-		{"verttransformMat0", 4, 0},
-		{"verttransformMat1", 4, 4},
-		{"verttransformMat2", 4, 8},
-		{"verttransformMat3", 4, 12},
-		{"verttextureBounds", 4, 16},
+	vertSrc, fragSrc, instanceDefs, textureVars := processLESL(leslPlugins)
+	program.instanceDefs = append([]framework.InstanceDef{
+		framework.InstanceDef{Name: "verttransformMat0", Size: 4, Index: 0},
+		framework.InstanceDef{Name: "verttransformMat1", Size: 4, Index: 4},
+		framework.InstanceDef{Name: "verttransformMat2", Size: 4, Index: 8},
+		framework.InstanceDef{Name: "verttransformMat3", Size: 4, Index: 12},
+	}, instanceDefs...)
+	for _, instanceDef := range program.InstanceDefs() {
+		program.instanceSize += instanceDef.Size
 	}
+	actionQueue = append(actionQueue, func() {
+		iShader := context.NewShader(vertSrc, fragSrc)
+		iShader.Start()
+		for key, value := range textureVars {
+			iShader.LoadUniform1I(key, value)
+		}
+		iShader.Stop()
+		shaders[program.id] = iShader
+		program.instanceBuffer = context.NewInstanceBuffer(program.instanceSize)
+	})
+	return program
 }
 
-func (shader *Shader) UniformLoader() UniformLoader {
-	return shader.uniformLoader
-}
+func (program *RenderProgram) InstanceDefs() []framework.InstanceDef { return program.instanceDefs }
+func (program *RenderProgram) InstanceSize() int                     { return program.instanceSize }
 
 // TODO: Add support for more variables + array uniforms.
 type UniformLoader struct {
@@ -95,20 +101,20 @@ func NewUniformLoader() UniformLoader {
 
 func (uniformLoader UniformLoader) loadTo(iShader framework.IShader) {
 	uniformLoader.mutex.RLock()
-	for varName, value := range uniformLoader.uniformInts {
-		iShader.LoadUniform1I(varName, value)
+	for key, value := range uniformLoader.uniformInts {
+		iShader.LoadUniform1I(key, value)
 	}
-	for varName, value := range uniformLoader.uniformFloats {
-		iShader.LoadUniform1F(varName, value)
+	for key, value := range uniformLoader.uniformFloats {
+		iShader.LoadUniform1F(key, value)
 	}
-	for varName, value := range uniformLoader.uniformVector3s {
-		iShader.LoadUniform3F(varName, value[0], value[1], value[2])
+	for key, value := range uniformLoader.uniformVector3s {
+		iShader.LoadUniform3F(key, value[0], value[1], value[2])
 	}
-	for varName, value := range uniformLoader.uniformVector4s {
-		iShader.LoadUniform4F(varName, value[0], value[1], value[2], value[3])
+	for key, value := range uniformLoader.uniformVector4s {
+		iShader.LoadUniform4F(key, value[0], value[1], value[2], value[3])
 	}
-	for varName, value := range uniformLoader.uniformMatrix4s {
-		iShader.LoadUniformMatrix4fv(varName, value.ToArray())
+	for key, value := range uniformLoader.uniformMatrix4s {
+		iShader.LoadUniformMatrix4fv(key, value.ToArray())
 	}
 	uniformLoader.mutex.RUnlock()
 }
@@ -143,11 +149,11 @@ func (uniformLoader UniformLoader) AddMatrix4(varName string, val gmath.Matrix4)
 	uniformLoader.mutex.Unlock()
 }
 
-// DeleteShader queues a gfx action that deletes the input shader.
-func DeleteShader(shader *Shader) {
+// DeleteRenderProgram queues a gfx action that deletes the input shader.
+func DeleteRenderProgram(program *RenderProgram) {
 	actionQueue = append(actionQueue, func() {
-		iShader := shaders[shader.id]
+		iShader := shaders[program.id]
 		iShader.Delete()
-		delete(shaders, shader.id)
+		delete(shaders, program.id)
 	})
 }

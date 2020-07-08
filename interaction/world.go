@@ -2,6 +2,7 @@ package interaction
 
 import (
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -18,12 +19,14 @@ var (
 type ColliderComponent struct {
 	IsTrigger bool
 
-	AABB gmath.AABB
+	AABB    gmath.AABB
+	InvMass float32
 }
 
 type World struct {
 	spacialStructure SpacialStructure
 	entities         map[limitengine.ECSEntity]*InteractEntity
+	entitiesMutex    sync.RWMutex
 	entitiesToRemove []limitengine.ECSEntity
 	interactions     []Interaction
 }
@@ -32,6 +35,7 @@ func NewWorld(spacialStructure SpacialStructure, targetUpdatesPerSecond float32)
 	world := World{
 		spacialStructure: spacialStructure,
 		entities:         make(map[limitengine.ECSEntity]*InteractEntity),
+		entitiesMutex:    sync.RWMutex{},
 	}
 	go func() {
 		currentTime := time.Now().UnixNano()
@@ -52,8 +56,10 @@ func NewWorld(spacialStructure SpacialStructure, targetUpdatesPerSecond float32)
 
 func (world *World) OnAddEntity(entity limitengine.ECSEntity) {
 	interactEntity := world.newInteractEntity(entity)
+	world.entitiesMutex.Lock()
 	world.entities[entity] = interactEntity
 	world.spacialStructure.Add(interactEntity)
+	world.entitiesMutex.Unlock()
 }
 
 func (world *World) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
@@ -156,6 +162,7 @@ func (world *World) ProcessInteractions(delta float32) {
 	}
 	world.entitiesToRemove = nil
 
+	world.entitiesMutex.RLock()
 	for _, interactEntity := range world.entities {
 		if interactEntity.Motion != nil && interactEntity.Motion.IsAwake() {
 			world.spacialStructure.Update(interactEntity)
@@ -207,10 +214,29 @@ func (world *World) ProcessInteractions(delta float32) {
 				// END TEMPORARY CODE
 
 				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
-					// TODO: Replace with proper physics equations.
-					interactEntityA.Transform.Position.SubV(normal.Clone().MulSc(penetration))
-					newVelocity := interactEntityA.Motion.Velocity.Clone().SubV(normal.Clone().MulSc(2 * normal.Dot(interactEntityA.Motion.Velocity)))
-					interactEntityA.Motion.Velocity.SetV(newVelocity)
+					// TODO: Finish/optimize collision resolution calculations.
+					var otherVel gmath.Vector3
+					if interactEntityB.Motion != nil {
+						otherVel = interactEntityB.Motion.Velocity.Clone()
+					} else {
+						otherVel = gmath.NewZeroVector3()
+					}
+					rv := otherVel.SubV(interactEntityA.Motion.Velocity)
+					normVelocity := rv.Dot(normal)
+					if normVelocity > 0 {
+						continue
+					}
+					e := float32(0.0) // Restitution NOTE: Modifying this variable will bring back the bouncy bugs.
+					j := -(1.0 + e) * normVelocity
+					j /= interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass
+					impulse := normal.Clone().MulSc(j)
+					interactEntityA.Motion.Velocity.SubV(impulse.Clone().MulSc(interactEntityA.Collider.InvMass))
+					correction := normal.Clone().MulSc(penetration / (interactEntityA.Collider.InvMass + interactEntityB.Collider.InvMass) * 0.8)
+					interactEntityA.Transform.Position.SubV(correction.Clone().MulSc(interactEntityA.Collider.InvMass))
+					if interactEntityB.Motion != nil {
+						interactEntityB.Motion.Velocity.AddV(impulse.MulSc(interactEntityB.Collider.InvMass))
+						interactEntityB.Transform.Position.AddV(correction.MulSc(interactEntityB.Collider.InvMass))
+					}
 				}
 
 				interactEntityA.collidingEntities[interactEntityB] = normal
@@ -252,6 +278,7 @@ func (world *World) ProcessInteractions(delta float32) {
 			interactEntityA.collidingEntities = make(map[*InteractEntity]gmath.Vector3)
 		}
 	}
+	world.entitiesMutex.RUnlock()
 }
 
 func (world *World) AddInteraction(interaction Interaction) {

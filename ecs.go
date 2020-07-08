@@ -18,7 +18,7 @@ type ECS struct {
 
 func NewECS() *ECS {
 	return &ECS{
-		ecs: make(map[ECSEntity]map[reflect.Type]ECSComponent),
+		ecs: make(map[ECSEntity]map[reflect.Type]ECSComponent), // TODO: Figure out an optimal 'max' size/number to entities needed in the program.
 	}
 }
 
@@ -44,13 +44,14 @@ func (ecs *ECS) NewEntity(components ...ECSComponent) ECSEntity {
 		id:  entityIndex,
 		ecs: ecs,
 	}
-	ecs.mutex.Lock()
-	ecs.ecs[entity] = make(map[reflect.Type]ECSComponent)
 	entityIndex++
+	ecsEntity := make(map[reflect.Type]ECSComponent, len(components))
 	for _, component := range components {
-		ecs.ecs[entity][reflect.TypeOf(component)] = component
+		ecsEntity[reflect.TypeOf(component)] = component
 	}
-	ecs.mutex.Unlock()
+	// ecs.mutex.Lock()
+	ecs.ecs[entity] = ecsEntity
+	// ecs.mutex.Unlock()
 	for _, listener := range ecs.listeners {
 		listener.GetTargetComponents()
 		if entity.HasComponent(listener.GetTargetComponents()...) {

@@ -1,0 +1,1 @@
+The code in this package is a clone of github.com/go-gl/gl containing only files related to OpenGL v3.3 both core and compatability editions.

@@ -9,7 +9,7 @@ var (
 	meshes     = make(map[uint32]framework.IMesh)
 	spriteMesh = &Mesh{
 		id:          0,
-		DepthTest:   false,
+		DepthTest:   false, // Enabling depth test with write depth false causes a depth buffer issue with the POST shader in the tests.
 		BackCulling: false,
 		WriteDepth:  false,
 	}
@@ -31,7 +31,6 @@ func init() {
 			[]float32{0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0},
 		)
 	})
-
 	// Sets [1] mesh to cube.
 	actionQueue = append(actionQueue, func() {
 		meshes[1] = context.NewMesh(
@@ -65,12 +64,7 @@ type Mesh struct {
 
 // NewMesh queues a gfx action that news a mesh using the input mesh data.
 func NewMesh(indices []uint32, vertices, texCoords, normals []float32) *Mesh {
-	mesh := &Mesh{
-		id:          meshIndex,
-		DepthTest:   true,
-		BackCulling: true,
-		WriteDepth:  true,
-	}
+	mesh := &Mesh{id: meshIndex, DepthTest: true, BackCulling: true, WriteDepth: true}
 	meshIndex++
 	actionQueue = append(actionQueue, func() { meshes[mesh.id] = context.NewMesh(indices, vertices, texCoords, normals) })
 	return mesh

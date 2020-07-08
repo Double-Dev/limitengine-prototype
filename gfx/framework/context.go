@@ -5,6 +5,10 @@ type Context interface {
 
 	ClearScreen(r, g, b, a float32)
 
+	DepthTest(depthTest bool)
+	BackCulling(backCulling bool)
+	WriteDepth(writeDepth bool)
+
 	NewFramebuffer(colorAttachment, depthAttachment IAttachment, width, height float32, samples int32) IFramebuffer
 	UnbindFramebuffers()
 

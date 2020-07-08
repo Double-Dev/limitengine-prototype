@@ -1,19 +1,29 @@
-#vert
+vert{
+    vars{
 
-void vert() {
-}
-#end
+    },
+    funcs{
 
-#frag
+    },
+    main{
 
-void frag() {
-    lesl.outColor = texture(lesl.texture, vec2(lesl.textureCoord.x, 1.0 - lesl.textureCoord.y));
+    },
+},
+frag{
+    vars{
 
-    // Invert colors:
-    lesl.outColor = vec4(1.0 - lesl.outColor.r, 1.0 - lesl.outColor.g, 1.0 - lesl.outColor.b, lesl.outColor.a);
+    },
+    funcs{
 
-    // Greyscale effect:
-    // float average = (lesl.outColor.r + lesl.outColor.g + lesl.outColor.b) / 3.0;
-    // lesl.outColor = vec4(average, average, average, 1.0);
-}
-#end
+    },
+    main{
+        lesl.outColor = texture(lesl.texture, vec2(lesl.textureCoord.x, 1.0 - lesl.textureCoord.y));
+
+        // Invert colors:
+        lesl.outColor = vec4(1.0 - lesl.outColor.r, 1.0 - lesl.outColor.g, 1.0 - lesl.outColor.b, lesl.outColor.a);
+
+        // Greyscale effect:
+        // float average = (lesl.outColor.r + lesl.outColor.g + lesl.outColor.b) / 3.0;
+        // lesl.outColor = vec4(average, average, average, 1.0);
+    },
+},

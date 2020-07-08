@@ -3,6 +3,7 @@ package gfx
 import (
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/double-dev/limitengine"
@@ -25,10 +26,18 @@ var (
 	fps        = float32(0.0)
 	projMatrix gmath.Matrix4
 
-	renderBatch = make(map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance)
-	actionQueue = []func(){}
-	gfxPipeline = [](chan func()){}
+	renderOrder   []int32
+	renderCameras []*Camera
+	renderBatch   = make(map[int32]map[*Camera]map[Shader]map[Material]map[*Mesh]*instanceData)
+	renderMutex   = sync.RWMutex{}
+	actionQueue   = []func(){}
+	gfxPipeline   = [](chan func()){}
 )
+
+type instanceData struct {
+	instances []*Instance
+	data      [][]float32
+}
 
 func init() {
 	if limitengine.Running() {
@@ -38,7 +47,7 @@ func init() {
 			view := limitengine.AppView()
 			view.SetContext()
 			var err error
-			context, err = gl.NewGLContext()
+			context, err = gl.NewContext()
 			if err != nil {
 				log.Err("Context could not be initialized.", err)
 			}
@@ -70,6 +79,8 @@ func init() {
 				}
 			}
 			// GFX Cleanup
+			renderOrder = nil
+			renderCameras = nil
 			renderBatch = nil
 			actionQueue = nil
 			gfxPipeline = nil
@@ -96,7 +107,7 @@ func Sweep() {
 	queuedFrames++
 	actionQueue = append(actionQueue, func() {
 		queuedFrames--
-		for camera, batch0 := range renderBatch {
+		for _, camera := range renderCameras {
 			iFrameBuffer := framebuffers[camera.id]
 			if iFrameBuffer != nil {
 				iFrameBuffer.Bind()
@@ -104,48 +115,68 @@ func Sweep() {
 				context.UnbindFramebuffers()
 			}
 			context.ClearScreen(camera.clearColor[0], camera.clearColor[1], camera.clearColor[2], camera.clearColor[3])
-			for shader, batch1 := range batch0 {
-				iShader := shaders[shader.id]
-				iShader.Start()
-				camera.prefs.loadTo(iShader)
-				shader.uniformLoader.loadTo(iShader)
-
-				for material, batch2 := range batch1 {
-					material.Prefs().loadTo(iShader)
-					iTexture := textures[material.Texture().id]
-					if iTexture != nil {
-						iTexture.Bind()
-					} else {
-						context.UnbindTextures()
-					}
-					for mesh, instances := range batch2 {
-						mesh.prefs.loadTo(iShader)
-						iMesh := meshes[mesh.id]
-						iMesh.Enable()
-
-						data := []float32{} // TODO: Don't new a new slice every frame.
-
-						for _, instance := range instances {
-							instanceDefs := shader.InstanceDefs()
-							for _, instanceDef := range instanceDefs {
-								instance.dataMutex.RLock()
-								data = append(data, instance.data[instanceDef.Name][0:instanceDef.Size]...)
-								instance.dataMutex.RUnlock()
-							}
-						}
-						// TODO: Look into optimizing GPU overhead from instanced rendering.
-						iMesh.Render(shader.instanceBuffer, shader.InstanceDefs(), data, int32(len(instances)))
-
-						iMesh.Disable()
-					}
+		}
+		for _, layer := range renderOrder {
+			for camera, batch0 := range renderBatch[layer] {
+				iFrameBuffer := framebuffers[camera.id]
+				if iFrameBuffer != nil {
+					iFrameBuffer.Bind()
+				} else {
+					context.UnbindFramebuffers()
 				}
-				iShader.Stop()
-			}
-			for _, blitCamera := range camera.blitCameras {
-				iFrameBuffer.BlitToFramebuffer(framebuffers[blitCamera.id])
+				for shader, batch1 := range batch0 {
+					renderProgram := shader.RenderProgram()
+					iShader := shaders[renderProgram.id]
+					iShader.Start()
+					camera.prefs.loadTo(iShader)
+					shader.UniformLoader().loadTo(iShader)
+					for material, batch2 := range batch1 {
+						material.Prefs().loadTo(iShader)
+						iTexture := textures[material.Texture().id]
+						if iTexture != nil {
+							iTexture.Bind()
+						} else {
+							context.UnbindTextures()
+						}
+						for mesh, batch3 := range batch2 {
+							mesh.prefs.loadTo(iShader)
+							context.DepthTest(mesh.DepthTest)
+							context.BackCulling(mesh.BackCulling)
+							context.WriteDepth(mesh.WriteDepth)
+							iMesh := meshes[mesh.id]
+							iMesh.Enable()
+
+							for i := 0; i < (len(batch3.instances)/context.GetMaxInstances())+1; i++ {
+								for j, instance := range batch3.instances[i*context.GetMaxInstances() : gmath.MinI((i+1)*context.GetMaxInstances(), len(batch3.instances))] {
+									if instance.dataModified {
+										instance.dataMutex.RLock()
+										for k, instanceDef := range renderProgram.InstanceDefs() {
+											for l, value := range instance.data[instanceDef.Name][0:instanceDef.Size] {
+												batch3.data[i][j*renderProgram.InstanceSize()+k*instanceDef.Size+l] = value
+											}
+										}
+										instance.dataMutex.RUnlock()
+										instance.dataModified = false
+									}
+								}
+								// TODO: Look into optimizing GPU overhead from instanced rendering.
+								iMesh.Render(
+									renderProgram.instanceBuffer,
+									renderProgram.InstanceDefs(),
+									batch3.data[i],
+									int32(len(batch3.data[i])/renderProgram.InstanceSize()),
+								)
+							}
+							iMesh.Disable()
+						}
+					}
+					iShader.Stop()
+				}
+				for _, blitCamera := range camera.blitCameras {
+					iFrameBuffer.BlitToFramebuffer(framebuffers[blitCamera.id])
+				}
 			}
 		}
-
 	})
 	pipeline := make(chan func())
 	gfxPipeline = append(gfxPipeline, pipeline)
@@ -160,8 +191,9 @@ func Sweep() {
 }
 
 type Renderable struct {
+	Layer    int32
 	Camera   *Camera
-	Shader   *Shader
+	Shader   Shader
 	Material Material
 	Mesh     *Mesh
 	Instance *Instance
@@ -169,73 +201,108 @@ type Renderable struct {
 
 func AddRenderable(renderable *Renderable) {
 	actionQueue = append(actionQueue, func() {
-		batch0 := renderBatch[renderable.Camera]
+		batchLayer := renderBatch[renderable.Layer]
+		if batchLayer == nil {
+			batchLayer = make(map[*Camera]map[Shader]map[Material]map[*Mesh]*instanceData)
+			renderMutex.Lock()
+			renderBatch[renderable.Layer] = batchLayer
+			renderMutex.Unlock()
+			i := 0
+			for i < len(renderOrder) && renderOrder[i] < renderable.Layer {
+				i++
+			}
+			renderOrder = append(renderOrder, -1)
+			copy(renderOrder[i+1:], renderOrder[i:])
+			renderOrder[i] = renderable.Layer
+		}
+		batch0 := batchLayer[renderable.Camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
-			renderBatch[renderable.Camera] = batch0
+			batch0 = make(map[Shader]map[Material]map[*Mesh]*instanceData)
+			renderMutex.Lock()
+			batchLayer[renderable.Camera] = batch0
+			renderMutex.Unlock()
+			renderCameras = append(renderCameras, renderable.Camera)
 		}
 		batch1 := batch0[renderable.Shader]
 		if batch1 == nil {
-			batch1 = make(map[Material]map[*Mesh][]*Instance)
+			batch1 = make(map[Material]map[*Mesh]*instanceData)
+			renderMutex.Lock()
 			batch0[renderable.Shader] = batch1
+			renderMutex.Unlock()
 		}
 		batch2 := batch1[renderable.Material]
 		if batch2 == nil {
-			batch2 = make(map[*Mesh][]*Instance)
+			batch2 = make(map[*Mesh]*instanceData)
+			renderMutex.Lock()
 			batch1[renderable.Material] = batch2
+			renderMutex.Unlock()
 		}
-
-		// TODO: Fix transparency sorting for translucent objects of different materials,
-		// shaders, meshes, etc., unless that doesn't need to be supported.
-		if renderable.Material.Transparency() {
-			instances := batch2[renderable.Mesh]
-			i := 0
-			for i < len(instances) && instances[i].GetData("verttransformMat3")[2] > renderable.Instance.GetData("verttransformMat3")[2] {
-				i++
-			}
-			instances = append(instances, nil)
-			copy(instances[i+1:], instances[i:])
-			instances[i] = renderable.Instance
-			batch2[renderable.Mesh] = instances
+		batch3 := batch2[renderable.Mesh]
+		if batch3 == nil {
+			batch3 = &instanceData{}
+			renderMutex.Lock()
+			batch2[renderable.Mesh] = batch3
+			renderMutex.Unlock()
+		}
+		batch3.instances = append(batch3.instances, renderable.Instance)
+		data := []float32{}
+		instanceDefs := renderable.Shader.RenderProgram().InstanceDefs()
+		for _, instanceDef := range instanceDefs {
+			renderable.Instance.dataMutex.RLock()
+			data = append(data, renderable.Instance.data[instanceDef.Name][0:instanceDef.Size]...)
+			renderable.Instance.dataMutex.RUnlock()
+		}
+		index := len(batch3.instances) / context.GetMaxInstances()
+		if len(batch3.data) <= index {
+			batch3.data = append(batch3.data, data)
 		} else {
-			batch2[renderable.Mesh] = append(batch2[renderable.Mesh], renderable.Instance)
+			batch3.data[index] = append(batch3.data[index], data...)
 		}
 	})
 }
 
 func RemoveRenderable(renderable *Renderable) {
 	actionQueue = append(actionQueue, func() {
-		batch0 := renderBatch[renderable.Camera]
+		batchLayer := renderBatch[renderable.Layer]
+		if batchLayer == nil {
+			return
+		}
+		batch0 := batchLayer[renderable.Camera]
 		if batch0 == nil {
-			batch0 = make(map[*Shader]map[Material]map[*Mesh][]*Instance)
-			renderBatch[renderable.Camera] = batch0
+			return
 		}
 		batch1 := batch0[renderable.Shader]
 		if batch1 == nil {
-			batch1 = make(map[Material]map[*Mesh][]*Instance)
-			batch0[renderable.Shader] = batch1
+			return
 		}
 		batch2 := batch1[renderable.Material]
 		if batch2 == nil {
-			batch2 = make(map[*Mesh][]*Instance)
-			batch1[renderable.Material] = batch2
+			return
+		}
+		batch3 := batch2[renderable.Mesh]
+		if batch3 == nil {
+			return
 		}
 
-		instances := batch2[renderable.Mesh]
-		for i, batchInstance := range instances {
-			if batchInstance == renderable.Instance {
-				copy(instances[i:], instances[i+1:])
-				instances[len(instances)-1] = nil
-				instances = instances[:len(instances)-1]
+		for i, instance := range batch3.instances {
+			if instance == renderable.Instance {
+				copy(batch3.instances[i:], batch3.instances[i+1:])
+				batch3.instances[len(batch3.instances)-1] = nil
+				batch3.instances = batch3.instances[:len(batch3.instances)-1]
+				instanceSize := renderable.Shader.RenderProgram().InstanceSize()
+				copy(batch3.data[i*instanceSize:], batch3.data[(i+1)*instanceSize:])
+				batch3.data[len(batch3.data)-1*instanceSize] = nil
+				batch3.data = batch3.data[:len(batch3.data)-1*instanceSize]
 				break
 			}
 		}
-		batch2[renderable.Mesh] = instances
 	})
 }
 
 func ClearRenderables() {
 	actionQueue = append(actionQueue, func() {
-		renderBatch = make(map[*Camera]map[*Shader]map[Material]map[*Mesh][]*Instance)
+		renderOrder = nil
+		renderCameras = nil
+		renderBatch = make(map[int32]map[*Camera]map[Shader]map[Material]map[*Mesh]*instanceData)
 	})
 }

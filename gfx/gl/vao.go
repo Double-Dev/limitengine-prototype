@@ -1,8 +1,8 @@
 package gl
 
 import (
+	"github.com/double-dev/limitengine/dependencies/gl/v3.3-core/gl"
 	"github.com/double-dev/limitengine/gfx/framework"
-	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
 type vao struct {
@@ -32,11 +32,7 @@ func (vao *vao) Enable() {
 	}
 }
 
-func (vao *vao) Render(instanceBuffer framework.IInstanceBuffer, instanceDefs []struct {
-	Name  string
-	Size  int
-	Index int
-}, instanceData []float32, numInstances int32) {
+func (vao *vao) Render(instanceBuffer framework.IInstanceBuffer, instanceDefs []framework.InstanceDef, instanceData []float32, numInstances int32) {
 	instanceBuffer.Bind()
 	instanceBuffer.StoreInstancedData(instanceData)
 

@@ -39,9 +39,7 @@ func NewEmptyTexture() *Texture {
 }
 
 func NewTexture(image *gio.Image) *Texture {
-	texture := &Texture{
-		id: textureIndex,
-	}
+	texture := &Texture{id: textureIndex}
 	textureIndex++
 	actionQueue = append(actionQueue, func() {
 		textures[texture.id] = context.NewTexture(image.Data(), image.Width(), image.Height())
