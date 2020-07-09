@@ -15,7 +15,10 @@ var (
 )
 
 func Setup() {
+	al.OpenDevice()
+
 	buffer = al.GenBuffers(1)[0]
+	fmt.Println("Buffer 1:", buffer)
 
 	r, err := os.Open(build.Default.GOPATH + "\\src\\github.com\\double-dev\\limitengine\\tests2d\\assets\\jump.ogg")
 	if err != nil {
@@ -35,18 +38,23 @@ func Setup() {
 
 	source = al.GenSources(1)[0]
 	source.SetGain(1.0)
+	// source.SetPitch(1.0)
 	source.SetPosition([3]float32{0.0, 0.0, 0.0})
 	source.SetVelocity([3]float32{0.0, 0.0, 0.0})
 
-	source.Seti(, int(buffer))
+	// source.QueueBuffers(buffer)
+	source.Seti(al.ParamBuffer, int32(buffer))
 	al.PlaySources(source)
 }
 
 func PlaySound() {
+	// source.QueueBuffers(buffer)
+	source.Seti(al.ParamBuffer, int32(buffer))
 	al.PlaySources(source)
 }
 
 func Delete() {
 	al.DeleteSources(source)
 	al.DeleteBuffers(buffer)
+	al.CloseDevice()
 }

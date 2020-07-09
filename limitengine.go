@@ -3,6 +3,8 @@ package limitengine
 import (
 	"runtime"
 	"time"
+
+	"github.com/double-dev/limitengine/sfx"
 )
 
 // Version is the current engine version string.
@@ -111,6 +113,8 @@ func Launch(initState State) {
 	initState.OnActive()
 	state = initState
 	go func() {
+		sfx.Setup() // TODO: Remove test code.
+
 		currentTime := time.Now().UnixNano()
 		for Running() {
 			if time.Now().UnixNano()-currentTime > int64((1.0/TargetUpdatesPerSecond)*1000000000.0) {
