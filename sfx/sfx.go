@@ -1,28 +1,28 @@
-package sfx
+package main
 
-import (
-	"github.com/double-dev/limitengine"
-	"github.com/double-dev/limitengine/sfx/framework"
-)
+// import (
+// 	"github.com/double-dev/limitengine"
+// 	"github.com/double-dev/limitengine/sfx/framework"
+// )
 
-var (
-	log     = limitengine.NewLogger("gfx")
-	context framework.Context
+// var (
+// 	log     = limitengine.NewLogger("gfx")
+// 	context framework.Context
 
-	actionQueue = []func(){}
-	sfxPipeline = [](chan func()){}
-)
+// 	actionQueue = []func(){}
+// 	sfxPipeline = [](chan func()){}
+// )
 
-func init() {
-	if limitengine.Running() {
-		go func() {
-			// var err error
-			// context, err = gl.NewGLContext()
-			// if err != nil {
-			// 	log.Err("Context could not be initialized.", err)
-			// }
+// func init() {
+// 	if limitengine.Running() {
+// 		go func() {
+// 			// var err error
+// 			// context, err = gl.NewGLContext()
+// 			// if err != nil {
+// 			// 	log.Err("Context could not be initialized.", err)
+// 			// }
 
-		}()
-		log.Log("SFX online...")
-	}
-}
+// 		}()
+// 		log.Log("SFX online...")
+// 	}
+// }
