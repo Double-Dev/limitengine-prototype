@@ -42,30 +42,30 @@ func NewMainState() *MainState {
 	// Entities
 	logic.NewPlayerEntity(mainState.ecs)
 
-	mainState.ecs.NewEntity(
-		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, 0.0, 0.0),
-			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
-		},
-		gfx.NewTextComponent(
-			2, assets.SceneCamera, assets.TextShader,
-			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
-			"Hello World!", 1.0,
-		),
-	)
-	mainState.ecs.NewEntity(
-		&gmath.TransformComponent{
-			Position: gmath.NewVector3(0.0, -0.25, 0.0),
-			Rotation: gmath.NewIdentityQuaternion(),
-			Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
-		},
-		gfx.NewTextComponent(
-			2, assets.SceneCamera, assets.TextShader,
-			gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
-			"<Start Game>", 1.0,
-		),
-	)
+	// mainState.ecs.NewEntity(
+	// 	&gmath.TransformComponent{
+	// 		Position: gmath.NewVector3(0.0, 0.0, 0.0),
+	// 		Rotation: gmath.NewIdentityQuaternion(),
+	// 		Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
+	// 	},
+	// 	gfx.NewTextComponent(
+	// 		2, assets.SceneCamera, assets.TextShader,
+	// 		gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
+	// 		"Hello World!", 1.0,
+	// 	),
+	// )
+	// mainState.ecs.NewEntity(
+	// 	&gmath.TransformComponent{
+	// 		Position: gmath.NewVector3(0.0, -0.25, 0.0),
+	// 		Rotation: gmath.NewIdentityQuaternion(),
+	// 		Scale:    gmath.NewVector3(1.0, 1.0, 1.0),
+	// 	},
+	// 	gfx.NewTextComponent(
+	// 		2, assets.SceneCamera, assets.TextShader,
+	// 		gfx.NewFont(assets.SegoeFont, gmath.NewVector3(0.75, 0.25, 0.75), 0.5, 0.1, gmath.NewZeroVector3(), 0.4, 0.5),
+	// 		"<Start Game>", 1.0,
+	// 	),
+	// )
 
 	// Left Wall
 	logic.NewLevelWallEntity(mainState.ecs, gmath.NewVector3(-1.5, 0.0, 0.0), gmath.NewVector3(0.1, 1.0, 1.0))
@@ -81,6 +81,7 @@ func NewMainState() *MainState {
 	// Systems
 	mainState.interactionWorld = interaction.NewWorld(interaction.NewGrid2D(0.5), 60.0)
 	mainState.interactionWorld.AddInteraction(&logic.ControlInteraction{})
+	mainState.interactionWorld.AddInteraction(&logic.ParticleInteraction{})
 
 	mainState.renderListener = gfx.NewRenderListener()
 	mainState.spriteListener = utils2d.NewSpriteListener()

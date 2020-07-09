@@ -49,9 +49,7 @@ func (ecs *ECS) NewEntity(components ...ECSComponent) ECSEntity {
 	for _, component := range components {
 		ecsEntity[reflect.TypeOf(component)] = component
 	}
-	// ecs.mutex.Lock()
 	ecs.ecs[entity] = ecsEntity
-	// ecs.mutex.Unlock()
 	for _, listener := range ecs.listeners {
 		listener.GetTargetComponents()
 		if entity.HasComponent(listener.GetTargetComponents()...) {
@@ -80,12 +78,12 @@ func (entity ECSEntity) AddComponent(component ECSComponent) {
 	}
 }
 
-func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool {
+func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool { // Consider taking in reflect.Type instead of nil components (would potentially be faster).
 	componentType := reflect.TypeOf(nilComponent)
-	if entity.HasComponent(componentType) {
-		entity.ecs.mutex.RLock()
-		component := entity.ecs.ecs[entity][componentType]
-		entity.ecs.mutex.RUnlock()
+	entity.ecs.mutex.RLock()
+	component := entity.ecs.ecs[entity][componentType]
+	entity.ecs.mutex.RUnlock()
+	if component != nil {
 		for _, listener := range entity.ecs.listeners {
 			if listener.ShouldListenForAllComponents() {
 				listener.OnRemoveComponent(entity, component)
@@ -108,49 +106,43 @@ func (entity ECSEntity) RemoveComponent(nilComponent interface{}) bool {
 
 func (ecs *ECS) RemoveEntity(entity ECSEntity) bool {
 	ecs.mutex.RLock()
-	if &entity != nil && ecs.ecs[entity] != nil {
+	components := ecs.ecs[entity]
+	ecs.mutex.RUnlock()
+	if components != nil {
 		for _, listener := range ecs.listeners {
 			for _, listenEntity := range listener.GetEntities() {
 				if entity == listenEntity {
 					listener.OnRemoveEntity(entity)
+					break
 				}
-				break
 			}
 		}
-		ecs.mutex.Lock()
+		components = nil
+		// ecs.mutex.Lock()
 		delete(ecs.ecs, entity)
-		ecs.mutex.Unlock()
-		ecs.mutex.RUnlock()
+		// ecs.mutex.Unlock()
 		return true
 	}
-	ecs.mutex.RUnlock()
 	return false
 }
 
 func (entity ECSEntity) GetComponent(nilComponent interface{}) ECSComponent {
-	entity.ecs.mutex.RLock()
-	if entity.ecs.ecs[entity] == nil {
-		entity.ecs.mutex.RUnlock()
-		return nil
-	}
-	component := entity.ecs.ecs[entity][reflect.TypeOf(nilComponent)]
-	entity.ecs.mutex.RUnlock()
-	return component
+	return entity.GetComponentOfType(reflect.TypeOf(nilComponent))
 }
 
 func (entity ECSEntity) GetComponentOfType(componentType reflect.Type) ECSComponent {
 	entity.ecs.mutex.RLock()
+	defer entity.ecs.mutex.RUnlock()
 	if entity.ecs.ecs[entity] == nil {
-		entity.ecs.mutex.RUnlock()
 		return nil
 	}
 	component := entity.ecs.ecs[entity][componentType]
-	entity.ecs.mutex.RUnlock()
 	return component
 }
 
 func (entity ECSEntity) HasComponent(targets ...reflect.Type) bool {
 	entity.ecs.mutex.RLock()
+	defer entity.ecs.mutex.RUnlock()
 	if entity.ecs.ecs[entity] == nil {
 		return false
 	}
@@ -159,7 +151,6 @@ func (entity ECSEntity) HasComponent(targets ...reflect.Type) bool {
 			return false
 		}
 	}
-	entity.ecs.mutex.RUnlock()
 	return true
 }
 

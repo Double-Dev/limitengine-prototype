@@ -56,10 +56,12 @@ type ParticleComponent struct {
 type ParticleInteraction struct{}
 
 func (interation *ParticleInteraction) StartInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3, penetration float32) {
-	interactor.Motion.Acceleration.Set(0.0, 0.0, 0.0)
-	interactor.Motion.Velocity.Set(0.0, 0.0, 0.0)
-	particle := interactor.Entity.GetComponent((*ParticleComponent)(nil)).(*ParticleComponent)
-	interactor.Transform.Position.SetV(particle.resetPos)
+	if interactee.Entity.GetComponent((*ParticleComponent)(nil)) == nil && interactee.Entity.GetComponent((*ParticleTrailComponent)(nil)) == nil {
+		interactor.Motion.Acceleration.Set(0.0, 0.0, 0.0)
+		interactor.Motion.Velocity.Set(0.0, 0.0, 0.0)
+		particle := interactor.Entity.GetComponent((*ParticleComponent)(nil)).(*ParticleComponent)
+		interactor.Transform.Position.SetV(particle.resetPos)
+	}
 }
 
 func (interation *ParticleInteraction) EndInteract(delta float32, interactor, interactee interaction.InteractEntity, normal gmath.Vector3) {
