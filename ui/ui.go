@@ -61,6 +61,10 @@ func (this *InputControl) AddTrigger(inputEvent InputEvent, weight float32) {
 	}{weight, this}
 }
 
+func (this *InputControl) RemoveTrigger(inputEvent InputEvent) {
+	delete(inputControls, inputEvent)
+}
+
 func (inputControl *InputControl) Amount() float32 {
 	return gmath.Clamp(inputControl.amt, -1.0, 1.0)
 }

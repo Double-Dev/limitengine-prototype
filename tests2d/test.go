@@ -27,5 +27,5 @@ func main() {
 	assets.LoadAssets()
 
 	// Launch!
-	limitengine.Launch(states.NewMainState())
+	limitengine.Launch(states.NewMenuState())
 }
