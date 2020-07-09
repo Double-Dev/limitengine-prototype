@@ -45,7 +45,9 @@ const (
 	paramOrientation      = 0x100F
 	paramMinGain          = 0x100D
 	paramMaxGain          = 0x100E
+	paramPitch            = 0x1003
 	paramSourceState      = 0x1010
+	ParamBuffer           = 0x1009
 	paramBuffersQueued    = 0x1015
 	paramBuffersProcessed = 0x1016
 	paramSecOffset        = 0x1024

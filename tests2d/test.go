@@ -17,7 +17,7 @@ func main() {
 	// Profile
 	defer profile.Start().Stop()
 
-	// Setup Window
+	// // Setup Window
 	limitengine.AppView().SetTitle("2D Tests!")
 	limitengine.AppView().SetPosition(100, 100)
 	limitengine.AppView().SetSize(900, 600)
