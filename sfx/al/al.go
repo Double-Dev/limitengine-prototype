@@ -233,6 +233,10 @@ func (s Source) SetMaxGain(v float32) {
 	s.Setf(paramMaxGain, v)
 }
 
+func (s Source) SetPitch(v float32) {
+	s.Setf(paramPitch, v)
+}
+
 // Position returns the position of the source.
 func (s Source) Position() Vector {
 	v := Vector{}
