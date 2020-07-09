@@ -52,7 +52,6 @@ func (instance *Instance) ModifyData(key string, values ...float32) {
 
 func (instance *Instance) GetData(key string) []float32 {
 	instance.dataMutex.RLock()
-	result := instance.data[key]
-	instance.dataMutex.RUnlock()
-	return result
+	defer instance.dataMutex.RUnlock()
+	return instance.data[key]
 }

@@ -247,11 +247,11 @@ func AddRenderable(renderable *Renderable) {
 		batch3.instances = append(batch3.instances, renderable.Instance)
 		data := []float32{}
 		instanceDefs := renderable.Shader.RenderProgram().InstanceDefs()
+		renderable.Instance.dataMutex.RLock()
 		for _, instanceDef := range instanceDefs {
-			renderable.Instance.dataMutex.RLock()
 			data = append(data, renderable.Instance.data[instanceDef.Name][0:instanceDef.Size]...)
-			renderable.Instance.dataMutex.RUnlock()
 		}
+		renderable.Instance.dataMutex.RUnlock()
 		index := len(batch3.instances) / context.GetMaxInstances()
 		if len(batch3.data) <= index {
 			batch3.data = append(batch3.data, data)
@@ -284,15 +284,19 @@ func RemoveRenderable(renderable *Renderable) {
 			return
 		}
 
+		// TODO: If anything starts behaving weirdly in the GFX, investigate here first.
 		for i, instance := range batch3.instances {
 			if instance == renderable.Instance {
 				copy(batch3.instances[i:], batch3.instances[i+1:])
 				batch3.instances[len(batch3.instances)-1] = nil
 				batch3.instances = batch3.instances[:len(batch3.instances)-1]
+				index := i / context.GetMaxInstances()
 				instanceSize := renderable.Shader.RenderProgram().InstanceSize()
-				copy(batch3.data[i*instanceSize:], batch3.data[(i+1)*instanceSize:])
-				batch3.data[len(batch3.data)-1*instanceSize] = nil
-				batch3.data = batch3.data[:len(batch3.data)-1*instanceSize]
+				copy(batch3.data[index][i*instanceSize:], batch3.data[index][(i+1)*instanceSize:])
+				for j := len(batch3.data[index]) - instanceSize; j < len(batch3.data[index]); j++ {
+					batch3.data[index][j] = 0.0
+				}
+				batch3.data[index] = batch3.data[index][:len(batch3.data[index])-instanceSize]
 				break
 			}
 		}

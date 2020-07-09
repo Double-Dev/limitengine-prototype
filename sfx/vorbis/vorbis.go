@@ -5577,3 +5577,9 @@ func (v *Vorbis) Close() {
 	}
 	v.v = nil
 }
+
+// Buf returns the vorbis file's byte array because for some reason
+// this library decided to decode it to a []float32.
+func (v *Vorbis) Buf() []byte {
+	return v.buf
+}

@@ -82,20 +82,20 @@ func NewPlayerEntity(ecs *limitengine.ECS) limitengine.ECSEntity {
 		},
 		&ParticleTrailComponent{
 			Particles: []limitengine.ECSEntity{
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
-				NewParticleEntity(ecs, gmath.NewZeroVector3()), NewParticleEntity(ecs, gmath.NewZeroVector3()),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
+				NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)), NewParticleEntity(ecs, gmath.NewVector3(-1.5, -1.5, 0.0)),
 			},
 		},
 	)
@@ -106,7 +106,7 @@ func NewParticleEntity(ecs *limitengine.ECS, position gmath.Vector3) limitengine
 	instance.SetTransform(gmath.NewTransformMatrix(position, gmath.NewIdentityQuaternion(), gmath.NewVector3(0.01, 0.01, 1.0)))
 	return ecs.NewEntity(
 		&gmath.TransformComponent{
-			Position: gmath.NewZeroVector3(),
+			Position: position.Clone(),
 			Rotation: gmath.NewIdentityQuaternion(),
 			Scale:    gmath.NewVector3(0.005, 0.005, 1.0),
 		},
