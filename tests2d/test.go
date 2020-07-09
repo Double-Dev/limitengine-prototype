@@ -5,6 +5,7 @@ import (
 
 	"github.com/double-dev/limitengine/gio"
 	"github.com/double-dev/limitengine/sfx"
+	"github.com/double-dev/limitengine/tests2d/assets"
 	"github.com/double-dev/limitengine/tests2d/states"
 
 	"github.com/double-dev/limitengine"
@@ -24,7 +25,7 @@ func main() {
 	limitengine.AppView().SetIcons([]image.Image{image.Image(gio.LoadPNG("assets/Test.png"))})
 
 	// Load Assets
-	// assets.LoadAssets()
+	assets.LoadAssets()
 
 	sfx.Setup()
 

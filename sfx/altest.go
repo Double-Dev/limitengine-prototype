@@ -38,6 +38,7 @@ func Setup() {
 	source.SetPosition([3]float32{0.0, 0.0, 0.0})
 	source.SetVelocity([3]float32{0.0, 0.0, 0.0})
 
+	source.Seti(, int(buffer))
 	al.PlaySources(source)
 }
 
@@ -46,5 +47,6 @@ func PlaySound() {
 }
 
 func Delete() {
+	al.DeleteSources(source)
 	al.DeleteBuffers(buffer)
 }
