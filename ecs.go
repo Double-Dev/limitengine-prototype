@@ -188,7 +188,6 @@ func (ecs *ECS) UpdateSystems(delta float32) {
 }
 
 func (ecs *ECS) RemoveECSSystem(system *ECSSystem) {
-	ecs.RemoveECSListener(system)
 	for i := 0; i < len(ecs.systems); i++ {
 		if ecs.systems[i] == system {
 			ecs.systems[i] = ecs.systems[len(ecs.systems)-1]
@@ -196,4 +195,5 @@ func (ecs *ECS) RemoveECSSystem(system *ECSSystem) {
 			ecs.systems = ecs.systems[:len(ecs.systems)-1]
 		}
 	}
+	ecs.RemoveECSListener(system)
 }

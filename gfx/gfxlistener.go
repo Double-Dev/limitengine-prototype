@@ -2,6 +2,7 @@ package gfx
 
 import (
 	"reflect"
+	"sync"
 
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gmath"
@@ -11,10 +12,11 @@ type GFXComponent interface {
 	Renderables() []*Renderable
 }
 
-type GFXListener struct { // TODO: May need mutex for map.
+type GFXListener struct {
 	target     []reflect.Type
 	entities   []limitengine.ECSEntity
 	components map[limitengine.ECSEntity]GFXComponent
+	mutex      sync.RWMutex
 }
 
 func NewGFXListener(nilGFXComponent GFXComponent) *GFXListener {
@@ -27,7 +29,9 @@ func NewGFXListener(nilGFXComponent GFXComponent) *GFXListener {
 func (gfxListener *GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
 	gfxListener.entities = append(gfxListener.entities, entity)
 	gfx := entity.GetComponentOfType(gfxListener.target[0]).(GFXComponent)
+	gfxListener.mutex.Lock()
 	gfxListener.components[entity] = gfx
+	gfxListener.mutex.Unlock()
 	for _, renderable := range gfx.Renderables() {
 		AddRenderable(renderable)
 	}
@@ -36,14 +40,18 @@ func (gfxListener *GFXListener) OnAddEntity(entity limitengine.ECSEntity) {
 func (gfxListener *GFXListener) OnAddComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
 	gfxListener.entities = append(gfxListener.entities, entity)
 	gfx := component.(GFXComponent)
+	gfxListener.mutex.Lock()
 	gfxListener.components[entity] = gfx
+	gfxListener.mutex.Unlock()
 	for _, renderable := range gfx.Renderables() {
 		AddRenderable(renderable)
 	}
 }
 
 func (gfxListener *GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, component limitengine.ECSComponent) {
+	gfxListener.mutex.RLock()
 	gfx := gfxListener.components[entity]
+	gfxListener.mutex.RUnlock()
 	for _, renderable := range gfx.Renderables() {
 		RemoveRenderable(renderable)
 	}
@@ -59,7 +67,9 @@ func (gfxListener *GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, 
 }
 
 func (gfxListener *GFXListener) OnRemoveEntity(entity limitengine.ECSEntity) {
+	gfxListener.mutex.RLock()
 	gfx := gfxListener.components[entity]
+	gfxListener.mutex.RUnlock()
 	for _, renderable := range gfx.Renderables() {
 		RemoveRenderable(renderable)
 	}

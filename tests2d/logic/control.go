@@ -1,11 +1,13 @@
 package logic
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gmath"
 	"github.com/double-dev/limitengine/interaction"
+	"github.com/double-dev/limitengine/tests2d/assets"
 	"github.com/double-dev/limitengine/ui"
 )
 
@@ -26,8 +28,14 @@ func NewControlSystem() *limitengine.ECSSystem {
 			maxSpeed := float32(1.0)
 			if control.XAxis.Amount() > 0.01 {
 				motion.Acceleration[0] = speed
+				if control.canJump {
+					assets.PlayerWalkSound.PlayOneShot(1.5)
+				}
 			} else if control.XAxis.Amount() < -0.01 {
 				motion.Acceleration[0] = -speed
+				if control.canJump {
+					assets.PlayerWalkSound.PlayOneShot(1.5)
+				}
 			} else {
 				// TODO: Implement friction in collision calculations to avoid doing this.
 				motion.Acceleration[0] = 0.0
@@ -45,6 +53,8 @@ func NewControlSystem() *limitengine.ECSSystem {
 					control.gravityEnabled = true
 					control.canJump = false
 					motion.Velocity[1] = 1.0
+					fmt.Println("Jump")
+					assets.PlayerJumpSound.Play(2.0)
 				} else if control.canWallJump {
 					control.gravityEnabled = true
 					control.canWallJump = false
@@ -54,6 +64,8 @@ func NewControlSystem() *limitengine.ECSSystem {
 					} else {
 						motion.Velocity[0] = 2.0
 					}
+					fmt.Println("Jump")
+					assets.PlayerJumpSound.Play(2.0)
 				}
 			}
 

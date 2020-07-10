@@ -11,8 +11,7 @@ import (
 type MenuState struct {
 	ecs *limitengine.ECS
 
-	control *ui.InputControl
-
+	control      *ui.InputControl
 	textListener *gfx.GFXListener
 	textSystem   *limitengine.ECSSystem
 }
@@ -72,6 +71,6 @@ func (menuState *MenuState) Update(delta float32) {
 }
 
 func (menuState *MenuState) OnInactive() {
+	menuState.ecs.RemoveECSSystem(menuState.textSystem)
 	// menuState.ecs.RemoveECSListener(menuState.textListener)
-	// menuState.ecs.RemoveECSSystem(menuState.textSystem)
 }
