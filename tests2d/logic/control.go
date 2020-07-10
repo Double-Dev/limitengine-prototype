@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/double-dev/limitengine"
@@ -53,8 +52,7 @@ func NewControlSystem() *limitengine.ECSSystem {
 					control.gravityEnabled = true
 					control.canJump = false
 					motion.Velocity[1] = 1.0
-					fmt.Println("Jump")
-					assets.PlayerJumpSound.Play(2.0)
+					assets.PlayerJumpSound.PlayOneShot(2.0)
 				} else if control.canWallJump {
 					control.gravityEnabled = true
 					control.canWallJump = false
@@ -64,8 +62,7 @@ func NewControlSystem() *limitengine.ECSSystem {
 					} else {
 						motion.Velocity[0] = 2.0
 					}
-					fmt.Println("Jump")
-					assets.PlayerJumpSound.Play(2.0)
+					assets.PlayerJumpSound.PlayOneShot(2.0)
 				}
 			}
 

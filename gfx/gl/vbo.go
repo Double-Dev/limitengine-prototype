@@ -1,6 +1,8 @@
 package gl
 
-import "github.com/double-dev/limitengine/dependencies/gl/v3.3-core/gl"
+import (
+	"github.com/double-dev/limitengine/dependencies/gl/v3.3-core/gl"
+)
 
 const (
 	vboArrayBufferType               = gl.ARRAY_BUFFER

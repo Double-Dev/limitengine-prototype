@@ -160,12 +160,14 @@ func Sweep() {
 									}
 								}
 								// TODO: Look into optimizing GPU overhead from instanced rendering.
-								iMesh.Render(
-									renderProgram.instanceBuffer,
-									renderProgram.InstanceDefs(),
-									batch3.data[i],
-									int32(len(batch3.data[i])/renderProgram.InstanceSize()),
-								)
+								if len(batch3.data[i]) > 0 {
+									iMesh.Render(
+										renderProgram.instanceBuffer,
+										renderProgram.InstanceDefs(),
+										batch3.data[i],
+										int32(len(batch3.data[i])/renderProgram.InstanceSize()),
+									)
+								}
 							}
 							iMesh.Disable()
 						}

@@ -59,7 +59,6 @@ func (gfxListener *GFXListener) OnRemoveComponent(entity limitengine.ECSEntity, 
 	for i, potentialEntity := range gfxListener.entities {
 		if potentialEntity == entity {
 			gfxListener.entities[i] = gfxListener.entities[len(gfxListener.entities)-1]
-			gfxListener.entities[len(gfxListener.entities)-1] = limitengine.ECSEntity{}
 			gfxListener.entities = gfxListener.entities[:len(gfxListener.entities)-1]
 			break
 		}
@@ -77,7 +76,6 @@ func (gfxListener *GFXListener) OnRemoveEntity(entity limitengine.ECSEntity) {
 	for i, potentialEntity := range gfxListener.entities {
 		if potentialEntity == entity {
 			gfxListener.entities[i] = gfxListener.entities[len(gfxListener.entities)-1]
-			gfxListener.entities[len(gfxListener.entities)-1] = limitengine.ECSEntity{}
 			gfxListener.entities = gfxListener.entities[:len(gfxListener.entities)-1]
 			break
 		}

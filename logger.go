@@ -38,7 +38,7 @@ func NewLogger(pkg string) logger {
 
 func (logger *logger) Log(msg interface{}) {
 	if loggingEnabled {
-		messageQueue = append(messageQueue, fmt.Sprint(logger.pkg+":", msg))
+		messageQueue = append(messageQueue, fmt.Sprint(logger.pkg+": ", msg))
 	}
 }
 

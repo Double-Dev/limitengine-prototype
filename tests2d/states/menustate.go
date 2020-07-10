@@ -72,5 +72,5 @@ func (menuState *MenuState) Update(delta float32) {
 
 func (menuState *MenuState) OnInactive() {
 	menuState.ecs.RemoveECSSystem(menuState.textSystem)
-	// menuState.ecs.RemoveECSListener(menuState.textListener)
+	menuState.ecs.RemoveECSListener(menuState.textListener)
 }

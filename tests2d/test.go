@@ -5,11 +5,10 @@ import (
 
 	"github.com/double-dev/limitengine/tests2d/assets"
 	"github.com/double-dev/limitengine/tests2d/states"
+	"github.com/pkg/profile"
 
 	"github.com/double-dev/limitengine"
 	"github.com/double-dev/limitengine/gio"
-
-	"github.com/pkg/profile"
 )
 
 func main() {

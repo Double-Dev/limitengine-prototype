@@ -154,6 +154,8 @@ func (entity ECSEntity) HasComponent(targets ...reflect.Type) bool {
 	return true
 }
 
+func (entity ECSEntity) ID() uint32 { return entity.id }
+
 func (ecs *ECS) AddECSListener(listener ECSListener) {
 	for entity := range ecs.ecs {
 		if entity.HasComponent(listener.GetTargetComponents()...) {
