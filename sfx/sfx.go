@@ -54,6 +54,7 @@ func NewSound(path string, speed float32) *Sound {
 	}
 	sampleRate := format.SampleRate
 	streamer.Seek(0)
+	speaker.Init(sampleRate, sampleRate.N(time.Second/10))
 	return &Sound{
 		sampleRate: sampleRate,
 		streamer:   streamer,
@@ -64,8 +65,7 @@ func (sound *Sound) Play(speed float32) {
 	sound.playing = true
 	actionQueue = append(actionQueue, func() {
 		sound.streamer.Seek(0)
-		sampleRate := beep.SampleRate(float32(sound.sampleRate) * speed)
-		speaker.Init(sampleRate, sampleRate.N(time.Second/10))
+		// sampleRate := beep.SampleRate(float32(sound.sampleRate) * speed)
 		speaker.Play(beep.Seq(sound.streamer, beep.Callback(func() {
 			playing = false
 			sound.playing = false

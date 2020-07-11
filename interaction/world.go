@@ -18,6 +18,7 @@ var (
 
 type ColliderComponent struct {
 	IsTrigger bool
+	Layer     string
 
 	AABB    gmath.AABB
 	InvMass float32
@@ -176,7 +177,7 @@ func (world *World) ProcessInteractions(delta float32) {
 				interactEntityA.Collider.AABB.Max.Clone().AddV(interactEntityA.Transform.Position),
 			))
 			for _, interactEntityB := range potentialCollisions {
-				if interactEntityA == interactEntityB {
+				if interactEntityA.Collider.Layer == interactEntityB.Collider.Layer {
 					continue
 				}
 
