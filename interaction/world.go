@@ -18,8 +18,8 @@ var (
 
 type ColliderComponent struct {
 	IsTrigger bool
-	Layer     string
 
+	Layer   string
 	AABB    gmath.AABB
 	InvMass float32
 }
