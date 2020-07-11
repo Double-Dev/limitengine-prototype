@@ -72,12 +72,25 @@ func (spriteSheet *SpriteSheet) Apply(instance *Instance, index uint32) {
 }
 
 func (spriteSheet *SpriteSheet) GetBounds(index uint32) gmath.Vector4 {
-	return gmath.NewVector4(
+	return spriteSheet.GetBoundsFlipped(index, false, false)
+}
+
+func (spriteSheet *SpriteSheet) GetBoundsFlipped(index uint32, xAxis, yAxis bool) gmath.Vector4 {
+	bounds := gmath.NewVector4(
 		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
 		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,
 		spriteSheet.spriteWidth-(2.0*spriteSheet.padding),
 		spriteSheet.spriteHeight-(2.0*spriteSheet.padding),
 	)
+	if xAxis {
+		bounds[0] += spriteSheet.spriteWidth - (2.0 * spriteSheet.padding)
+		bounds[2] *= -1.0
+	}
+	if yAxis {
+		bounds[1] += spriteSheet.spriteHeight - (2.0 * spriteSheet.padding)
+		bounds[3] *= -1.0
+	}
+	return bounds
 }
 
 type TextureAtlas struct {
