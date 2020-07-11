@@ -214,7 +214,8 @@ func (world *World) ProcessInteractions(delta float32) {
 				}
 				// END TEMPORARY CODE
 
-				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger {
+				if !interactEntityA.Collider.IsTrigger && !interactEntityB.Collider.IsTrigger &&
+					(interactEntityA.Collider.InvMass != 0.0 || interactEntityB.Collider.InvMass != 0.0) {
 					// TODO: Finish/optimize collision resolution calculations.
 					var otherVel gmath.Vector3
 					if interactEntityB.Motion != nil {
