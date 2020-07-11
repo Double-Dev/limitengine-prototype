@@ -12,6 +12,10 @@ type TransformComponent struct {
 	Scale    Vector3
 }
 
+func (transform *TransformComponent) SetAwake(awake bool) {
+	transform.notAwake = !awake
+}
+
 func (transform *TransformComponent) IsAwake() bool {
 	return !transform.notAwake
 }

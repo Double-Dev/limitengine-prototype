@@ -44,6 +44,7 @@ func NewSpriteSystem() *limitengine.ECSSystem {
 
 				sprite := components[0].(*SpriteComponent)
 				sprite.Renderable.Instance.SetTransform(transformMat)
+				transform.SetAwake(false)
 			}
 		}
 	}, (*SpriteComponent)(nil), (*gmath.TransformComponent)(nil))

@@ -182,6 +182,7 @@ func NewTextSystem() *limitengine.ECSSystem {
 						transformMat.MulM(text.relativeTransforms[i]),
 					)
 				}
+				transform.SetAwake(false)
 			}
 		}
 	}, (*TextComponent)(nil), (*gmath.TransformComponent)(nil))
