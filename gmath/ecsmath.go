@@ -5,7 +5,7 @@ import (
 )
 
 type TransformComponent struct {
-	awake bool
+	notAwake bool
 
 	Position Vector3
 	Rotation Quaternion
@@ -13,7 +13,7 @@ type TransformComponent struct {
 }
 
 func (transform *TransformComponent) IsAwake() bool {
-	return transform.awake
+	return !transform.notAwake
 }
 
 type MotionComponent struct {
@@ -35,7 +35,7 @@ func NewMotionSystem(damping float32) *limitengine.ECSSystem {
 			transform := components[1].(*TransformComponent)
 			motion := components[0].(*MotionComponent)
 			if motion.Velocity.LenSq() > 0.0 || motion.Velocity.LenSq() > 0.0 {
-				transform.awake = true
+				transform.notAwake = false
 				motion.Velocity.AddV(motion.Acceleration.Clone().MulSc(delta))
 				// TODO: Optimize/fix awake system.
 				if motion.Velocity.LenSq() <= 0.0001 {
@@ -50,7 +50,7 @@ func NewMotionSystem(damping float32) *limitengine.ECSSystem {
 				motion.AngVelocity = NewIdentityQuaternion().Slerp(motion.AngVelocity, 0.95)
 				transform.Rotation.MulQ(NewIdentityQuaternion().Slerp(motion.AngVelocity, delta))
 			} else {
-				transform.awake = false
+				transform.notAwake = true
 			}
 		}
 	}, (*MotionComponent)(nil), (*TransformComponent)(nil))
