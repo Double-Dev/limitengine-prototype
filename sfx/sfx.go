@@ -41,7 +41,7 @@ type Sound struct {
 	streamer   beep.StreamSeekCloser
 }
 
-func NewSound(path string, speed float32) *Sound {
+func NewSound(path string) *Sound {
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("File read went horribly wrong!")
