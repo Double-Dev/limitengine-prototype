@@ -39,11 +39,12 @@ func NewSpriteSystem() *limitengine.ECSSystem {
 	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			transform := components[1].(*gmath.TransformComponent)
+			if transform.IsAwake() {
+				transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
 
-			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
-
-			sprite := components[0].(*SpriteComponent)
-			sprite.Renderable.Instance.SetTransform(transformMat)
+				sprite := components[0].(*SpriteComponent)
+				sprite.Renderable.Instance.SetTransform(transformMat)
+			}
 		}
 	}, (*SpriteComponent)(nil), (*gmath.TransformComponent)(nil))
 }

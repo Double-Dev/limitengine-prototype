@@ -116,11 +116,12 @@ func NewRenderSystem() *limitengine.ECSSystem {
 	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			transform := components[1].(*gmath.TransformComponent)
+			if transform.IsAwake() {
+				transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
 
-			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
-
-			render := components[0].(*RenderComponent)
-			render.Renderable.Instance.SetTransform(transformMat)
+				render := components[0].(*RenderComponent)
+				render.Renderable.Instance.SetTransform(transformMat)
+			}
 		}
 	}, (*RenderComponent)(nil), (*gmath.TransformComponent)(nil))
 }

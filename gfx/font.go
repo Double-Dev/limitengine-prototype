@@ -173,14 +173,15 @@ func NewTextSystem() *limitengine.ECSSystem {
 	return limitengine.NewSystem(func(delta float32, entities [][]limitengine.ECSComponent) {
 		for _, components := range entities {
 			transform := components[1].(*gmath.TransformComponent)
+			if transform.IsAwake() {
+				transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
 
-			transformMat := gmath.NewTransformMatrix(transform.Position, transform.Rotation, transform.Scale)
-
-			text := components[0].(*TextComponent)
-			for i, renderable := range text.Renderables() {
-				renderable.Instance.SetTransform(
-					transformMat.MulM(text.relativeTransforms[i]),
-				)
+				text := components[0].(*TextComponent)
+				for i, renderable := range text.Renderables() {
+					renderable.Instance.SetTransform(
+						transformMat.MulM(text.relativeTransforms[i]),
+					)
+				}
 			}
 		}
 	}, (*TextComponent)(nil), (*gmath.TransformComponent)(nil))
