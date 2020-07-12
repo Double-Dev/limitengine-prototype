@@ -34,9 +34,6 @@ func newGLFWView() *glfwView {
 	glfwView := &glfwView{
 		window: window,
 	}
-	// if WindowIcons != nil {
-	// 	glfwView.SetIcons(WindowIcons)
-	// }
 	return glfwView
 }
 
