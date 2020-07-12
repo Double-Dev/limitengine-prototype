@@ -64,8 +64,8 @@ func NewSpriteSheet(spriteWidth, spriteHeight, padding float32) *SpriteSheet {
 func (spriteSheet *SpriteSheet) Apply(instance *Instance, index uint32) {
 	instance.ModifyData(
 		"textureBounds",
-		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
-		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,
+		spriteSheet.spriteWidth*float32(index%spriteSheet.columns)+spriteSheet.padding,
+		spriteSheet.spriteHeight*float32(index/spriteSheet.columns)+spriteSheet.padding,
 		spriteSheet.spriteWidth-(2.0*spriteSheet.padding),
 		spriteSheet.spriteHeight-(2.0*spriteSheet.padding),
 	)
@@ -77,8 +77,8 @@ func (spriteSheet *SpriteSheet) GetBounds(index uint32) gmath.Vector4 {
 
 func (spriteSheet *SpriteSheet) GetBoundsFlipped(index uint32, xAxis, yAxis bool) gmath.Vector4 {
 	bounds := gmath.NewVector4(
-		spriteSheet.spriteWidth*float32(index%spriteSheet.rows)+spriteSheet.padding,
-		spriteSheet.spriteHeight*float32(index/spriteSheet.rows)+spriteSheet.padding,
+		spriteSheet.spriteWidth*float32(index%spriteSheet.columns)+spriteSheet.padding,
+		spriteSheet.spriteHeight*float32(index/spriteSheet.columns)+spriteSheet.padding,
 		spriteSheet.spriteWidth-(2.0*spriteSheet.padding),
 		spriteSheet.spriteHeight-(2.0*spriteSheet.padding),
 	)
