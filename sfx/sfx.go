@@ -14,6 +14,8 @@ import (
 var (
 	log = limitengine.NewLogger("sfx")
 
+	mixer       = new(beep.Mixer)
+	sounds      []*Sound
 	playing     = false
 	actionQueue = []func(){}
 )
@@ -22,8 +24,7 @@ func init() {
 	if limitengine.Running() {
 		go func() {
 			for limitengine.Running() {
-				if len(actionQueue) > 0 && !playing {
-					playing = true
+				if len(actionQueue) > 0 {
 					actionQueue[0]()
 					actionQueue = actionQueue[1:]
 				} else {
@@ -33,6 +34,18 @@ func init() {
 		}()
 		log.Log("SFX online...")
 	}
+}
+
+func Stop() {
+	actionQueue = append(actionQueue, func() {
+		if playing {
+			speaker.Clear()
+			playing = false
+			for _, sound := range sounds {
+				sound.playing = false
+			}
+		}
+	})
 }
 
 type Sound struct {
@@ -55,10 +68,12 @@ func NewSound(path string) *Sound {
 	sampleRate := format.SampleRate
 	streamer.Seek(0)
 	speaker.Init(sampleRate, sampleRate.N(time.Second/10))
-	return &Sound{
+	sound := &Sound{
 		sampleRate: sampleRate,
 		streamer:   streamer,
 	}
+	sounds = append(sounds, sound)
+	return sound
 }
 
 func (sound *Sound) Play(speed float32) {
@@ -66,10 +81,15 @@ func (sound *Sound) Play(speed float32) {
 	actionQueue = append(actionQueue, func() {
 		sound.streamer.Seek(0)
 		// sampleRate := beep.SampleRate(float32(sound.sampleRate) * speed)
-		speaker.Play(beep.Seq(sound.streamer, beep.Callback(func() {
-			playing = false
+		mixer.Add(beep.Seq(sound.streamer, beep.Callback(func() {
 			sound.playing = false
 		})))
+		if !playing {
+			playing = true
+			speaker.Play(beep.Seq(mixer, beep.Callback(func() {
+				playing = false
+			})))
+		}
 	})
 }
 
