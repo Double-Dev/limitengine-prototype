@@ -1,7 +1,6 @@
 package gfx
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 	"time"
@@ -52,7 +51,7 @@ func init() {
 				log.Err("Context could not be initialized.", err)
 			}
 			limitengine.AddResizeCallback(func(width, height int) {
-				fmt.Println(width, height)
+				// fmt.Println(width, height)
 				actionQueue = append(actionQueue, func() { context.Resize(width, height) })
 				for _, camera := range cameras {
 					camera.resize(width, height)
