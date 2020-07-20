@@ -85,8 +85,8 @@ func LoadAssets() {
 	PlayerLeftWalk = gfx.NewFrameAnimation(gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(4), 0.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(5), 0.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(6), 0.25), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(7), 0.25))
 	PlayerLeftWallSlide = gfx.NewFrameAnimation(gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(12), 0.5), gfx.NewDurationFrame(PlayerSpriteSheet.GetBounds(14), 0.5))
 
-	PlayerWalkSound = sfx.NewSound("assets/footsteps.wav", 0.5)
-	PlayerJumpSound = sfx.NewSound("assets/jump.wav", 0.5)
+	PlayerWalkSound = sfx.NewSound("assets/footsteps.wav")
+	PlayerJumpSound = sfx.NewSound("assets/jump.wav")
 
 	// Particle
 	ParticleMaterial = gfx.NewColorMaterial(gmath.NewVector3(0.7, 0.7, 0.4))
