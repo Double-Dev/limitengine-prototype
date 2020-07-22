@@ -1,6 +1,9 @@
-# limitengine
+# LimitEngine Prototype
+NOTICE: This repository is a prototype for LimitEngine written in GoLang.
+LimitEngine's will be written in C++ and can be found in my LimitEngine repository. 
+
 A custom GoLang cross-platform *application* engine. This engine has been designed with a wide variety of uses in mind (not just game development) to provide both the interface and tools necessary for developers to write any kind of program.
-Please note that Limitengine is still in alpha development and some features are subject to change. 
+Please note that Limitengine is still in alpha development and some features are subject to change.
 
 ## Requirements
 - A cgo compiler.
@@ -8,10 +11,6 @@ Please note that Limitengine is still in alpha development and some features are
 
 ## Dependencies
 This engine contains bindings for the GLFW, OpenGL, OpenAL Soft, and Vorbis libraries for low-level graphical and audio interface.
-
-Please note that the following external Go packages are used for mobile and web builds:
-- [golang.org/x/mobile]
-- [github.com/gopherjs/gopherjs]
 
 ## Profiling
 Put the following line of code at the top of your main method:
