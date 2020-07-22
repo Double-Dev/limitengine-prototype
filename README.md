@@ -1,6 +1,6 @@
 # LimitEngine Prototype
 NOTICE: This repository is a prototype for LimitEngine written in GoLang.
-LimitEngine's will be written in C++ and can be found in my LimitEngine repository. 
+The production version of LimitEngine will be written in C++ and can be found in my LimitEngine repository. 
 
 A custom GoLang cross-platform *application* engine. This engine has been designed with a wide variety of uses in mind (not just game development) to provide both the interface and tools necessary for developers to write any kind of program.
 Please note that Limitengine is still in alpha development and some features are subject to change.
