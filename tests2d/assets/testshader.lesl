@@ -1,0 +1,16 @@
+vert{
+    vars{
+    },
+    funcs{
+    },
+    main{
+    },
+},
+frag{
+    vars{
+    },
+    funcs{
+    },
+    main{
+	},
+},
